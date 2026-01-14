@@ -1,4 +1,5 @@
 #include "app.hpp"
+#include "GLFW/glfw3.h"
 #include "input.hpp"
 
 App *App::sp_instance = nullptr;
@@ -20,6 +21,9 @@ App::~App() {
 void App::run() { 
 	if(!init()) return;
 
+	InputManager &input_manager = InputManager::get_instance();
+	input_manager.set_mouse_mode(mp_window, GLFW_CURSOR_DISABLED);
+
 	mp_world = std::make_unique<World>();
 
 	f64 last_frame, current_frame;
@@ -32,10 +36,14 @@ void App::run() {
 		f32 delta_time = current_frame - last_frame;
 		last_frame = current_frame;
 
+		f64 mouse_x, mouse_y;
+		glfwGetCursorPos(mp_window, &mouse_x, &mouse_y);
+
+		input_manager.update_mouse_position({f32(mouse_x), f32(mouse_y)});
+
 		mp_world->update(delta_time);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		mp_world->render(aspect_ratio);
 
 		glfwSwapBuffers(mp_window);
@@ -107,11 +115,11 @@ void App::window_size_callback_glfw([[maybe_unused]] GLFWwindow *window, i32 w, 
 void App::key_event_callback_glfw([[maybe_unused]] GLFWwindow *window, [[maybe_unused]] i32 key, [[maybe_unused]] i32 scancode, [[maybe_unused]] i32 action, [[maybe_unused]] i32 mods) {
 	switch(action) {
 		case GLFW_PRESS:
-			InputManager::handle_key_event(key, true);
+			InputManager::get_instance().handle_key_event(key, true);
 			break;
 
 		case GLFW_RELEASE:
-			InputManager::handle_key_event(key, false);
+			InputManager::get_instance().handle_key_event(key, false);
 			break;
 	}
 }

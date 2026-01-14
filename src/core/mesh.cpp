@@ -33,7 +33,7 @@ void Mesh::set_data(std::span<const Vertex> vertices, std::span<const u16> eleme
 
 	// Vertices
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vec3), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
 	// Elements
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);

@@ -13,8 +13,7 @@ public:
 	void render(f32 aspect_ratio);
 
 private:
-	std::unique_ptr<Camera> mp_camera;
-
+	Camera m_camera;
 	Shader m_shader;
 	Mesh m_mesh;
 };
