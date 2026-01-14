@@ -14,19 +14,20 @@ file(GLOB_RECURSE PROJECT_SOURCES
 
 add_executable(vox ${PROJECT_SOURCES})
 
-FetchContent_Declare(
-    glad
-    GIT_REPOSITORY https://github.com/Dav1dde/glad.git
-    GIT_TAG        73db193f853e2ee079bf3ca8a64aa2eaf6459043 #v2.0.6
-    GIT_PROGRESS   TRUE
-    SOURCE_SUBDIR  cmake
-)
+# GLAD v2.0.6 
+FetchContent_Declare(glad GIT_REPOSITORY https://github.com/Dav1dde/glad.git GIT_TAG 73db193f853e2ee079bf3ca8a64aa2eaf6459043 GIT_PROGRESS TRUE SOURCE_SUBDIR cmake)
 FetchContent_MakeAvailable(glad)
 glad_add_library(glad_gl_core_43 STATIC REPRODUCIBLE LOADER API gl:core=4.3)
 
-add_subdirectory(vendor/glfw)
-target_include_directories(vox PRIVATE ${glad_SOURCE_DIR}/include)
-target_link_libraries(vox PRIVATE glfw glad_gl_core_43)
+# GLM 1.0.3
+FetchContent_Declare(glm GIT_REPOSITORY	https://github.com/g-truc/glm.git GIT_TAG 8d1fd52e5ab5590e2c81768ace50c72bae28f2ed GIT_PROGRESS TRUE)
+FetchContent_MakeAvailable(glm)
+
+# GLFW 3.4
+FetchContent_Declare(glfw GIT_REPOSITORY https://github.com/glfw/glfw.git GIT_TAG 7b6aead9fb88b3623e3b3725ebb42670cbe4c579 GIT_PROGRESS TRUE)
+FetchContent_MakeAvailable(glfw)
+
+target_link_libraries(vox PRIVATE glfw glad_gl_core_43 glm::glm)
 target_precompile_headers(vox PRIVATE src/pch.h)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
