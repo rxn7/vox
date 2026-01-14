@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/input.hpp"
+#include "glm/gtc/constants.hpp"
 
 class Camera {
 public:
@@ -20,7 +21,7 @@ private:
 
 public:
 	vec3 m_position;
-	f32 m_yaw;
-	f32 m_pitch;
+	f32 m_yaw = -glm::radians(90.0f);
+	f32 m_pitch = 0.0f;
 	f32 m_fov;
 };

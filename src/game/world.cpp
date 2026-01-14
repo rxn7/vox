@@ -12,7 +12,7 @@ const std::array ELEMENTS = {
 };
 
 World::World() 
-: m_camera(vec3(0, 0, 1.0f), 80.0f) {
+: m_camera(vec3(0, 0, 5.0f), 80.0f) {
 	m_shader.load(b::embed<"shaders/default-vert.glsl">().str(), b::embed<"shaders/default-frag.glsl">().str());
 	m_mesh.set_data(std::span(VERTICES), std::span(ELEMENTS));
 }
