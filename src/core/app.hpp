@@ -13,6 +13,8 @@ private:
 	bool init_glfw();
 	bool init_opengl();
 
+	void update(f32 dt);
+
 	void render_3d();
 	void render_ui();
 

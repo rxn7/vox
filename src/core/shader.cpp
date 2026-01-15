@@ -1,4 +1,5 @@
 #include "shader.hpp"
+#include "profiler.hpp"
 
 u32 Shader::s_bound_program = 0;
 
@@ -52,7 +53,7 @@ bool Shader::load(std::string_view vert_source, std::string_view frag_source) {
 }
 
 u32 Shader::create_shader(ShaderType type, std::string_view source) {
-	u32 id = glCreateShader(type);
+	const u32 id = glCreateShader(type);
 	
 	if(id == 0) [[unlikely]] {
 		std::println("Failed to create a shader\nShader source\n: {}", source);
@@ -72,8 +73,10 @@ u32 Shader::create_shader(ShaderType type, std::string_view source) {
 	return id;
 }
 
-i32 Shader::get_uniform_location(const std::string &name) const {
-	const auto uniform_location_it = m_uniform_locations.find(name);
+i32 Shader::get_uniform_location(std::string_view name) const {
+	PROFILE_FUNC();
+
+	const auto &uniform_location_it = m_uniform_locations.find(std::string(name));
 	const bool uniform_exists = uniform_location_it != m_uniform_locations.end();
 
 	if(!uniform_exists) [[unlikely]] {
@@ -85,7 +88,7 @@ i32 Shader::get_uniform_location(const std::string &name) const {
 		return location;
 	}
 
-	return m_uniform_locations.at(name);
+	return uniform_location_it->second;
 }
 
 bool Shader::check_compile_errors(u32 id, u32 flag, bool is_program) {

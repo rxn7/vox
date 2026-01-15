@@ -3,8 +3,10 @@
 #include <print>
 #include <array>
 #include <vector>
+#include <unordered_map>
 #include <span>
 #include <memory>
+#include <set>
 
 #define DB_PRODUCTION_MODE
 #include <battery/embed.hpp>

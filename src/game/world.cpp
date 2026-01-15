@@ -1,5 +1,4 @@
 #include "world.hpp"
-#include "core/input.hpp"
 
 const std::array<Vertex, 3> VERTICES = {
 	Vertex(vec3(-0.5f, -0.5f, 0.0f), vec2(0,0)),

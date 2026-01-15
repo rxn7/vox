@@ -1,7 +1,7 @@
 #include "app.hpp"
+#include "profiler.hpp"
 #include "text_renderer.hpp"
 #include "input.hpp"
-#include <format>
 
 App *App::sp_instance = nullptr;
 
@@ -14,6 +14,7 @@ App::~App() {
 
 	TextRenderer::destroy_instance();
 	InputManager::destroy_instance();
+	Profiler::destroy_instance();
 
 	if(mp_window) {
 		glfwDestroyWindow(mp_window);
@@ -55,7 +56,19 @@ void App::run() {
 
 		glfwSwapBuffers(mp_window);
 		glfwPollEvents();
+
+		for(const ProfileResult &result : Profiler::get_instance().get_results()) {
+			std::println("{}: {:} ms", result.name, result.duration_ms);
+		}
+
+		Profiler::get_instance().clear();
 	}
+}
+
+void App::update(f32 dt) { 
+	PROFILE_FUNC();
+
+	mp_world->update(dt);
 }
 
 void App::render_3d() { 

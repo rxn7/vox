@@ -1,4 +1,5 @@
 #include "mesh.hpp"
+#include "profiler.hpp"
 
 Mesh::Mesh() { }
 
@@ -15,12 +16,15 @@ Mesh::~Mesh() {
 }
 
 void Mesh::draw() const {
+	PROFILE_FUNC();
+
 	glBindVertexArray(m_vao);
 	glDrawElements(GL_TRIANGLES, m_element_count, GL_UNSIGNED_SHORT, 0);
 	glBindVertexArray(0);
 }
 
 void Mesh::set_data(std::span<const Vertex> vertices, std::span<const u16> elements) {
+	PROFILE_FUNC();
 	assert(vertices.size() >= 3 && elements.size() >= 3);
 
 	m_element_count = elements.size();

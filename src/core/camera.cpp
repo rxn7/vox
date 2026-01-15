@@ -1,8 +1,6 @@
 #include "camera.hpp"
-#include "glm/gtc/constants.hpp"
-
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
+#include "input.hpp"
+#include "profiler.hpp"
 
 constexpr f32 SENSITIVITY = 0.002f;
 constexpr f32 MOVE_SPEED = 5.0f;
@@ -14,11 +12,15 @@ Camera::Camera(vec3 position, f32 fov)
 }
 
 void Camera::update(f32 dt) {
+	PROFILE_FUNC();
+
 	handle_mouse_movement();
 	handle_movement(dt);
 }
 
 mat4 Camera::get_matrix(f32 aspect_ratio) const {
+	PROFILE_FUNC();
+
 	constexpr vec3 UP = vec3(0.0f, 1.0f, 0.0f);
 	const vec3 forward = get_forward_direction();
 
@@ -44,6 +46,8 @@ vec3 Camera::get_right_direction() const {
 }
 
 void Camera::handle_movement(f32 dt) {
+	PROFILE_FUNC();
+
 	const InputState &input = InputManager::get_instance().get_state();
 
 	vec3 movement = vec3(0.0f);
@@ -70,6 +74,8 @@ void Camera::handle_movement(f32 dt) {
 }
 
 void Camera::handle_mouse_movement() {
+	PROFILE_FUNC();
+
 	InputManager &input_manager = InputManager::get_instance();
 
 	if(input_manager.get_mouse_mode() != GLFW_CURSOR_DISABLED) {

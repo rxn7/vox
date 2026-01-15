@@ -1,6 +1,6 @@
 #include "input.hpp"
 
-std::unique_ptr<InputManager> InputManager::sp_instance;
+SINGLETON_IMPL(InputManager);
 
 void InputManager::set_mouse_mode(GLFWwindow *window, i32 mode) {
 	if(m_mouse_mode == mode) {

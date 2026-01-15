@@ -1,9 +1,10 @@
 #include "text_renderer.hpp"
+#include "profiler.hpp"
 #include "font_data.hpp"
 
 constexpr u32 STAGING_BUFFER_SIZE = 2048;
 
-std::unique_ptr<TextRenderer> TextRenderer::sp_instance = nullptr;
+SINGLETON_IMPL(TextRenderer);
 
 TextRenderer::TextRenderer() {
 }
@@ -39,6 +40,8 @@ void TextRenderer::init() {
 }
 
 void TextRenderer::render_text(std::string_view text, const vec2 &position, f32 size) {
+	PROFILE_FUNC();
+
 	if(text.empty()) [[unlikely]] {
 		return;
 	}
@@ -68,5 +71,6 @@ void TextRenderer::render_text(std::string_view text, const vec2 &position, f32 
 }
 
 void TextRenderer::update_screen_size(const vec2 &size) {
+	PROFILE_FUNC();
 	m_shader.set_uniform_vec2("u_screen_size", size);
 }

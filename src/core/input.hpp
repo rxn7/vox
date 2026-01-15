@@ -1,5 +1,7 @@
 #pragma once
 
+#include "singleton.hpp"
+
 struct InputState {
 	bool move_left = false;
 	bool move_right = false;
@@ -13,29 +15,18 @@ struct InputState {
 };
 
 class InputManager {
+SINGLETON_CLASS(InputManager);
 public:
 	InputManager() {}
-
-	inline static InputManager &get_instance() {
-		if(!sp_instance) [[unlikely]] {
-			sp_instance = std::make_unique<InputManager>();
-		}
-
-		return *sp_instance.get();
-	}
-
-	inline static void destroy_instance() { sp_instance.reset(); }
 
 	void set_mouse_mode(GLFWwindow *window, i32 mode);
 	void update_mouse_position(vec2 position);
 	void handle_key_event(i32 key, bool is_pressed);
-	inline i32 get_mouse_mode() { return m_mouse_mode; }
-	inline const InputState &get_state() { return m_state; }
+	[[nodiscard]] inline i32 get_mouse_mode() { return m_mouse_mode; }
+	[[nodiscard]] inline const InputState &get_state() { return m_state; }
 
 private:
 	std::optional<vec2> m_last_mouse_position = std::nullopt;
 	i32 m_mouse_mode = GLFW_CURSOR_NORMAL;
 	InputState m_state = {0};
-
-	static std::unique_ptr<InputManager> sp_instance;
 };

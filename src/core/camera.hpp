@@ -1,8 +1,5 @@
 #pragma once
 
-#include "core/input.hpp"
-#include "glm/gtc/constants.hpp"
-
 class Camera {
 public:
 	Camera(vec3 position = vec3(0, 0, -1.0f), f32 fov = 80.0f);
@@ -10,15 +7,15 @@ public:
 
 	void update(f32 dt);
 
-	mat4 get_matrix(f32 aspect_ratio) const;
+	[[nodiscard]] mat4 get_matrix(f32 aspect_ratio) const;
 
-	vec3 get_forward_direction() const;
-	vec3 get_right_direction() const;
+	[[nodiscard]] vec3 get_forward_direction() const;
+	[[nodiscard]] vec3 get_right_direction() const;
 
-	const vec3 &get_position() const { return m_position; }
-	f32 get_pitch() const { return m_pitch; }
-	f32 get_yaw() const { return m_yaw; }
-	f32 get_fov() const { return m_fov; }
+	[[nodiscard]] inline const vec3 &get_position() const { return m_position; }
+	[[nodiscard]] inline f32 get_pitch() const { return m_pitch; }
+	[[nodiscard]] inline f32 get_yaw() const { return m_yaw; }
+	[[nodiscard]] inline f32 get_fov() const { return m_fov; }
 
 private:
 	void handle_movement(f32 dt);
