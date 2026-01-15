@@ -1,6 +1,7 @@
 #include "app.hpp"
-#include "GLFW/glfw3.h"
+#include "text_renderer.hpp"
 #include "input.hpp"
+#include <format>
 
 App *App::sp_instance = nullptr;
 
@@ -10,6 +11,9 @@ App::App() {
 
 App::~App() { 
 	mp_world.reset();
+
+	TextRenderer::destroy_instance();
+	InputManager::destroy_instance();
 
 	if(mp_window) {
 		glfwDestroyWindow(mp_window);
@@ -21,6 +25,10 @@ App::~App() {
 void App::run() { 
 	if(!init()) return;
 
+	TextRenderer &text_renderer = TextRenderer::get_instance();
+	text_renderer.init();
+	text_renderer.update_screen_size(m_window_size);
+
 	InputManager &input_manager = InputManager::get_instance();
 	input_manager.set_mouse_mode(mp_window, GLFW_CURSOR_DISABLED);
 
@@ -30,25 +38,44 @@ void App::run() {
 	last_frame = current_frame = glfwGetTime();
 
 	while(!glfwWindowShouldClose(mp_window)) {
-		const f32 aspect_ratio = f32(m_window_size.x) / f32(m_window_size.y);
-
 		current_frame = glfwGetTime();
-		f32 delta_time = current_frame - last_frame;
+		m_delta_time = current_frame - last_frame;
 		last_frame = current_frame;
 
 		f64 mouse_x, mouse_y;
 		glfwGetCursorPos(mp_window, &mouse_x, &mouse_y);
+		input_manager.update_mouse_position(vec2(mouse_x, mouse_y));
 
-		input_manager.update_mouse_position({f32(mouse_x), f32(mouse_y)});
-
-		mp_world->update(delta_time);
+		mp_world->update(m_delta_time);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		mp_world->render(aspect_ratio);
+
+		render_3d();
+		render_ui();
 
 		glfwSwapBuffers(mp_window);
 		glfwPollEvents();
 	}
+}
+
+void App::render_3d() { 
+	glEnable(GL_DEPTH_TEST);
+
+	const f32 aspect_ratio = f32(m_window_size.x) / f32(m_window_size.y);
+	mp_world->render(aspect_ratio);
+}
+
+void App::render_ui() {
+	glDisable(GL_DEPTH_TEST);
+
+	TextRenderer &text_renderer = TextRenderer::get_instance();
+
+	const Camera &camera = mp_world->get_camera();
+	const vec3 position = camera.get_position();
+
+	text_renderer.render_text(std::format("FPS: {:.0f}", 1.0f / m_delta_time), vec2(0, m_window_size.y - 16.0f), 16.0f);
+	text_renderer.render_text(std::format("Camera Position: ({:.2f}, {:.2f}, {:.2f})", position.x, position.y, position.z), vec2(0, 0), 16.0f);
+	text_renderer.render_text(std::format("Camera Rotation: ({:.2f}, {:.2f})", glm::degrees(camera.get_pitch()), glm::degrees(camera.get_yaw())), vec2(0, 16), 16.0f);
 }
 
 bool App::init() {
@@ -69,7 +96,6 @@ bool App::init_glfw() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_SAMPLES, 8);
 
 	mp_window = glfwCreateWindow(1280, 720, "vox", nullptr, nullptr);
 	if(!mp_window) {
@@ -81,6 +107,7 @@ bool App::init_glfw() {
 	glfwSetKeyCallback(mp_window, key_event_callback_glfw);
 
 	glfwMakeContextCurrent(mp_window);
+	glfwSwapInterval(0);
 
 	return true;
 }
@@ -94,8 +121,12 @@ bool App::init_opengl() {
 
 	std::println("OpenGL version: {}.{}", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
-	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 	return true;
@@ -110,6 +141,8 @@ void App::window_size_callback_glfw([[maybe_unused]] GLFWwindow *window, i32 w, 
 	sp_instance->m_window_size.y = h;
 
 	glViewport(0, 0, w, h);
+
+	TextRenderer::get_instance().update_screen_size(vec2(w, h));
 }
 
 void App::key_event_callback_glfw([[maybe_unused]] GLFWwindow *window, [[maybe_unused]] i32 key, [[maybe_unused]] i32 scancode, [[maybe_unused]] i32 action, [[maybe_unused]] i32 mods) {

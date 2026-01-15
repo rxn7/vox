@@ -29,12 +29,13 @@ mat4 Camera::get_matrix(f32 aspect_ratio) const {
 }
 
 vec3 Camera::get_forward_direction() const {
+	const f32 yaw = m_yaw + glm::half_pi<f32>();
 	const f32 pitch_cos = cos(m_pitch);
 
 	return vec3(
-		pitch_cos * cos(m_yaw), 
+		pitch_cos * cos(yaw), 
 		sin(m_pitch), 
-		pitch_cos * sin(m_yaw)
+		pitch_cos * sin(yaw)
 	);
 }
 

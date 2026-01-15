@@ -80,28 +80,12 @@ i32 Shader::get_uniform_location(const std::string &name) const {
 		const i32 location = glGetUniformLocation(m_program_id, name.data());
 		m_uniform_locations.emplace(name, location);
 
-		std::println("{}: {}", name, location);
+		std::println("Uniform {}: {}", name, location);
 
 		return location;
 	}
 
 	return m_uniform_locations.at(name);
-}
-
-void Shader::set_uniform_f32(const std::string &name, f32 value) {
-	const i32 location = get_uniform_location(name);
-	if(location == -1) [[unlikely]] return;
-
-	bind();
-	glUniform1f(location, value);
-}
-
-void Shader::set_uniform_mat4(const std::string &name, const mat4 &matrix) {
-	const i32 location = get_uniform_location(name);
-	if(location == -1) [[unlikely]] return;
-
-	bind();
-	glUniformMatrix4fv(location, 1, false, glm::value_ptr(matrix)); 
 }
 
 bool Shader::check_compile_errors(u32 id, u32 flag, bool is_program) {

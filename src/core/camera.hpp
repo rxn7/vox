@@ -15,13 +15,18 @@ public:
 	vec3 get_forward_direction() const;
 	vec3 get_right_direction() const;
 
+	const vec3 &get_position() const { return m_position; }
+	f32 get_pitch() const { return m_pitch; }
+	f32 get_yaw() const { return m_yaw; }
+	f32 get_fov() const { return m_fov; }
+
 private:
 	void handle_movement(f32 dt);
 	void handle_mouse_movement();
 
-public:
+private:
 	vec3 m_position;
-	f32 m_yaw = -glm::radians(90.0f);
+	f32 m_yaw = 0.0f;
 	f32 m_pitch = 0.0f;
 	f32 m_fov;
 };

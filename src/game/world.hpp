@@ -12,6 +12,8 @@ public:
 	void update(f32 delta_time);
 	void render(f32 aspect_ratio);
 
+	inline const Camera &get_camera() const { return m_camera; }
+
 private:
 	Camera m_camera;
 	Shader m_shader;
