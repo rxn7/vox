@@ -1,5 +1,4 @@
 #include "scope_timer.hpp"
-#include "profiler.hpp"
 
 ScopeTimer::ScopeTimer(std::string_view name)
 : m_name(name) {

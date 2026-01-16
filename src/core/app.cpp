@@ -1,4 +1,5 @@
 #include "app.hpp"
+#include "imgui.h"
 #include "profiler.hpp"
 #include "text_renderer.hpp"
 #include "input.hpp"
@@ -16,6 +17,10 @@ App::~App() {
 	InputManager::destroy_instance();
 	Profiler::destroy_instance();
 
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
 	if(mp_window) {
 		glfwDestroyWindow(mp_window);
 	}
@@ -30,8 +35,7 @@ void App::run() {
 	text_renderer.init();
 	text_renderer.update_screen_size(m_window_size);
 
-	InputManager &input_manager = InputManager::get_instance();
-	input_manager.set_mouse_mode(mp_window, GLFW_CURSOR_DISABLED);
+	InputManager::get_instance().set_mouse_mode(mp_window, GLFW_CURSOR_DISABLED);
 
 	mp_world = std::make_unique<World>();
 
@@ -43,42 +47,47 @@ void App::run() {
 		m_delta_time = current_frame - last_frame;
 		last_frame = current_frame;
 
-		f64 mouse_x, mouse_y;
-		glfwGetCursorPos(mp_window, &mouse_x, &mouse_y);
-		input_manager.update_mouse_position(vec2(mouse_x, mouse_y));
+		update();
+		render();
 
-		mp_world->update(m_delta_time);
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		render_3d();
-		render_ui();
-
-		glfwSwapBuffers(mp_window);
 		glfwPollEvents();
-
-		for(const ProfileResult &result : Profiler::get_instance().get_results()) {
-			std::println("{}: {:} ms", result.name, result.duration_ms);
-		}
-
 		Profiler::get_instance().clear();
 	}
 }
 
-void App::update(f32 dt) { 
+void App::update() { 
 	PROFILE_FUNC();
 
-	mp_world->update(dt);
+	f64 mouse_x, mouse_y;
+	glfwGetCursorPos(mp_window, &mouse_x, &mouse_y);
+	InputManager::get_instance().update_mouse_position(vec2(mouse_x, mouse_y));
+
+	mp_world->update(m_delta_time);
+}
+
+void App::render() {
+	PROFILE_FUNC();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	render_3d();
+	render_ui();
+	render_imgui();
+
+	glfwSwapBuffers(mp_window);
 }
 
 void App::render_3d() { 
-	glEnable(GL_DEPTH_TEST);
+	PROFILE_FUNC();
 
+	glEnable(GL_DEPTH_TEST);
+	
 	const f32 aspect_ratio = f32(m_window_size.x) / f32(m_window_size.y);
 	mp_world->render(aspect_ratio);
 }
 
 void App::render_ui() {
+	PROFILE_FUNC();
+
 	glDisable(GL_DEPTH_TEST);
 
 	TextRenderer &text_renderer = TextRenderer::get_instance();
@@ -91,9 +100,25 @@ void App::render_ui() {
 	text_renderer.render_text(std::format("Camera Rotation: ({:.2f}, {:.2f})", glm::degrees(camera.get_pitch()), glm::degrees(camera.get_yaw())), vec2(0, 16), 16.0f);
 }
 
+void App::render_imgui() {
+	PROFILE_FUNC();
+
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	// ImGui::ShowDemoWindow();
+
+	ImGui::EndFrame();
+	ImGui::Render();
+
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 bool App::init() {
 	if(!init_glfw())	return false;
 	if(!init_opengl())	return false;
+	if(!init_imgui())	return false;
 
 	return true;
 }
@@ -145,11 +170,28 @@ bool App::init_opengl() {
 	return true;
 }
 
+bool App::init_imgui() {
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+
+	if(!ImGui_ImplGlfw_InitForOpenGL(mp_window, true)) {
+		std::println("Failed to initialize ImGui");
+		return false;
+	}
+
+	if(!ImGui_ImplOpenGL3_Init("#version 430 core")) {
+		std::println("Failed to initialize ImGui");
+		return false;
+	}
+	
+	return true;
+}
+
 void App::error_callback_glfw(i32 error, const char *description) {
 	std::println("GLFW error {}: {}", error, description);
 }
 
-void App::window_size_callback_glfw([[maybe_unused]] GLFWwindow *window, i32 w, i32 h) {
+void App::window_size_callback_glfw([[maybe_unused]] GLFWwindow *p_window, i32 w, i32 h) {
 	sp_instance->m_window_size.x = w;
 	sp_instance->m_window_size.y = h;
 
@@ -158,14 +200,14 @@ void App::window_size_callback_glfw([[maybe_unused]] GLFWwindow *window, i32 w, 
 	TextRenderer::get_instance().update_screen_size(vec2(w, h));
 }
 
-void App::key_event_callback_glfw([[maybe_unused]] GLFWwindow *window, [[maybe_unused]] i32 key, [[maybe_unused]] i32 scancode, [[maybe_unused]] i32 action, [[maybe_unused]] i32 mods) {
+void App::key_event_callback_glfw([[maybe_unused]] GLFWwindow *p_window, [[maybe_unused]] i32 key, [[maybe_unused]] i32 scancode, [[maybe_unused]] i32 action, [[maybe_unused]] i32 mods) {
 	switch(action) {
 		case GLFW_PRESS:
-			InputManager::get_instance().handle_key_event(key, true);
+			InputManager::get_instance().handle_key_event(p_window, key, true);
 			break;
 
 		case GLFW_RELEASE:
-			InputManager::get_instance().handle_key_event(key, false);
+			InputManager::get_instance().handle_key_event(p_window, key, false);
 			break;
 	}
 }

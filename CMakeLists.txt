@@ -10,28 +10,17 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -ffast-math")
 
 include(FetchContent)
 
-# GLAD 2.0.6 
-FetchContent_Declare(glad GIT_REPOSITORY https://github.com/Dav1dde/glad.git GIT_TAG 73db193f853e2ee079bf3ca8a64aa2eaf6459043 GIT_PROGRESS TRUE SOURCE_SUBDIR cmake)
-FetchContent_MakeAvailable(glad)
-glad_add_library(glad_gl_core_43 STATIC REPRODUCIBLE LOADER API gl:core=4.3)
-
-# GLM 1.0.3
-FetchContent_Declare(glm GIT_REPOSITORY	https://github.com/g-truc/glm.git GIT_TAG 8d1fd52e5ab5590e2c81768ace50c72bae28f2ed GIT_PROGRESS TRUE)
-FetchContent_MakeAvailable(glm)
-
-# GLFW 3.4
-FetchContent_Declare(glfw GIT_REPOSITORY https://github.com/glfw/glfw.git GIT_TAG 7b6aead9fb88b3623e3b3725ebb42670cbe4c579 GIT_PROGRESS TRUE)
-FetchContent_MakeAvailable(glfw)
-
-# battery-embed 1.2.19
-FetchContent_Declare(battery-embed GIT_REPOSITORY https://github.com/batterycenter/embed.git GIT_TAG fdbae3fa33e96824726b68d9a8f64ba6be3833c6 GIT_PROGRESS TRUE)
-FetchContent_MakeAvailable(battery-embed)
+include(cmake/imgui.cmake)
+include(cmake/glad.cmake)
+include(cmake/glfw.cmake)
+include(cmake/glm.cmake)
+include(cmake/embed.cmake)
 
 file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS src/*.cpp)
 add_executable(vox ${PROJECT_SOURCES})
 
 target_include_directories(vox PRIVATE src)
-target_link_libraries(vox PRIVATE glfw glad_gl_core_43 glm::glm)
+target_link_libraries(vox PRIVATE imgui glfw glad_gl_core_43 glm::glm)
 target_precompile_headers(vox PRIVATE src/pch.hpp)
 
 add_subdirectory(assets)

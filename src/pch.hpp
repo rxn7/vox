@@ -15,6 +15,12 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
+#define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
@@ -41,3 +47,5 @@ typedef uint32_t u32;
 
 typedef int64_t i64;
 typedef uint64_t u64;
+
+#include "core/profiler.hpp"

@@ -12,11 +12,13 @@ private:
 	bool init();
 	bool init_glfw();
 	bool init_opengl();
+	bool init_imgui();
 
-	void update(f32 dt);
-
+	void update();
+	void render();
 	void render_3d();
 	void render_ui();
+	void render_imgui();
 
 	static void error_callback_glfw(i32 error, const char *description);
 	static void window_size_callback_glfw(GLFWwindow *window, i32 w, i32 h);

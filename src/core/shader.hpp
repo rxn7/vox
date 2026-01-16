@@ -1,7 +1,5 @@
 #pragma once
 
-#include "profiler.hpp"
-
 enum ShaderType {
 	SHADER_VERTEX = GL_VERTEX_SHADER,
 	SHADER_FRAGMENT = GL_FRAGMENT_SHADER,

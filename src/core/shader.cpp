@@ -1,6 +1,4 @@
 #include "shader.hpp"
-#include "profiler.hpp"
-
 u32 Shader::s_bound_program = 0;
 
 Shader::Shader() {}

@@ -19,9 +19,9 @@ SINGLETON_CLASS(InputManager);
 public:
 	InputManager() {}
 
-	void set_mouse_mode(GLFWwindow *window, i32 mode);
+	void set_mouse_mode(GLFWwindow *p_window, i32 mode);
 	void update_mouse_position(vec2 position);
-	void handle_key_event(i32 key, bool is_pressed);
+	void handle_key_event(GLFWwindow *p_window, i32 key, bool is_pressed);
 	[[nodiscard]] inline i32 get_mouse_mode() { return m_mouse_mode; }
 	[[nodiscard]] inline const InputState &get_state() { return m_state; }
 

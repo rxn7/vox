@@ -1,5 +1,4 @@
 #include "mesh.hpp"
-#include "profiler.hpp"
 
 Mesh::Mesh() { }
 

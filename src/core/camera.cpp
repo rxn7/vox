@@ -1,6 +1,5 @@
 #include "camera.hpp"
 #include "input.hpp"
-#include "profiler.hpp"
 
 constexpr f32 SENSITIVITY = 0.002f;
 constexpr f32 MOVE_SPEED = 5.0f;
