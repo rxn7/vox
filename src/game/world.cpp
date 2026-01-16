@@ -20,10 +20,13 @@ World::~World() {
 }
 
 void World::update(f32 delta_time) {
+	PROFILE_FUNC();
 	m_camera.update(delta_time);
 }
 
 void World::render(f32 aspect_ratio) {
+	PROFILE_FUNC();
+
 	const mat4 view_matrix = m_camera.get_matrix(aspect_ratio);
 	m_shader.set_uniform_mat4("u_cameraMatrix", view_matrix);
 

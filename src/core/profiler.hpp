@@ -1,45 +1,39 @@
 #pragma once
 
 #include "singleton.hpp"
-#include "scope_timer.hpp"
-#include <chrono>
 
 typedef std::chrono::high_resolution_clock ProfilerClock;
 typedef ProfilerClock::time_point ProfilerTimePoint;
 
-struct ProfileResult {
-	std::string_view name;
-	f32 duration_ms;
-};
+struct ProfilerNode {
+	const char *name;
+	f32 duration_us = 0.0f;
+	u16 calls = 0;
+	u8 depth = 0;
 
-struct ProfileResultCmp {
-	bool operator()(const ProfileResult &a, const ProfileResult &b) const {
-		return a.duration_ms > b.duration_ms;
-	}
+	i16 parent = -1;
+	i16 first_child = -1;
+	i16 last_child = -1;
+	i16 next_sibling = -1;
 };
 
 class Profiler {
 SINGLETON_CLASS(Profiler);
 public:
-	void start(std::string_view name);
-	void stop(std::string_view name);
-	void clear();
+	void new_frame();
+	void end_frame();
 
-	[[nodiscard]] inline const std::multiset<ProfileResult, ProfileResultCmp> &get_results() const { return m_results; }
+	i16 start_scope(const char *name);
+	void end_scope(f32 duration_us);
+
+	[[nodiscard]] inline f32 get_frame_duration_us() const { return m_frame_duration_us; }
+	[[nodiscard]] inline const std::vector<ProfilerNode> &get_results() const { return m_results; }
 
 private:
-	std::unordered_map<std::string, f32> m_duration_ms_map;
-	std::unordered_map<std::string, ProfilerTimePoint> m_start_time_map;
-	std::multiset<ProfileResult, ProfileResultCmp> m_results;
+	std::vector<ProfilerNode> m_buffer;
+	std::vector<ProfilerNode> m_results;
+	i16 m_current_node_idx = 0;
+
+    ProfilerTimePoint m_frame_start;
+    f32 m_frame_duration_us = 0.0f;
 };
-
-#ifndef NDEBUG
-
-#define PROFILE_SCOPE(name) ScopeTimer __scope_timer##__LINE__(name);
-#define PROFILE_FUNC() ScopeTimer __scope_timer##__LINE__(__PRETTY_FUNCTION__);
-
-#else
-#define PROFILE_SCOPE(name)
-#define PROFILE_FUNC()
-
-#endif

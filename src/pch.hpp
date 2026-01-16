@@ -1,12 +1,14 @@
 #pragma once
 
 #include <print>
+#include <chrono>
 #include <array>
 #include <vector>
 #include <unordered_map>
 #include <span>
 #include <memory>
 #include <set>
+#include <unordered_set>
 
 #define DB_PRODUCTION_MODE
 #include <battery/embed.hpp>
@@ -48,4 +50,4 @@ typedef uint32_t u32;
 typedef int64_t i64;
 typedef uint64_t u64;
 
-#include "core/profiler.hpp"
+#include "core/scope_timer.hpp"

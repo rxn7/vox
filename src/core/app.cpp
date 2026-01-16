@@ -42,7 +42,11 @@ void App::run() {
 	f64 last_frame, current_frame;
 	last_frame = current_frame = glfwGetTime();
 
+	Profiler &profiler = Profiler::get_instance();
+
 	while(!glfwWindowShouldClose(mp_window)) {
+		profiler.new_frame();
+
 		current_frame = glfwGetTime();
 		m_delta_time = current_frame - last_frame;
 		last_frame = current_frame;
@@ -51,16 +55,20 @@ void App::run() {
 		render();
 
 		glfwPollEvents();
-		Profiler::get_instance().clear();
+
+		profiler.end_frame();
 	}
 }
 
 void App::update() { 
 	PROFILE_FUNC();
 
-	f64 mouse_x, mouse_y;
-	glfwGetCursorPos(mp_window, &mouse_x, &mouse_y);
-	InputManager::get_instance().update_mouse_position(vec2(mouse_x, mouse_y));
+	{
+		PROFILE_SCOPE("Get cursor pos");
+		f64 mouse_x, mouse_y;
+		glfwGetCursorPos(mp_window, &mouse_x, &mouse_y);
+		InputManager::get_instance().update_mouse_position(vec2(mouse_x, mouse_y));
+	}
 
 	mp_world->update(m_delta_time);
 }
@@ -107,7 +115,7 @@ void App::render_imgui() {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	// ImGui::ShowDemoWindow();
+	m_profiler_window.render();
 
 	ImGui::EndFrame();
 	ImGui::Render();

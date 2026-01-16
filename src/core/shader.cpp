@@ -81,8 +81,6 @@ i32 Shader::get_uniform_location(std::string_view name) const {
 		const i32 location = glGetUniformLocation(m_program_id, name.data());
 		m_uniform_locations.emplace(name, location);
 
-		std::println("Uniform {}: {}", name, location);
-
 		return location;
 	}
 

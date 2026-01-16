@@ -1,5 +1,6 @@
 #pragma once
 
+#include "imgui/profiler_window.hpp"
 #include "game/world.hpp"
 
 class App {
@@ -30,6 +31,7 @@ private:
 	ivec2 m_window_size;
 	f32 m_delta_time;
 
+	ProfilerWindow m_profiler_window;
 	std::unique_ptr<World> mp_world;
 
 	static App *sp_instance;
