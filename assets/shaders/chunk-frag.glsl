@@ -1,6 +1,8 @@
 #version 430 core
 
+in vec3 v_normal;
 in vec3 v_color;
+
 out vec4 f_color;
 
 void main() {

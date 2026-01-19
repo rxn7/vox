@@ -1,4 +1,5 @@
 #include "core/render/chunk_renderer.hpp"
+#include "core/render/packer.hpp"
 
 SINGLETON_IMPL(ChunkRenderer);
 
@@ -104,7 +105,7 @@ void ChunkRenderer::add_draw_command(u16 slot, u32 index_count, i16vec3 chunk_po
 	};
 	
 	m_draw_commands.push_back(cmd);
-	m_packed_chunk_positions.push_back(pack_chunk_position(chunk_position));
+	m_packed_chunk_positions.push_back(Packer::pack_chunk_position(chunk_position));
 }
 
 u16 ChunkRenderer::allocate_chunk_slot() {

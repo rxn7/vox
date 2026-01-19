@@ -1,8 +1,7 @@
 #pragma once
 
 constexpr u32 CHUNK_WIDTH = 16;
-constexpr u32 CHUNK_HEIGHT = 16;
-constexpr u32 TOTAL_BLOCKS = CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH;
+constexpr u32 TOTAL_BLOCKS = CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_WIDTH;
 
 class Chunk {
 public:
@@ -35,3 +34,4 @@ private:
 
 	friend class World;
 };
+
