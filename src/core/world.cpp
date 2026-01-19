@@ -1,10 +1,10 @@
 #include "world.hpp"
-#include "core/render/chunk_renderer.hpp"
 
 World::World() {
-	for(int x = 0; x < 4; ++x) {
-		for(int z = 0; z < 4; ++z) {
-			m_chunks.emplace(i16vec3(x, 0, z), std::make_unique<Chunk>());
+	for(i32 x = -2; x < 2; ++x) {
+		for(i32 z = -2; z < 2; ++z) {
+			const ChunkPosition position(x, 0, z);
+			m_chunks.emplace(position, std::make_unique<Chunk>(*this, position));
 		}
 	}
 }
@@ -16,9 +16,14 @@ void World::update() {
 
 	for(auto &[position, chunk] : m_chunks) {
 		chunk->update();
-
-		if(chunk->m_render_slot.has_value() && chunk->m_index_count > 0) {
-			ChunkRenderer::get_instance().add_draw_command(chunk->m_render_slot.value(), chunk->m_index_count, position);
-		}
+		chunk->render();
 	}
+}
+
+Chunk *World::get_chunk(const ChunkPosition &position) {
+	const auto it = m_chunks.find(position);
+	if(it == m_chunks.end())
+		return nullptr;
+	
+	return it->second.get();
 }

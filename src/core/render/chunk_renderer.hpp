@@ -27,7 +27,7 @@ public:
 	void free_chunk_slot(u16 slot);
 	
 public:
-	static constexpr u32 VERTEX_SLOT_SIZE = 8 * 8 * 8 * 6 * 4; // 8x8x8 chunk (worst case) * 6 faces * 4 vertices
+	static constexpr u32 VERTEX_SLOT_SIZE = 16 * 16 * 16 * 6 * 4; // 8x8x8 chunk (worst case) * 6 faces * 4 vertices
 	static constexpr u32 INDEX_SLOT_SIZE = VERTEX_SLOT_SIZE * 3 / 2;
 
 	// TODO: Calculate on runtime based on render distance

@@ -22,7 +22,7 @@ struct BlockTextures {
 };
 
 struct BlockType {
-	constexpr BlockType() : name("INVALID") { }
+	constexpr BlockType() : name("INVALID"), is_solid(false), is_transparent(true) { }
 
 	constexpr BlockType(std::string_view name, TextureID texture, bool is_solid = true, bool is_transparent = false) 
 	: name(name), is_solid(is_solid), is_transparent(is_transparent) {

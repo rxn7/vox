@@ -45,32 +45,16 @@ void main() {
 
     gl_Position = u_camera_matrix * vec4(world_pos, 1.0);
 
-    // Right (0), Left (1) -> X is constant. Plane is ZY.
-    // Top (2), Bottom (3) -> Y is constant. Plane is XZ.
-    // Front (4), Back (5) -> Z is constant. Plane is XY.
 
     if (face_id <= 1) {
-        // Right & Left: Use Z and Y
         v_uv = vec2(local_z, local_y);
-    } 
-    else if (face_id <= 3) {
-        // Top & Bottom: Use X and Z
+    } else if (face_id <= 3) {
         v_uv = vec2(local_x, local_z);
-    } 
-    else {
-        // Front & Back: Use X and Y
+    } else {
         v_uv = vec2(local_x, local_y);
     }
 
-    // --- FLIP FIX ---
-    // Because of the direction your vertices "walk" in C++, 
-    // some faces run backwards (e.g. 1->0) and need to be flipped.
-    
-    // Right (0): Z goes 1->0. Needs Flip.
-    // Top (2):   Z goes 1->0. Needs Flip.
-    // Back (5):  X goes 1->0. Needs Flip.
-    
-    if (face_id == 0 || face_id == 2 || face_id == 5) {
+    if(face_id == 0 || face_id == 2 || face_id == 5) {
         v_uv.x = -v_uv.x;
     }
 }
