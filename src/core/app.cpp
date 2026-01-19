@@ -1,8 +1,9 @@
 #include "app.hpp"
+#include "core/render/chunk_renderer.hpp"
 #include "imgui.h"
-#include "profiler.hpp"
-#include "text_renderer.hpp"
 #include "input.hpp"
+#include "profiler/profiler.hpp"
+#include "render/text_renderer.hpp"
 
 App *App::sp_instance = nullptr;
 
@@ -11,8 +12,9 @@ App::App() {
 }
 
 App::~App() { 
-	mp_world.reset();
+	mp_game.reset();
 
+	ChunkRenderer::destroy_instance();
 	TextRenderer::destroy_instance();
 	InputManager::destroy_instance();
 	Profiler::destroy_instance();
@@ -31,21 +33,12 @@ App::~App() {
 void App::run() { 
 	if(!init()) return;
 
-	TextRenderer &text_renderer = TextRenderer::get_instance();
-	text_renderer.init();
-	text_renderer.update_screen_size(m_window_size);
-
-	InputManager::get_instance().set_mouse_mode(mp_window, GLFW_CURSOR_DISABLED);
-
-	mp_world = std::make_unique<World>();
-
-	f64 last_frame, current_frame;
-	last_frame = current_frame = glfwGetTime();
-
+	f64 last_frame, current_frame; last_frame = current_frame = glfwGetTime();
 	Profiler &profiler = Profiler::get_instance();
 
 	while(!glfwWindowShouldClose(mp_window)) {
 		profiler.new_frame();
+		ChunkRenderer::get_instance().new_frame();
 
 		current_frame = glfwGetTime();
 		m_delta_time = current_frame - last_frame;
@@ -55,7 +48,6 @@ void App::run() {
 		render();
 
 		glfwPollEvents();
-
 		profiler.end_frame();
 	}
 }
@@ -70,7 +62,7 @@ void App::update() {
 		InputManager::get_instance().update_mouse_position(vec2(mouse_x, mouse_y));
 	}
 
-	mp_world->update(m_delta_time);
+	mp_game->update(m_delta_time);
 }
 
 void App::render() {
@@ -81,31 +73,23 @@ void App::render() {
 	render_ui();
 	render_imgui();
 
+	PROFILE_SCOPE("Swap buffers");
 	glfwSwapBuffers(mp_window);
 }
 
 void App::render_3d() { 
 	PROFILE_FUNC();
-
 	glEnable(GL_DEPTH_TEST);
 	
 	const f32 aspect_ratio = f32(m_window_size.x) / f32(m_window_size.y);
-	mp_world->render(aspect_ratio);
+	mp_game->render_3d(aspect_ratio);
 }
 
 void App::render_ui() {
 	PROFILE_FUNC();
-
 	glDisable(GL_DEPTH_TEST);
 
-	TextRenderer &text_renderer = TextRenderer::get_instance();
-
-	const Camera &camera = mp_world->get_camera();
-	const vec3 position = camera.get_position();
-
-	text_renderer.render_text(std::format("FPS: {:.0f}", 1.0f / m_delta_time), vec2(0, m_window_size.y - 16.0f), 16.0f);
-	text_renderer.render_text(std::format("Camera Position: ({:.2f}, {:.2f}, {:.2f})", position.x, position.y, position.z), vec2(0, 0), 16.0f);
-	text_renderer.render_text(std::format("Camera Rotation: ({:.2f}, {:.2f})", glm::degrees(camera.get_pitch()), glm::degrees(camera.get_yaw())), vec2(0, 16), 16.0f);
+	mp_game->render_ui();
 }
 
 void App::render_imgui() {
@@ -127,6 +111,20 @@ bool App::init() {
 	if(!init_glfw())	return false;
 	if(!init_opengl())	return false;
 	if(!init_imgui())	return false;
+
+	TextRenderer &text_renderer = TextRenderer::get_instance();
+	text_renderer.init();
+	text_renderer.update_screen_size(m_window_size);
+
+	InputManager::get_instance().set_mouse_mode(mp_window, GLFW_CURSOR_DISABLED);
+	ChunkRenderer::get_instance().init();
+
+	mp_game = std::make_unique<Game>();
+
+	constexpr float VRAM_USAGE_PER_CHUNK = (ChunkRenderer::VERTEX_SLOT_SIZE * sizeof(u32) + ChunkRenderer::INDEX_SLOT_SIZE * sizeof(u32)) / 1000.0f;
+
+	std::println("ChunkRenderer VRAM usage: {} KB per chunk", VRAM_USAGE_PER_CHUNK);
+	std::println("ChunkRenderer Total VRAM usage: {} KB", VRAM_USAGE_PER_CHUNK * ChunkRenderer::MAX_CHUNKS);
 
 	return true;
 }
@@ -172,6 +170,8 @@ bool App::init_opengl() {
 
 	glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -219,3 +219,4 @@ void App::key_event_callback_glfw([[maybe_unused]] GLFWwindow *p_window, [[maybe
 			break;
 	}
 }
+

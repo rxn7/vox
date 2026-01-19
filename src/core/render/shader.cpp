@@ -6,16 +6,6 @@ Shader::Shader() {}
 Shader::~Shader() {
 	if(!m_created) return;
 
-	if(m_frag_id != 0) {
-		glDetachShader(m_program_id, m_frag_id);
-		glDeleteShader(m_frag_id);
-	}
-
-	if(m_vert_id != 0) {
-		glDetachShader(m_program_id, m_vert_id);
-		glDeleteShader(m_vert_id);
-	}
-
 	glDeleteProgram(m_program_id);
 }
 
@@ -40,6 +30,16 @@ bool Shader::load(std::string_view vert_source, std::string_view frag_source) {
 	glLinkProgram(m_program_id);
 	if(check_compile_errors(m_program_id, GL_LINK_STATUS, true)) [[unlikely]] {
 		return false;
+	}
+
+	if(m_frag_id != 0) {
+		glDetachShader(m_program_id, m_frag_id);
+		glDeleteShader(m_frag_id);
+	}
+
+	if(m_vert_id != 0) {
+		glDetachShader(m_program_id, m_vert_id);
+		glDeleteShader(m_vert_id);
 	}
 
 	glValidateProgram(m_program_id);
@@ -79,8 +79,12 @@ i32 Shader::get_uniform_location(std::string_view name) const {
 
 	if(!uniform_exists) [[unlikely]] {
 		const i32 location = glGetUniformLocation(m_program_id, name.data());
-		m_uniform_locations.emplace(name, location);
+		if(location == -1) [[unlikely]] {
+			std::println("Failed to get uniform location: {}", name);
+			return -1;
+		}
 
+		m_uniform_locations.emplace(name, location);
 		return location;
 	}
 

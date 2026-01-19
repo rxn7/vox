@@ -1,21 +1,20 @@
 #pragma once
 
 #include "core/camera.hpp"
-#include "core/mesh.hpp"
-#include "core/shader.hpp"
+#include "core/world.hpp"
 
-class World {
+class Game {
 public:
-	World();
-	~World();
+	Game();
+	~Game();
 
 	void update(f32 delta_time);
-	void render(f32 aspect_ratio);
+	void render_3d(f32 aspect_ratio);
+	void render_ui();
 
 	inline const Camera &get_camera() const { return m_camera; }
 
 private:
 	Camera m_camera;
-	Shader m_shader;
-	Mesh m_mesh;
+	World m_world;
 };

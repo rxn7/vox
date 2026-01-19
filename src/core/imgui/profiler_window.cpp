@@ -1,6 +1,8 @@
 #include "profiler_window.hpp"
 #include "imgui.h"
 
+#include <fstream>
+
 void ProfilerWindow::render() {
 	PROFILE_FUNC();
 
@@ -12,12 +14,23 @@ void ProfilerWindow::render() {
 	m_time_since_update += ImGui::GetIO().DeltaTime;
 	if(!m_paused && m_time_since_update > 0.25f) {
 		m_time_since_update = 0.0f;
-		update_data();
+		update();
 	}
 
 	ImGui::Text("Frame Duration: %.2fus", m_frame_duration_us);
 	ImGui::Text("FPS: %.0f", 1.0f / (m_frame_duration_us / 1000.0f / 1000.0f));
+	ImGui::Text("Mem usage: %.2f MB", m_mem_used / (1024.0f * 1024.0f));
 	ImGui::Checkbox("Paused", &m_paused);
+
+	if(ImGui::Button("Expand All")) {
+		m_expand_all_triggered = true;
+	}
+
+	ImGui::SameLine();
+
+	if(ImGui::Button("Hide All")) {
+		m_hide_all_triggered = true;
+	}
 
 	if(m_data.empty()) {
 		ImGui::Text("No results");
@@ -26,6 +39,9 @@ void ProfilerWindow::render() {
 	}
 
 	render_node_recursive(m_data, 0);
+
+	m_expand_all_triggered = false;
+	m_hide_all_triggered = false;
 
 	ImGui::End();
 }
@@ -41,14 +57,15 @@ void ProfilerWindow::render_node_recursive(const std::vector<ProfilerNode> &node
 	}
 
     const ImVec4 fg_color = ImVec4(
-        duration_ratio_to_parent, 
-        (1.0f - duration_ratio_to_parent), 
+        duration_ratio_to_parent * 2.0f, 
+        (1.0f - duration_ratio_to_parent) * 2.0f, 
         0.0f, 
         1.0f
     );
 
 	ImGui::PushID(node_idx);
     ImGui::PushStyleColor(ImGuiCol_Text, fg_color);
+    ImGui::PushStyleColor(ImGuiCol_TextDisabled, fg_color);
 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Framed;
 	if(node.first_child == -1) {
@@ -61,7 +78,15 @@ void ProfilerWindow::render_node_recursive(const std::vector<ProfilerNode> &node
 		flags |= ImGuiTreeNodeFlags_DefaultOpen;
 	}
 
-	if(ImGui::TreeNodeEx("##Node", flags, "%s %.2fus (%d %%) (%d calls)", node.name, node.duration_us, std::clamp(static_cast<i32>(duration_ratio_to_parent * 100), 0, 100), node.calls)) {
+	if(m_expand_all_triggered) {
+		ImGui::SetNextItemOpen(true);
+	} else if(m_hide_all_triggered) {
+		ImGui::SetNextItemOpen(false);
+	}
+
+	const i32 duration_percentage = std::clamp(static_cast<i32>(duration_ratio_to_parent * 100), 0, 100);
+
+	if(ImGui::TreeNodeEx("##Node", flags, "%s %.2fus (%d %%) (%d calls)", node.name, node.duration_us, duration_percentage, node.calls)) {
 		std::vector<i16> children_idxs;
 		i16 child = node.first_child;
 
@@ -82,15 +107,42 @@ void ProfilerWindow::render_node_recursive(const std::vector<ProfilerNode> &node
 	}
 
 	ImGui::PopStyleColor();
+	ImGui::PopStyleColor();
 	ImGui::PopID();
 }
 
-void ProfilerWindow::update_data() {
+void ProfilerWindow::update() {
 	const Profiler &profiler = Profiler::get_instance();
 
+#ifndef NDEBUG
 	const std::vector<ProfilerNode> &data = profiler.get_results();
 	m_data.clear();
 	m_data.assign_range(data);
+#endif
+
+	m_mem_used = get_current_mem_usage();
 
 	m_frame_duration_us = profiler.get_frame_duration_us();
+}
+
+u64 ProfilerWindow::get_current_mem_usage() {
+#ifndef __linux__
+	return 0;
+#endif
+	
+	std::ifstream statm("/proc/self/statm");
+	if(!statm) {
+		std::println("Failed to open /proc/self/statm");
+		return 0;
+	}
+
+	u64 size_pages = 0;
+	u64 resident_pages = 0;
+
+	statm >> size_pages >> resident_pages;
+
+	statm.close();
+
+	const u64 page_size = sysconf(_SC_PAGESIZE);
+	return page_size * size_pages;
 }

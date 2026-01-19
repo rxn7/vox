@@ -23,6 +23,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
@@ -34,6 +35,8 @@ typedef glm::ivec3 ivec3;
 typedef glm::ivec4 ivec4;
 typedef glm::mat4 mat4;
 typedef glm::mat3 mat3;
+
+typedef glm::i16vec3 i16vec3;
 
 typedef float f32;
 typedef double f64;
@@ -50,4 +53,4 @@ typedef uint32_t u32;
 typedef int64_t i64;
 typedef uint64_t u64;
 
-#include "core/scope_timer.hpp"
+#include "core/profiler/scope_timer.hpp"

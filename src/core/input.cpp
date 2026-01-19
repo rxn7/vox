@@ -1,4 +1,5 @@
 #include "input.hpp"
+#include "core/render/chunk_renderer.hpp"
 
 SINGLETON_IMPL(InputManager);
 
@@ -40,5 +41,13 @@ void InputManager::handle_key_event(GLFWwindow *p_window, i32 key, bool is_press
 			}
 			break;
 		}
+
+		case GLFW_KEY_F1: 
+			if(is_pressed) {
+				ChunkRenderer::get_instance().wireframe = !ChunkRenderer::get_instance().wireframe;
+				return;
+			}
+
+			break;
 	}
 }

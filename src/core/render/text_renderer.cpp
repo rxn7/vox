@@ -1,5 +1,5 @@
 #include "text_renderer.hpp"
-#include "font_data.hpp"
+#include "core/font_data.hpp"
 
 constexpr u32 STAGING_BUFFER_SIZE = 2048;
 

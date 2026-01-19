@@ -22,5 +22,5 @@ void main() {
         discard;
     }
 
-    f_color = vec4(1.0, 1.0, 1.0, 1.0); // White Text
+    f_color = vec4(1.0, 1.0, 1.0, 1.0);
 }

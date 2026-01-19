@@ -1,12 +1,11 @@
 #pragma once
 
-#include "singleton.hpp"
+#include "core/singleton.hpp"
 #include "shader.hpp"
 
 class TextRenderer {
 SINGLETON_CLASS(TextRenderer);
 public:
-
 	TextRenderer();
 	~TextRenderer();
 

@@ -2,6 +2,19 @@
 
 SINGLETON_IMPL(Profiler);
 
+#ifdef NDEBUG
+
+void Profiler::new_frame() {
+	m_frame_start = ProfilerClock::now();
+}
+void Profiler::end_frame() {
+	m_frame_duration_us = std::chrono::duration<f32, std::micro>(ProfilerClock::now() - m_frame_start).count();
+}
+i16 Profiler::start_scope(const char *name) { return 0; }
+void Profiler::end_scope(f32 duration_us) {}
+
+#else 
+
 void Profiler::new_frame() {
 	m_frame_start = ProfilerClock::now();
 
@@ -9,8 +22,7 @@ void Profiler::new_frame() {
 }
 
 void Profiler::end_frame() {
-	const ProfilerTimePoint frame_end = ProfilerClock::now();
-	m_frame_duration_us = std::chrono::duration<f32, std::micro>(frame_end - m_frame_start).count();
+	m_frame_duration_us = std::chrono::duration<f32, std::micro>(ProfilerClock::now() - m_frame_start).count();
 
 	m_results.swap(m_buffer);
 	m_buffer.clear();
@@ -67,3 +79,5 @@ void Profiler::end_scope(f32 duration_us) {
 		m_current_node_idx = node.parent;
 	}
 }
+
+#endif

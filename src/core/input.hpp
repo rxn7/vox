@@ -11,6 +11,8 @@ struct InputState {
 	bool jump = false;
 	bool crouch = false;
 
+	bool toggle_wireframe = false;
+
 	vec2 mouse_delta = vec2(0);
 };
 

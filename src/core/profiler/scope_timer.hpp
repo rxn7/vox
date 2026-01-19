@@ -4,9 +4,9 @@
 
 class ScopeTimer {
 public:
-	explicit inline ScopeTimer(const char *name) 
-	: m_name(name), m_start(std::chrono::high_resolution_clock::now()) { 
+	explicit inline ScopeTimer(const char *name) : m_name(name) { 
         Profiler::get_instance().start_scope(m_name);
+        m_start = ProfilerClock::now();
     }
 
 	inline ~ScopeTimer() {
@@ -53,8 +53,10 @@ constexpr auto clean_func_name(const char(&s)[N]) {
     #define RAW_FUNC_SIG __func__
 #endif
 
-#define PROFILE_SCOPE(name) ScopeTimer __scope_timer##__LINE__(name);
-#define PROFILE_FUNC() ScopeTimer __scope_timer##__LINE__( \
+#define GLUE(a, b) a##b
+#define COMBINE(a, b) GLUE(a, b)
+#define PROFILE_SCOPE(name) ScopeTimer COMBINE(__scope_timer__, __COUNTER__)(name);
+#define PROFILE_FUNC() ScopeTimer COMBINE(__scope_timer__, __COUNTER__)( \
     ({ \
         static constexpr auto _static_name = clean_func_name(RAW_FUNC_SIG); \
         _static_name.data(); \

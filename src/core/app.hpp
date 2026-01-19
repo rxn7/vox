@@ -1,7 +1,7 @@
 #pragma once
 
 #include "imgui/profiler_window.hpp"
-#include "game/world.hpp"
+#include "game/game.hpp"
 
 class App {
 public:
@@ -32,7 +32,7 @@ private:
 	f32 m_delta_time;
 
 	ProfilerWindow m_profiler_window;
-	std::unique_ptr<World> mp_world;
+	std::unique_ptr<Game> mp_game;
 
 	static App *sp_instance;
 };

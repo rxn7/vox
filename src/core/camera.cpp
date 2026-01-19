@@ -4,7 +4,7 @@
 constexpr f32 SENSITIVITY = 0.002f;
 constexpr f32 MOVE_SPEED = 5.0f;
 constexpr f32 NEAR_PLANE = 0.1f;
-constexpr f32 FAR_PLANE = 100.0f;
+constexpr f32 FAR_PLANE = 1000.0f;
 
 Camera::Camera(vec3 position, f32 fov) 
 : m_position(position), m_fov(fov) {

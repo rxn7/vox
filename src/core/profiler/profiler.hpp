@@ -1,6 +1,6 @@
 #pragma once
 
-#include "singleton.hpp"
+#include "core/singleton.hpp"
 
 typedef std::chrono::high_resolution_clock ProfilerClock;
 typedef ProfilerClock::time_point ProfilerTimePoint;
@@ -27,13 +27,17 @@ public:
 	void end_scope(f32 duration_us);
 
 	[[nodiscard]] inline f32 get_frame_duration_us() const { return m_frame_duration_us; }
+#ifndef NDEBUG
 	[[nodiscard]] inline const std::vector<ProfilerNode> &get_results() const { return m_results; }
+#endif
 
 private:
+    ProfilerTimePoint m_frame_start;
+    f32 m_frame_duration_us = 0.0f;
+
+#ifndef NDEBUG
 	std::vector<ProfilerNode> m_buffer;
 	std::vector<ProfilerNode> m_results;
 	i16 m_current_node_idx = 0;
-
-    ProfilerTimePoint m_frame_start;
-    f32 m_frame_duration_us = 0.0f;
+#endif
 };
