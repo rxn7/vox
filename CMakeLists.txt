@@ -28,12 +28,13 @@ target_compile_options(vox PRIVATE
 target_compile_options(vox PRIVATE
     $<$<CONFIG:Release>:
         $<$<CXX_COMPILER_ID:MSVC>:/Ot /Oy /fp:fast /GS->
-        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-O3 -fomit-frame-pointer -ffast-math -fno-stack-protector -march=x86-64-v3>
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-O3 -fomit-frame-pointer -ffast-math -fno-stack-protector>
     >
 )
 
-target_include_directories(vox PRIVATE src)
+target_include_directories(vox PRIVATE src include)
 target_precompile_headers(vox PRIVATE src/pch.hpp)
 target_link_libraries(vox PRIVATE imgui glfw glad_gl_core_43 glm::glm)
 
 add_subdirectory(assets)
+add_dependencies(vox vox_copy_assets)

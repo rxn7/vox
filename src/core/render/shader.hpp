@@ -13,6 +13,10 @@ public:
 	bool load(std::string_view vert_source, std::string_view frag_source);
 	[[nodiscard]] i32 get_uniform_location(std::string_view name) const;
 
+	inline void set_uniform_i32(std::string_view name, i32 value) {
+		set_uniform(name, [value](i32 location) { glUniform1i(location, value); });
+	}
+
 	inline void set_uniform_f32(std::string_view name, f32 value) {
 		set_uniform(name, [value](i32 location) { glUniform1f(location, value); });
 	}

@@ -2,8 +2,10 @@
 #include "core/render/chunk_renderer.hpp"
 
 World::World() {
-	for(int i = 0; i < 16; ++i) {
-		m_chunks.emplace(i16vec3(i, i, i), std::make_unique<Chunk>());
+	for(int x = 0; x < 4; ++x) {
+		for(int z = 0; z < 4; ++z) {
+			m_chunks.emplace(i16vec3(x, 0, z), std::make_unique<Chunk>());
+		}
 	}
 }
 

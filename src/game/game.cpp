@@ -3,7 +3,8 @@
 #include "core/render/text_renderer.hpp"
 
 Game::Game() 
-: m_camera(vec3(0, 0, -5.0f), 80.0f) { }
+: m_camera(vec3(0, 0, -5.0f), 80.0f) { 
+}
 
 Game::~Game() {
 }

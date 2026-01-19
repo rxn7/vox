@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/render/texture_array.hpp"
 #include "core/render/shader.hpp"
 #include "core/singleton.hpp"
 
@@ -46,6 +47,7 @@ private:
 	u32 m_packed_chunk_positions_ssbo;
 
 	Shader m_shader;
+	TextureArray m_textures;
 
 	std::vector<DrawElementsIndirectCommand> m_draw_commands;
 	std::vector<u32> m_packed_chunk_positions;

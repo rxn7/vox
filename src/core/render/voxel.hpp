@@ -1,10 +1,10 @@
 #pragma once
 
 enum class FaceID : u8 {
-	Top = 0,
-	Bottom,
-	Front,
-	Back,
-	Right,
-	Left
+	Right = 0,
+	Left = 1,
+	Top = 2,
+	Bottom = 3,
+	Front = 4,
+	Back = 5
 };

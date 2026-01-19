@@ -1,10 +1,12 @@
 #include "core/render/chunk_renderer.hpp"
 #include "core/render/packer.hpp"
+#include "core/texture_paths.hpp"
 
 SINGLETON_IMPL(ChunkRenderer);
 
 void ChunkRenderer::init() {
 	m_shader.load(b::embed<"shaders/chunk-vert.glsl">().str(), b::embed<"shaders/chunk-frag.glsl">().str());
+	m_textures.load(TexturePaths::get_all());
 
 	glCreateVertexArrays(1, &m_vao);
 
@@ -30,6 +32,7 @@ void ChunkRenderer::init() {
 }
 
 void ChunkRenderer::new_frame() {
+	// TODO: do this only when chunks change
 	m_draw_commands.clear();
 	m_packed_chunk_positions.clear();
 }
@@ -41,7 +44,10 @@ void ChunkRenderer::render(const mat4 &camera_matrix) {
 		return;
 	}
 
+	glBindTextureUnit(0, m_textures.get_id());
+
 	m_shader.bind();
+	m_shader.set_uniform_i32("u_textures", 0);
 	m_shader.set_uniform_mat4("u_camera_matrix", camera_matrix);
 
 	glBindVertexArray(m_vao);

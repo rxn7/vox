@@ -1,9 +1,11 @@
-#include "app.hpp"
+#include "core/app.hpp"
 #include "core/render/chunk_renderer.hpp"
-#include "imgui.h"
-#include "input.hpp"
-#include "profiler/profiler.hpp"
-#include "render/text_renderer.hpp"
+#include "core/input.hpp"
+#include "core/profiler/profiler.hpp"
+#include "core/render/text_renderer.hpp"
+
+#include <imgui.h>
+#include <stb_image.h>
 
 App *App::sp_instance = nullptr;
 
@@ -112,6 +114,8 @@ bool App::init() {
 	if(!init_opengl())	return false;
 	if(!init_imgui())	return false;
 
+	stbi_set_flip_vertically_on_load(true);
+
 	TextRenderer &text_renderer = TextRenderer::get_instance();
 	text_renderer.init();
 	text_renderer.update_screen_size(m_window_size);
@@ -171,7 +175,8 @@ bool App::init_opengl() {
 	glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 

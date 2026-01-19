@@ -34,12 +34,12 @@ constexpr auto clean_func_name(const char(&s)[N]) {
     //     v = v.substr(0, v.rfind('<'));
 
     // strip return type: void foo -> foo
-    const size_t space = v.rfind(' ');
+    const sz space = v.rfind(' ');
     v = (space == v.npos) ? v : v.substr(space + 1);
 
     std::array<char, N> a{};
 
-    for(size_t i = 0; i < v.size(); ++i) 
+    for(sz i = 0; i < v.size(); ++i) 
         a[i] = v[i];
 
     return a;
