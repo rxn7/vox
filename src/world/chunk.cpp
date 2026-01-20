@@ -3,7 +3,7 @@
 #include "world/block_registry.hpp"
 #include "graphics/backend/packer.hpp"
 #include "graphics/resources/texture_id.hpp"
-#include "graphics/renderers/chunk_renderer.hpp"
+#include "graphics/renderers/world_renderer.hpp"
 
 Chunk::Chunk(World &world, ivec3 position) 
 : m_world(world), m_position(position) {
@@ -28,7 +28,7 @@ Chunk::Chunk(World &world, ivec3 position)
 	m_is_dirty = true;
 }
 
-void Chunk::render(ChunkRenderer &renderer) {
+void Chunk::render(WorldRenderer &renderer) {
 	PROFILE_FUNC();
 
 	if(m_is_dirty) {
@@ -41,15 +41,15 @@ void Chunk::render(ChunkRenderer &renderer) {
 	}
 }
 
-void Chunk::generate_mesh_and_upload(ChunkRenderer &renderer) {
+void Chunk::generate_mesh_and_upload(WorldRenderer &renderer) {
 	PROFILE_FUNC();
 
 	static std::vector<u32> s_tmp_vertices;
-	s_tmp_vertices.reserve(ChunkRenderer::VERTEX_SLOT_SIZE);
+	s_tmp_vertices.reserve(WorldRenderer::VERTEX_SLOT_SIZE);
 	s_tmp_vertices.clear();
 
 	static std::vector<u32> s_tmp_indices;
-	s_tmp_indices.reserve(ChunkRenderer::INDEX_SLOT_SIZE);
+	s_tmp_indices.reserve(WorldRenderer::INDEX_SLOT_SIZE);
 	s_tmp_indices.clear();
 
 	u32 index_offset = 0;

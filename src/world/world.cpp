@@ -12,7 +12,7 @@ World::World() {
 
 World::~World() {}
 
-void World::render(ChunkRenderer &renderer) {
+void World::render(WorldRenderer &renderer) {
 	PROFILE_FUNC();
 
 	for(auto &[position, chunk] : m_chunks) {

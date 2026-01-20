@@ -1,8 +1,8 @@
-#include "graphics/renderers/chunk_renderer.hpp"
+#include "graphics/renderers/world_renderer.hpp"
 #include "graphics/backend/packer.hpp"
 #include "graphics/resources/texture_paths.hpp"
 
-void ChunkRenderer::init() {
+void WorldRenderer::init() {
 	m_shader.load(b::embed<"shaders/chunk-vert.glsl">().str(), b::embed<"shaders/chunk-frag.glsl">().str());
 	m_textures.load(TexturePaths::get_all());
 
@@ -29,13 +29,13 @@ void ChunkRenderer::init() {
 	glVertexArrayElementBuffer(m_vao, m_ebo);
 }
 
-void ChunkRenderer::new_frame() {
+void WorldRenderer::new_frame() {
 	// TODO: do this only when chunks change
 	m_draw_commands.clear();
 	m_packed_chunk_positions.clear();
 }
 
-void ChunkRenderer::render(const mat4 &camera_matrix) {
+void WorldRenderer::render(const mat4 &camera_matrix) {
 	PROFILE_FUNC();
 
 	if(m_draw_commands.empty()) {
@@ -67,18 +67,18 @@ void ChunkRenderer::render(const mat4 &camera_matrix) {
 	}
 }
 
-void ChunkRenderer::upload_mesh(u16 slot, std::span<const u32> vertices, std::span<const u32> indices) {
+void WorldRenderer::upload_mesh(u16 slot, std::span<const u32> vertices, std::span<const u32> indices) {
 	PROFILE_FUNC();
 
 	u32 vert_count = static_cast<u32>(vertices.size());
 	if(vertices.size() > VERTEX_SLOT_SIZE) [[unlikely]] {
-		std::println("ChunkRenderer: Too many vertices to upload mesh ({} > {})", vertices.size(), VERTEX_SLOT_SIZE);
+		std::println("WorldRenderer: Too many vertices to upload mesh ({} > {})", vertices.size(), VERTEX_SLOT_SIZE);
 		vert_count = VERTEX_SLOT_SIZE;
 	}
 
 	u32 index_count = static_cast<u32>(indices.size());
 	if(indices.size() > INDEX_SLOT_SIZE) [[unlikely]] {
-		std::println("ChunkRenderer: Too many indices to upload mesh ({} > {})", indices.size(), INDEX_SLOT_SIZE);
+		std::println("WorldRenderer: Too many indices to upload mesh ({} > {})", indices.size(), INDEX_SLOT_SIZE);
 		index_count = INDEX_SLOT_SIZE;
 	}
 
@@ -92,11 +92,11 @@ void ChunkRenderer::upload_mesh(u16 slot, std::span<const u32> vertices, std::sp
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, index_offset * sizeof(u32), index_count * sizeof(u32), indices.data());
 }
 
-void ChunkRenderer::add_draw_command(u16 slot, u32 index_count, i16vec3 chunk_position) {
+void WorldRenderer::add_draw_command(u16 slot, u32 index_count, i16vec3 chunk_position) {
 	PROFILE_FUNC();
 
 	if(m_draw_commands.size() >= MAX_CHUNKS) [[unlikely]] {
-		std::println("ChunkRenderer: Too many chunks ({} > {})", m_draw_commands.size(), MAX_CHUNKS);
+		std::println("WorldRenderer: Too many chunks ({} > {})", m_draw_commands.size(), MAX_CHUNKS);
 		return;
 	}
 
@@ -112,7 +112,7 @@ void ChunkRenderer::add_draw_command(u16 slot, u32 index_count, i16vec3 chunk_po
 	m_packed_chunk_positions.push_back(Packer::pack_chunk_position(chunk_position));
 }
 
-u16 ChunkRenderer::allocate_chunk_slot() {
+u16 WorldRenderer::allocate_chunk_slot() {
 	PROFILE_FUNC();
 
 	if(!m_free_chunk_slots.empty()) {
@@ -124,6 +124,6 @@ u16 ChunkRenderer::allocate_chunk_slot() {
 	return m_next_chunk_slot++;
 }
 
-void ChunkRenderer::free_chunk_slot(u16 slot) {
+void WorldRenderer::free_chunk_slot(u16 slot) {
 	m_free_chunk_slots.push_back(slot);
 }

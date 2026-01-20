@@ -2,7 +2,7 @@
 #include "core/input.hpp"
 #include "tools/fps_counter.hpp"
 #include "tools/profiler/scope_timer.hpp"
-#include "graphics/renderers/chunk_renderer.hpp"
+#include "graphics/renderers/world_renderer.hpp"
 
 #include <stb_image.h>
 
@@ -121,10 +121,10 @@ bool App::init() {
 
 	mp_game = std::make_unique<Game>();
 
-	constexpr f32 VRAM_USAGE_PER_CHUNK = (ChunkRenderer::VERTEX_SLOT_SIZE * sizeof(u32) + ChunkRenderer::INDEX_SLOT_SIZE * sizeof(u32)) / 1000.0f;
+	constexpr f32 VRAM_USAGE_PER_CHUNK = (WorldRenderer::VERTEX_SLOT_SIZE * sizeof(u32) + WorldRenderer::INDEX_SLOT_SIZE * sizeof(u32)) / 1000.0f;
 
-	std::println("ChunkRenderer VRAM usage: {} KB per chunk", VRAM_USAGE_PER_CHUNK);
-	std::println("ChunkRenderer Total VRAM usage: {} KB", VRAM_USAGE_PER_CHUNK * ChunkRenderer::MAX_CHUNKS);
+	std::println("WorldRenderer VRAM usage: {} KB per chunk", VRAM_USAGE_PER_CHUNK);
+	std::println("WorldRenderer Total VRAM usage: {} KB", VRAM_USAGE_PER_CHUNK * WorldRenderer::MAX_CHUNKS);
 
 	ProfilerTimePoint end = ProfilerClock::now();
 	std::println("App initialization took {} ms", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());

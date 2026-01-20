@@ -41,13 +41,13 @@ target_compile_options(vox PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:
             /Ot 
             /Oy 
-            # /fp:fast 
+            /fp:fast 
             /GS-
         >
         $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:
             -O3 
             -fomit-frame-pointer 
-            # -ffast-math 
+            -ffast-math 
             -fno-stack-protector
         >
     >

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "world/block_id.hpp"
-#include "graphics/renderers/chunk_renderer.hpp"
+#include "graphics/renderers/world_renderer.hpp"
 
 constexpr u32 CHUNK_WIDTH = 16;
 constexpr u32 TOTAL_BLOCKS = CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_WIDTH;
@@ -14,7 +14,7 @@ class Chunk {
 public:
 	Chunk(World &world, ivec3 position);
 
-	void render(ChunkRenderer &renderer);
+	void render(WorldRenderer &renderer);
 
 	constexpr vec3 get_global_position() const { 
 		return vec3(m_position) * CHUNK_WIDTH; 
@@ -37,7 +37,7 @@ public:
 	}
 
 private:
-	void generate_mesh_and_upload(ChunkRenderer &renderer);
+	void generate_mesh_and_upload(WorldRenderer &renderer);
 	bool should_draw_face(i8 x, i8 y, i8 z) const;
 
 private:

@@ -20,7 +20,7 @@ public:
 	World();
 	~World();
 
-	void render(ChunkRenderer &renderer);
+	void render(WorldRenderer &renderer);
 
 	RaycastResult raycast(vec3 start, vec3 dir, f32 max_distance) const;
 

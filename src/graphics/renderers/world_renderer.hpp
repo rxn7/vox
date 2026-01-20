@@ -12,7 +12,7 @@ struct DrawElementsIndirectCommand {
 	u32 base_instance;
 };
 
-class ChunkRenderer {
+class WorldRenderer {
 public:
 	void init();
 	void new_frame();
