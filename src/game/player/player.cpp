@@ -2,6 +2,7 @@
 #include "world/block_registry.hpp"
 #include "core/input.hpp"
 #include "tools/profiler/scope_timer.hpp"
+#include "world/world.hpp"
 
 constexpr f32 HALF_PLAYER_WIDTH = PLAYER_WIDTH / 2.0f;
 constexpr vec3 UP = vec3(0.0f, 1.0f, 0.0f);
@@ -17,12 +18,14 @@ void Player::update(World &world, f32 dt) {
 
 	handle_movement(world, dt);
 	handle_mouse_movement();
+	handle_block_interaction(world);
 }
 
 AABB Player::calculate_aabb() const {
 	return AABB {
 		.min = vec3(m_position.x - HALF_PLAYER_WIDTH, m_position.y - PLAYER_HEIGHT, m_position.z - HALF_PLAYER_WIDTH),
-		.max = vec3(m_position.x + HALF_PLAYER_WIDTH, m_position.y, m_position.z + HALF_PLAYER_WIDTH)
+																/* + 0.2f to prevent camera clipping through the ceiling */
+		.max = vec3(m_position.x + HALF_PLAYER_WIDTH, m_position.y + 0.2f, m_position.z + HALF_PLAYER_WIDTH)
 	};
 }
 
@@ -120,9 +123,15 @@ bool Player::check_collision(World &world) {
 	for(i32 x = min_x; x <= max_x; ++x) {
 		for(i32 y = min_y; y <= max_y; ++y) {
 			for(i32 z = min_z; z <= max_z; ++z) {
-				const vec3 test_position = vec3(static_cast<f32>(x) + 0.5f, static_cast<f32>(y) + 0.5f, static_cast<f32>(z) + 0.5f);
+				const BlockPosition check_position = world.get_block_position(
+					vec3(
+						static_cast<f32>(x) + 0.5f, 
+						static_cast<f32>(y) + 0.5f, 
+						static_cast<f32>(z) + 0.5f
+					)
+				);
 
-				const BlockID block_id = world.get_block(test_position);
+				const BlockID block_id = world.get_block(check_position);
 				const BlockType &block_type = BlockRegistry::get(block_id);
 
 				if(block_type.is_solid) {
@@ -133,4 +142,42 @@ bool Player::check_collision(World &world) {
 	}
 
 	return false;
+}
+
+void Player::handle_block_interaction(World &world) {
+	PROFILE_FUNC();
+
+	Input &input = Input::get_instance();
+	const bool left_click = input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_LEFT);
+	const bool right_click = input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_RIGHT);
+
+	if(!left_click && !right_click) {
+		return;
+	}
+
+	const vec3 ray_start = m_position;
+	const vec3 ray_dir = m_camera.get_forward_direction();
+
+	const RaycastResult raycast_result = world.raycast(ray_start, ray_dir, REACH_DISTANCE);
+		
+	if(!raycast_result.hit) {
+		return;
+	}
+
+	if(right_click) {
+		const AABB player_aabb = calculate_aabb();
+		const AABB block_aabb = {
+			.min = vec3(raycast_result.previous_grid_position) - 0.5f,
+			.max = vec3(raycast_result.previous_grid_position) + 1.0f,
+		};
+
+		if(!player_aabb.overlap(block_aabb)) {
+			const vec3 last_center = vec3(raycast_result.previous_grid_position) + 0.5f;
+			const BlockPosition place_position = world.get_block_position(last_center);
+
+			world.set_block(place_position, BlockID::Stone);
+		}
+	} else if(left_click) {
+		world.set_block(raycast_result.hit_block_position, BlockID::Air);
+	}
 }

@@ -13,7 +13,7 @@ public:
 
 public:
 	float m_size = 24.0f;
-	float m_thickness = 0.06f;
+	float m_thickness = 0.1f;
 
 private:
 	Mesh m_mesh;

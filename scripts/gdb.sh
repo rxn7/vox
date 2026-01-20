@@ -1,5 +1,5 @@
 #!/bin/sh
 
-pushd build/debug >/dev/null
-gdb ./vox -q
+pushd build >/dev/null
+gdb ./Debug/vox -q
 popd >/dev/null

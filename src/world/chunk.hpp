@@ -6,6 +6,8 @@
 constexpr u32 CHUNK_WIDTH = 16;
 constexpr u32 TOTAL_BLOCKS = CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_WIDTH;
 
+typedef ivec3 ChunkPosition;
+
 class World;
 
 class Chunk {
@@ -26,8 +28,12 @@ public:
 		return m_blocks[get_block_idx(v)]; 
 	}
 
-	inline void set_block(u8 x, u8 y, u8 z, BlockID value) {
-		m_blocks[y * CHUNK_WIDTH * CHUNK_WIDTH + z * CHUNK_WIDTH + x] = value;
+	inline void set_block(u8vec3 pos, BlockID value) {
+		m_blocks[pos.y * CHUNK_WIDTH * CHUNK_WIDTH + pos.z * CHUNK_WIDTH + pos.x] = value;
+	}
+
+	inline void set_dirty() {
+		m_is_dirty = true;
 	}
 
 private:
@@ -38,7 +44,7 @@ private:
 	World &m_world;
 	std::array<BlockID, TOTAL_BLOCKS> m_blocks;
 
-	ivec3 m_position;
+	ChunkPosition m_position;
 
 	bool m_is_dirty = false;
 	std::optional<u16> m_render_slot = std::nullopt;

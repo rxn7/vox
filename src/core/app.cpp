@@ -15,9 +15,6 @@ App::App() {
 App::~App() { 
 	mp_game.reset();
 
-	Input::get_instance().destroy();
-	Profiler::get_instance().destroy();
-
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
@@ -39,20 +36,28 @@ void App::run() {
 	Input &input = Input::get_instance();
 
 	while(!glfwWindowShouldClose(mp_window)) {
+		profiler.new_frame();
+
 		current_frame = glfwGetTime();
 		m_delta_time = current_frame - last_frame;
-		last_frame = current_frame;
 
-		profiler.new_frame();
+		last_frame = current_frame;
 		FpsCounter::get_instance().tick();
 		input.new_frame();
 
-		glfwPollEvents();
+		{
+			PROFILE_SCOPE("Poll Events");
+			glfwPollEvents();
+		}
 
 		update();
 		render();
 
-		glfwSwapBuffers(mp_window);
+		{
+			PROFILE_SCOPE("Swap Buffers");
+			glfwSwapBuffers(mp_window);
+		}
+
 		profiler.end_frame();
 	}
 }
@@ -110,7 +115,10 @@ bool App::init() {
 
 	stbi_set_flip_vertically_on_load(true);
 
-	Input::get_instance().set_mouse_mode(mp_window, GLFW_CURSOR_DISABLED);
+	Input &input = Input::get_instance();
+	input.init(mp_window);
+	input.set_mouse_mode(GLFW_CURSOR_DISABLED);
+
 	mp_game = std::make_unique<Game>();
 
 	constexpr f32 VRAM_USAGE_PER_CHUNK = (ChunkRenderer::VERTEX_SLOT_SIZE * sizeof(u32) + ChunkRenderer::INDEX_SLOT_SIZE * sizeof(u32)) / 1000.0f;
@@ -145,7 +153,8 @@ bool App::init_glfw() {
 	glfwSetWindowSizeCallback(mp_window, window_size_callback_glfw);
 	glfwSetCursorPosCallback(mp_window, mouse_move_callback_glfw);
 	glfwSetKeyCallback(mp_window, key_event_callback_glfw);
-
+	glfwSetMouseButtonCallback(mp_window, mouse_button_event_callback_glfw);
+	
 	glfwMakeContextCurrent(mp_window);
 	glfwSwapInterval(0);
 
@@ -209,11 +218,24 @@ void App::key_event_callback_glfw([[maybe_unused]] GLFWwindow *p_window, [[maybe
 	Input &input = Input::get_instance();
 	switch(action) {
 		case GLFW_PRESS:
-			input.update_key(p_window, key, true);
+			input.update_key(key, true);
 			break;
 
 		case GLFW_RELEASE:
-			input.update_key(p_window, key, false);
+			input.update_key(key, false);
+			break;
+	}
+}
+
+void App::mouse_button_event_callback_glfw([[maybe_unused]] GLFWwindow *p_window, i32 button, i32 action, [[maybe_unused]] i32 mods) {
+	Input &input = Input::get_instance();
+	switch(action) {
+		case GLFW_PRESS:
+			input.update_mouse_button(button, true);
+			break;
+
+		case GLFW_RELEASE:
+			input.update_mouse_button(button, false);
 			break;
 	}
 }

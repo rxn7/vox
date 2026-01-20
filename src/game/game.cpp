@@ -18,12 +18,18 @@ Game::~Game() {
 void Game::update(f32 delta_time) {
 	PROFILE_FUNC();
 
-	const Input &input = Input::get_instance();
+	Input &input = Input::get_instance();
 	if(input.is_key_just_pressed(GLFW_KEY_F1)) {
 		m_chunk_renderer.m_use_wireframe ^= true;
 	}
 	if(input.is_key_just_pressed(GLFW_KEY_F2)) {
 		m_player.m_fly_enabled ^= true;
+	}
+	if(input.is_key_just_pressed(GLFW_KEY_ESCAPE)) {
+		if(input.get_mouse_mode() == GLFW_CURSOR_DISABLED)
+			input.set_mouse_mode(GLFW_CURSOR_NORMAL);
+		else
+			input.set_mouse_mode(GLFW_CURSOR_DISABLED);
 	}
 
 	m_player.update(m_world, delta_time);

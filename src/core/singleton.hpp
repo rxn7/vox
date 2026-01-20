@@ -7,7 +7,5 @@ public:\
 		static T instance;\
 		return instance;\
 	} \
-	void init() {}\
-	void destroy() {}\
 private: \
 	T() {}\

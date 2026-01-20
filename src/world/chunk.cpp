@@ -15,11 +15,11 @@ Chunk::Chunk(World &world, ivec3 position)
 
 			for(u32 y = 0; y < max_y; ++y) {
 				if(y == max_y - 1) {
-					set_block(x, y, z, BlockID::Grass);
+					set_block({x, y, z}, BlockID::Grass);
 				} else if(y < 10) {
-					set_block(x, y, z, BlockID::Stone);
+					set_block({x, y, z}, BlockID::Stone);
 				} else {
-					set_block(x, y, z, BlockID::Dirt);
+					set_block({x, y, z}, BlockID::Dirt);
 				}
 			}
 		}
@@ -116,9 +116,9 @@ bool Chunk::should_draw_face(i8 x, i8 y, i8 z) const {
 	PROFILE_FUNC();
 
 	BlockID block;
-
 	if(x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_WIDTH || z < 0 || z >= CHUNK_WIDTH) {
-		block = m_world.get_block(get_global_position() + vec3(x, y, z));
+		const BlockPosition block_position = m_world.get_block_position(get_global_position() + vec3(x, y, z));
+		block = m_world.get_block(block_position);
 	} else {
 		block = get_block({x, y, z});
 	}

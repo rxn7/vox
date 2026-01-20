@@ -3,11 +3,16 @@
 #include "world/chunk.hpp"
 #include <glm/gtx/hash.hpp>
 
-typedef ivec3 ChunkPosition;
-
 struct BlockPosition {
 	ChunkPosition chunk_position;
 	u8vec3 local_position;
+};
+
+struct RaycastResult {
+	bool hit = false;
+	BlockPosition hit_block_position; // used for breaking blocks
+	ivec3 previous_grid_position; // used for placing blocks
+	f32 distance = 0.0f;
 };
 
 class World {
@@ -17,10 +22,14 @@ public:
 
 	void render(ChunkRenderer &renderer);
 
-	BlockPosition global_to_local(vec3 global_position) const;
-	BlockID get_block(vec3 global_position) const;
-	const Chunk *get_chunk(ChunkPosition position) const;
+	RaycastResult raycast(vec3 start, vec3 dir, f32 max_distance) const;
+
+	void set_block(BlockPosition position, BlockID value);
+	BlockID get_block(BlockPosition position) const;
+
+	BlockPosition get_block_position(vec3 global_position) const;
+	Chunk *get_chunk(ChunkPosition position) const;
 
 private:
-	std::unordered_map<ChunkPosition, std::unique_ptr<Chunk>> m_chunks; 
+	mutable std::unordered_map<ChunkPosition, std::unique_ptr<Chunk>> m_chunks; 
 };
