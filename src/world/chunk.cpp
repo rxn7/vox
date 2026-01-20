@@ -54,9 +54,9 @@ void Chunk::generate_mesh_and_upload(ChunkRenderer &renderer) {
 
 	u32 index_offset = 0;
 
-	for(u8 y = 0; y < CHUNK_WIDTH; ++y) {
-		for(u8 z = 0; z < CHUNK_WIDTH; ++z) {
-			for(u8 x = 0; x < CHUNK_WIDTH; ++x) {
+	for(i8 y = 0; y < CHUNK_WIDTH; ++y) {
+		for(i8 z = 0; z < CHUNK_WIDTH; ++z) {
+			for(i8 x = 0; x < CHUNK_WIDTH; ++x) {
 				const BlockID block = get_block({x, y, z});
 
 				if(block == BlockID::Air) {

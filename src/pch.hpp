@@ -1,6 +1,7 @@
 #pragma once
 
 #include <print>
+#include <cmath>
 #include <chrono>
 #include <fstream>
 #include <array>
@@ -9,7 +10,6 @@
 #include <span>
 #include <memory>
 
-#define B_PRODUCTION_MODE ON
 #include <battery/embed.hpp>
 
 #define GLFW_INCLUDE_NONE

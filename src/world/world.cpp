@@ -20,17 +20,23 @@ void World::render(ChunkRenderer &renderer) {
 }
 
 BlockID World::get_block(const vec3 &global_position) const {
-	const ChunkPosition position = global_position / CHUNK_WIDTH;
+	const ChunkPosition position(
+		static_cast<i32>(std::floor(global_position.x / CHUNK_WIDTH)),
+		static_cast<i32>(std::floor(global_position.y / CHUNK_WIDTH)),
+		static_cast<i32>(std::floor(global_position.z / CHUNK_WIDTH))
+	);
 
 	const Chunk *chunk = get_chunk(position);
 	if(chunk == nullptr) {
 		return BlockID::Air;
 	}
 
-	const u8vec3 local_position = u8vec3(
-		static_cast<i32>(global_position.x + CHUNK_WIDTH) % CHUNK_WIDTH,
-		static_cast<i32>(global_position.y + CHUNK_WIDTH) % CHUNK_WIDTH,
-		static_cast<i32>(global_position.z + CHUNK_WIDTH) % CHUNK_WIDTH
+	const auto safe_mod = [](i32 a, i32 n) { return (a % n + n) % n; };
+
+	const u8vec3 local_position(
+		safe_mod(static_cast<i32>(std::floor(global_position.x)), CHUNK_WIDTH),
+		safe_mod(static_cast<i32>(std::floor(global_position.y)), CHUNK_WIDTH),
+		safe_mod(static_cast<i32>(std::floor(global_position.z)), CHUNK_WIDTH)
 	);
 
 	return chunk->get_block(local_position);
