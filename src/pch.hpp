@@ -9,7 +9,7 @@
 #include <span>
 #include <memory>
 
-#define DB_PRODUCTION_MODE
+#define B_PRODUCTION_MODE ON
 #include <battery/embed.hpp>
 
 #define GLFW_INCLUDE_NONE
@@ -35,6 +35,8 @@ typedef glm::ivec4 ivec4;
 typedef glm::mat4 mat4;
 typedef glm::mat3 mat3;
 
+typedef glm::i8vec3 i8vec3;
+typedef glm::u8vec3 u8vec3;
 typedef glm::i16vec3 i16vec3;
 
 typedef float f32;

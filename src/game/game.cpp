@@ -4,7 +4,7 @@
 #include "core/input.hpp"
 
 Game::Game() 
-: m_camera(vec3(0, 0, -5.0f), 80.0f) { 
+: m_camera(vec3(0, 30.0f, 0), 80.0f) { 
 	m_chunk_renderer.init();
 	m_text_renderer.init();
 }
@@ -18,7 +18,8 @@ void Game::update(f32 delta_time) {
 	m_camera.update(delta_time);
 	m_chunk_renderer.new_frame();
 
-	if(Input::get_instance().is_key_just_pressed(GLFW_KEY_F1)) {
+	const Input &input = Input::get_instance();
+	if(input.is_key_just_pressed(GLFW_KEY_F1)) {
 		m_chunk_renderer.wireframe ^= true;
 	}
 }
@@ -38,5 +39,6 @@ void Game::render_ui() {
 }
 
 void Game::handle_window_resize(vec2 window_size) {
+	PROFILE_FUNC();
 	m_text_renderer.handle_window_resize(window_size);
 }

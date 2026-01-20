@@ -1,4 +1,4 @@
-#include "profiler.hpp"
+#include "tools/profiler/profiler.hpp"
 
 #ifdef NDEBUG
 

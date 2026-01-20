@@ -7,7 +7,6 @@ FetchContent_Declare(
     GIT_PROGRESS TRUE 
     SOURCE_SUBDIR cmake
 )
-
 FetchContent_MakeAvailable(glad)
 
-glad_add_library(glad_gl_core_43 STATIC REPRODUCIBLE LOADER API gl:core=4.3)
+glad_add_library(glad_gl_core_43 STATIC REPRODUCIBLE API gl:core=4.3)

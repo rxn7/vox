@@ -11,7 +11,7 @@ cmake --build .
 ./vox
 ```
 or you can just use my configuration:
-````bash
+```bash
 ./scripts/configure.sh 
 ./scripts/debug.sh
 ```

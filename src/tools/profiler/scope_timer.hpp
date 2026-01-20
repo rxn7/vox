@@ -1,6 +1,6 @@
 #pragma once
 
-#include "profiler.hpp"
+#include "tools/profiler/profiler.hpp"
 
 class ScopeTimer {
 public:
@@ -18,7 +18,7 @@ public:
 
 private:
 	const char *m_name;
-	std::chrono::high_resolution_clock::time_point m_start;
+    ProfilerTimePoint m_start;
 };
 
 #ifndef NDEBUG

@@ -29,7 +29,8 @@ App::~App() {
 }
 
 void App::run() { 
-	if(!init()) return;
+	if(!init())
+		return;
 
 	f64 last_frame, current_frame; last_frame = current_frame = glfwGetTime();
 

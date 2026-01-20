@@ -1,3 +1,6 @@
+set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
+set(GLM_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
 # GLM 1.0.3
 FetchContent_Declare(
     glm 

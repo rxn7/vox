@@ -21,10 +21,11 @@ bool Input::is_key_just_pressed(i32 key) const {
 		return false;
 
 	const auto previous_it = m_previous_keys.find(key);
-	if(previous_it != m_previous_keys.end())
-		return false;
 
-	return true;
+	const bool was_pressed = previous_it != m_previous_keys.end() && previous_it->second;
+	const bool is_pressed = it->second;
+
+	return is_pressed && !was_pressed;
 }
 
 void Input::set_mouse_mode(GLFWwindow *p_window, i32 mode) {

@@ -14,12 +14,16 @@ public:
 
 	void render(ChunkRenderer &renderer);
 
-	constexpr u16 get_block_idx(u8 x, u8 y, u8 z) const {
-		return y * CHUNK_WIDTH * CHUNK_WIDTH + z * CHUNK_WIDTH + x;
+	constexpr vec3 get_global_position() const { 
+		return vec3(m_position) * CHUNK_WIDTH; 
 	}
 
-	constexpr inline BlockID get_block(u8 x, u8 y, u8 z) const { 
-		return m_blocks[get_block_idx(x, y, z)]; 
+	constexpr u16 get_block_idx(u8vec3 v) const {
+		return v.y * CHUNK_WIDTH * CHUNK_WIDTH + v.z * CHUNK_WIDTH + v.x;
+	}
+
+	constexpr inline BlockID get_block(u8vec3 v) const { 
+		return m_blocks[get_block_idx(v)]; 
 	}
 
 	inline void set_block(u8 x, u8 y, u8 z, BlockID value) {
