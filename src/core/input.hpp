@@ -1,34 +1,30 @@
 #pragma once
 
-#include "singleton.hpp"
+#include "core/singleton.hpp"
 
-struct InputState {
-	bool move_left = false;
-	bool move_right = false;
-	bool move_forward = false;
-	bool move_backward = false;
-
-	bool jump = false;
-	bool crouch = false;
-
-	bool toggle_wireframe = false;
-
-	vec2 mouse_delta = vec2(0);
-};
-
-class InputManager {
-SINGLETON_CLASS(InputManager);
+class Input {
+SINGLETON_CLASS(Input);
 public:
-	InputManager() {}
+	// this has to be called right before glfwPollEvents
+	void new_frame();
+
+	bool is_key_pressed(i32 key) const;
+	bool is_key_just_pressed(i32 key) const;
 
 	void set_mouse_mode(GLFWwindow *p_window, i32 mode);
+
 	void update_mouse_position(vec2 position);
-	void handle_key_event(GLFWwindow *p_window, i32 key, bool is_pressed);
-	[[nodiscard]] inline i32 get_mouse_mode() { return m_mouse_mode; }
-	[[nodiscard]] inline const InputState &get_state() { return m_state; }
+	void update_key(GLFWwindow *p_window, i32 key, bool is_pressed);
+
+	inline vec2 get_mouse_delta() const { return m_mouse_position - m_last_mouse_position.value_or(m_mouse_position); }
+	inline i32 get_mouse_mode() const { return m_mouse_mode; }
 
 private:
+	std::unordered_map<i32, bool> m_keys;
+	std::unordered_map<i32, bool> m_previous_keys;
+
 	std::optional<vec2> m_last_mouse_position = std::nullopt;
+	vec2 m_mouse_position = vec2(0);
+
 	i32 m_mouse_mode = GLFW_CURSOR_NORMAL;
-	InputState m_state = {0};
 };

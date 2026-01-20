@@ -1,6 +1,6 @@
 #pragma once
 
-#include "imgui/profiler_window.hpp"
+#include "tools/imgui/profiler_window.hpp"
 #include "game/game.hpp"
 
 class App {

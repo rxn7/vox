@@ -1,12 +1,14 @@
 #!/bin/sh
 
-cmake --build build/release
+set -e 
+set -o pipefail
+
+cmake --build build --config Release
 
 if [ $? -ne 0 ]; then
 exit
 fi
 
-pushd build/release >/dev/null
-./vox
+pushd build >/dev/null
+./Release/vox
 popd >/dev/null
-

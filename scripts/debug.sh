@@ -1,13 +1,14 @@
 #!/bin/sh
 
-cmake --build build/debug
+set -e 
+set -o pipefail
+
+cmake --build build --config Debug
 
 if [ $? -ne 0 ]; then
 exit
 fi
 
-cp build/debug/compile_commands.json .
-
-pushd build/debug >/dev/null
-./vox
+pushd build >/dev/null
+./Debug/vox
 popd >/dev/null

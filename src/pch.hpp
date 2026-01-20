@@ -2,13 +2,12 @@
 
 #include <print>
 #include <chrono>
+#include <fstream>
 #include <array>
 #include <vector>
 #include <unordered_map>
 #include <span>
 #include <memory>
-#include <set>
-#include <unordered_set>
 
 #define DB_PRODUCTION_MODE
 #include <battery/embed.hpp>
@@ -54,5 +53,3 @@ typedef int64_t i64;
 typedef uint64_t u64;
 
 typedef size_t sz;
-
-#include "core/profiler/scope_timer.hpp"

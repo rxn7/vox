@@ -1,10 +1,8 @@
 #include "core/app.hpp"
-#include "core/render/chunk_renderer.hpp"
 #include "core/input.hpp"
-#include "core/profiler/profiler.hpp"
-#include "core/render/text_renderer.hpp"
+#include "tools/profiler/scope_timer.hpp"
+#include "graphics/renderers/chunk_renderer.hpp"
 
-#include <imgui.h>
 #include <stb_image.h>
 
 App *App::sp_instance = nullptr;
@@ -16,10 +14,8 @@ App::App() {
 App::~App() { 
 	mp_game.reset();
 
-	ChunkRenderer::destroy_instance();
-	TextRenderer::destroy_instance();
-	InputManager::destroy_instance();
-	Profiler::destroy_instance();
+	Input::get_instance().destroy();
+	Profiler::get_instance().destroy();
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -36,34 +32,30 @@ void App::run() {
 	if(!init()) return;
 
 	f64 last_frame, current_frame; last_frame = current_frame = glfwGetTime();
+
 	Profiler &profiler = Profiler::get_instance();
+	Input &input = Input::get_instance();
 
 	while(!glfwWindowShouldClose(mp_window)) {
-		profiler.new_frame();
-		ChunkRenderer::get_instance().new_frame();
-
 		current_frame = glfwGetTime();
 		m_delta_time = current_frame - last_frame;
 		last_frame = current_frame;
 
+		profiler.new_frame();
+		input.new_frame();
+
+		glfwPollEvents();
+
 		update();
 		render();
 
-		glfwPollEvents();
+		glfwSwapBuffers(mp_window);
 		profiler.end_frame();
 	}
 }
 
 void App::update() { 
 	PROFILE_FUNC();
-
-	{
-		PROFILE_SCOPE("Get cursor pos");
-		f64 mouse_x, mouse_y;
-		glfwGetCursorPos(mp_window, &mouse_x, &mouse_y);
-		InputManager::get_instance().update_mouse_position(vec2(mouse_x, mouse_y));
-	}
-
 	mp_game->update(m_delta_time);
 }
 
@@ -74,9 +66,6 @@ void App::render() {
 	render_3d();
 	render_ui();
 	render_imgui();
-
-	PROFILE_SCOPE("Swap buffers");
-	glfwSwapBuffers(mp_window);
 }
 
 void App::render_3d() { 
@@ -116,13 +105,7 @@ bool App::init() {
 
 	stbi_set_flip_vertically_on_load(true);
 
-	TextRenderer &text_renderer = TextRenderer::get_instance();
-	text_renderer.init();
-	text_renderer.update_screen_size(m_window_size);
-
-	InputManager::get_instance().set_mouse_mode(mp_window, GLFW_CURSOR_DISABLED);
-	ChunkRenderer::get_instance().init();
-
+	Input::get_instance().set_mouse_mode(mp_window, GLFW_CURSOR_DISABLED);
 	mp_game = std::make_unique<Game>();
 
 	constexpr float VRAM_USAGE_PER_CHUNK = (ChunkRenderer::VERTEX_SLOT_SIZE * sizeof(u32) + ChunkRenderer::INDEX_SLOT_SIZE * sizeof(u32)) / 1000.0f;
@@ -152,6 +135,7 @@ bool App::init_glfw() {
 	}
 
 	glfwSetWindowSizeCallback(mp_window, window_size_callback_glfw);
+	glfwSetCursorPosCallback(mp_window, mouse_move_callback_glfw);
 	glfwSetKeyCallback(mp_window, key_event_callback_glfw);
 
 	glfwMakeContextCurrent(mp_window);
@@ -209,19 +193,24 @@ void App::window_size_callback_glfw([[maybe_unused]] GLFWwindow *p_window, i32 w
 	sp_instance->m_window_size.y = h;
 
 	glViewport(0, 0, w, h);
-
-	TextRenderer::get_instance().update_screen_size(vec2(w, h));
+	
+	sp_instance->mp_game->handle_window_resize(vec2(w, h));
 }
 
 void App::key_event_callback_glfw([[maybe_unused]] GLFWwindow *p_window, [[maybe_unused]] i32 key, [[maybe_unused]] i32 scancode, [[maybe_unused]] i32 action, [[maybe_unused]] i32 mods) {
+	Input &input = Input::get_instance();
 	switch(action) {
 		case GLFW_PRESS:
-			InputManager::get_instance().handle_key_event(p_window, key, true);
+			input.update_key(p_window, key, true);
 			break;
 
 		case GLFW_RELEASE:
-			InputManager::get_instance().handle_key_event(p_window, key, false);
+			input.update_key(p_window, key, false);
 			break;
 	}
 }
 
+void App::mouse_move_callback_glfw([[maybe_unused]] GLFWwindow *p_window, [[maybe_unused]] f64 x, [[maybe_unused]] f64 y) {
+	Input &input = Input::get_instance();
+	input.update_mouse_position(vec2(x, y));
+}

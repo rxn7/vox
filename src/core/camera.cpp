@@ -1,5 +1,6 @@
-#include "camera.hpp"
-#include "input.hpp"
+#include "core/camera.hpp"
+#include "core/input.hpp"
+#include "tools/profiler/scope_timer.hpp"
 
 constexpr f32 SENSITIVITY = 0.002f;
 constexpr f32 MOVE_SPEED = 5.0f;
@@ -47,8 +48,6 @@ vec3 Camera::get_right_direction() const {
 void Camera::handle_movement(f32 dt) {
 	PROFILE_FUNC();
 
-	const InputState &input = InputManager::get_instance().get_state();
-
 	vec3 movement = vec3(0.0f);
 
 	vec3 forward = get_forward_direction();
@@ -57,12 +56,13 @@ void Camera::handle_movement(f32 dt) {
 
 	const vec3 right = get_right_direction();
 
-	if(input.move_left)		movement -= right;
-	if(input.move_right)	movement += right;
-	if(input.move_forward)	movement += forward;
-	if(input.move_backward) movement -= forward;
-	if(input.jump)			movement += vec3(0.0f, 1.0f, 0.0f);
-	if(input.crouch)		movement -= vec3(0.0f, 1.0f, 0.0f);
+	const Input &input = Input::get_instance();
+	if(input.is_key_pressed(GLFW_KEY_A))				movement -= right;
+	if(input.is_key_pressed(GLFW_KEY_D))				movement += right;
+	if(input.is_key_pressed(GLFW_KEY_W))				movement += forward;
+	if(input.is_key_pressed(GLFW_KEY_S))				movement -= forward;
+	if(input.is_key_pressed(GLFW_KEY_SPACE))			movement += vec3(0.0f, 1.0f, 0.0f);
+	if(input.is_key_pressed(GLFW_KEY_LEFT_SHIFT))		movement -= vec3(0.0f, 1.0f, 0.0f);
 
 	if(movement.x == 0.0f && movement.y == 0.0f && movement.z == 0.0f) {
 		return;
@@ -75,16 +75,15 @@ void Camera::handle_movement(f32 dt) {
 void Camera::handle_mouse_movement() {
 	PROFILE_FUNC();
 
-	InputManager &input_manager = InputManager::get_instance();
+	Input &input = Input::get_instance();
 
-	if(input_manager.get_mouse_mode() != GLFW_CURSOR_DISABLED) {
+	if(input.get_mouse_mode() != GLFW_CURSOR_DISABLED) {
 		return;
 	}
 
-	const InputState &input = input_manager.get_state();
-
-	m_yaw += input.mouse_delta.x * SENSITIVITY;
-	m_pitch -= input.mouse_delta.y * SENSITIVITY;
+	const vec2 mouse_delta = input.get_mouse_delta();
+	m_yaw += mouse_delta.x * SENSITIVITY;
+	m_pitch -= mouse_delta.y * SENSITIVITY;
 
 	m_pitch = glm::clamp(m_pitch, -glm::half_pi<f32>() + glm::radians(1.0f), glm::half_pi<f32>() - glm::radians(1.0f));
 	m_yaw = glm::mod(m_yaw, glm::two_pi<f32>());

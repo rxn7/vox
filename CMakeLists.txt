@@ -4,12 +4,12 @@ project(vox LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -ffast-math")
+set(CMAKE_CONFIGURATION_TYPES "Release;Debug")
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 include(FetchContent)
+
+add_compile_definitions(B_PRODUCTION_MODE=ON)
 
 include(cmake/imgui.cmake)
 include(cmake/glad.cmake)
@@ -32,9 +32,15 @@ target_compile_options(vox PRIVATE
     >
 )
 
-target_include_directories(vox PRIVATE src include)
-target_precompile_headers(vox PRIVATE src/pch.hpp)
+target_include_directories(vox PRIVATE src ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_precompile_headers(vox PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pch.hpp)
 target_link_libraries(vox PRIVATE imgui glfw glad_gl_core_43 glm::glm)
 
 add_subdirectory(assets)
 add_dependencies(vox vox_copy_assets)
+
+file(CREATE_LINK
+    "${CMAKE_BINARY_DIR}/compile_commands.json"
+    "${CMAKE_SOURCE_DIR}/compile_commands.json"
+    SYMBOLIC
+)

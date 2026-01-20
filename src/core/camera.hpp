@@ -7,15 +7,15 @@ public:
 
 	void update(f32 dt);
 
-	[[nodiscard]] mat4 get_matrix(f32 aspect_ratio) const;
+	mat4 get_matrix(f32 aspect_ratio) const;
 
-	[[nodiscard]] vec3 get_forward_direction() const;
-	[[nodiscard]] vec3 get_right_direction() const;
+	vec3 get_forward_direction() const;
+	vec3 get_right_direction() const;
 
-	[[nodiscard]] inline vec3 get_position() const { return m_position; }
-	[[nodiscard]] inline f32 get_pitch() const { return m_pitch; }
-	[[nodiscard]] inline f32 get_yaw() const { return m_yaw; }
-	[[nodiscard]] inline f32 get_fov() const { return m_fov; }
+	inline vec3 get_position() const { return m_position; }
+	inline f32 get_pitch() const { return m_pitch; }
+	inline f32 get_yaw() const { return m_yaw; }
+	inline f32 get_fov() const { return m_fov; }
 
 private:
 	void handle_movement(f32 dt);
