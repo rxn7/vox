@@ -55,6 +55,7 @@ void Player::handle_movement(World &world, f32 dt) {
 		m_vertical_velocity = input_y * MOVE_SPEED;
 	} else {
 		m_vertical_velocity -= GRAVITY * dt;
+
 		if(m_vertical_velocity < -TERMINAL_VELOCITY) {
 			m_vertical_velocity = -TERMINAL_VELOCITY;
 		}
@@ -86,6 +87,8 @@ void Player::handle_movement(World &world, f32 dt) {
 		} else if(m_vertical_velocity > 0.0f) {
 			m_vertical_velocity = 0.0f;
 		}
+	} else {
+		m_is_grounded = false;
 	}
 }
 
