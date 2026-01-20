@@ -3,3 +3,4 @@
 - Frustum culling
 - Use a buddy allocator for ChunkRenderer
 - Infinite world
+- Text renderer alignment
