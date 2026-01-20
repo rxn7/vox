@@ -2,9 +2,15 @@ b_embed_proxy_target(vox vox-assets)
 
 b_embed(vox-assets shaders/default-vert.glsl)
 b_embed(vox-assets shaders/default-frag.glsl)
+
 b_embed(vox-assets shaders/chunk-vert.glsl)
 b_embed(vox-assets shaders/chunk-frag.glsl)
+
+b_embed(vox-assets shaders/block-outline-vert.glsl)
+b_embed(vox-assets shaders/block-outline-frag.glsl)
+
 b_embed(vox-assets shaders/ui/text-vert.glsl)
 b_embed(vox-assets shaders/ui/text-frag.glsl)
+
 b_embed(vox-assets shaders/ui/crosshair-vert.glsl)
 b_embed(vox-assets shaders/ui/crosshair-frag.glsl)

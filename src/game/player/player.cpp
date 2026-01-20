@@ -151,18 +151,17 @@ void Player::handle_block_interaction(World &world) {
 	const bool left_click = input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_LEFT);
 	const bool right_click = input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_RIGHT);
 
-	if(!left_click && !right_click) {
-		return;
-	}
-
 	const vec3 ray_start = m_position;
 	const vec3 ray_dir = m_camera.get_forward_direction();
 
 	const RaycastResult raycast_result = world.raycast(ray_start, ray_dir, REACH_DISTANCE);
 		
 	if(!raycast_result.hit) {
+		m_last_highlighted_block_position = std::nullopt;
 		return;
 	}
+
+	m_last_highlighted_block_position = raycast_result.hit_block_position;
 
 	if(right_click) {
 		const AABB player_aabb = calculate_aabb();

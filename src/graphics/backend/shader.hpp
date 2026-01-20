@@ -31,6 +31,10 @@ public:
 		set_uniform(name, [value](i32 location) { glUniform2i(location, value.x, value.y); });
 	}
 
+	inline void set_uniform_vec4(std::string_view name, vec4 value) {
+		set_uniform(name, [value](i32 location) { glUniform4f(location, value.x, value.y, value.z, value.w); });
+	}
+
 	inline void set_uniform_mat4(std::string_view name, const mat4 &value) {
 		set_uniform(name, [value](i32 location) { glUniformMatrix4fv(location, 1, false, glm::value_ptr(value)); });
 	}

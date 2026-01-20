@@ -24,6 +24,7 @@ public:
 
 	void update(World &world, f32 dt);
 	AABB calculate_aabb() const;
+	const std::optional<BlockPosition> &get_last_highlighted_block_position() const { return m_last_highlighted_block_position; }
 
 private:
 	void handle_movement(World &world, f32 dt);
@@ -40,6 +41,8 @@ private:
 
 	f32 m_vertical_velocity = 0.0f;
 	vec3 m_horizontal_velocity;
+
+	std::optional<BlockPosition> m_last_highlighted_block_position;
 
 	bool m_is_grounded = false;
 };

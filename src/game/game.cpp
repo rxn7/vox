@@ -4,11 +4,13 @@
 #include "tools/fps_counter.hpp"
 #include "core/app.hpp"
 #include "core/input.hpp"
+#include "world/world.hpp"
 
 Game::Game() 
 : m_camera(vec3(0, 30.0f, 0), 80.0f), m_player(m_camera) {
 	m_chunk_renderer.init();
 	m_text_renderer.init();
+	m_block_outline_renderer.init();
 	m_crosshair.init();
 }
 
@@ -40,8 +42,14 @@ void Game::render_3d(f32 aspect_ratio) {
 	PROFILE_FUNC();
 
 	const mat4 camera_matrix = m_camera.get_matrix(aspect_ratio);
+
 	m_world.render(m_chunk_renderer);
 	m_chunk_renderer.render(camera_matrix);
+
+	const std::optional<BlockPosition> &last_highlighted_block_position = m_player.get_last_highlighted_block_position();
+	if(last_highlighted_block_position.has_value()) {
+		m_block_outline_renderer.render(last_highlighted_block_position.value(), camera_matrix);
+	}
 }
 
 void Game::render_ui() {

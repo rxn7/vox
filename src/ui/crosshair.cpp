@@ -4,18 +4,18 @@ Crosshair::Crosshair() {}
 
 Crosshair::~Crosshair() {}
 
-constexpr std::array<Vertex, 4> VERTICES = {
-	Vertex(vec3(-0.5f, -0.5f, 0.0f), vec2(0.0f, 0.0f)),
-	Vertex(vec3(0.5f, -0.5f, 0.0f), vec2(1.0f, 0.0f)),
-	Vertex(vec3(0.5f, 0.5f, 0.0f), vec2(1.0f, 1.0f)),
-	Vertex(vec3(-0.5f, 0.5f, 0.0f), vec2(0.0f, 1.0f))
+constexpr std::array<CrosshairVertex, 4> VERTICES = {
+	CrosshairVertex(vec2(-0.5f, -0.5f)),
+	CrosshairVertex(vec2(0.5f, -0.5f)),
+	CrosshairVertex(vec2(0.5f, 0.5f)),
+	CrosshairVertex(vec2(-0.5f, 0.5f))
 };
 
 constexpr std::array<u16, 6> INDICES = { 0, 1, 2, 2, 3, 0 };
 
 void Crosshair::init() {
 	m_shader.load(b::embed<"shaders/ui/crosshair-vert.glsl">().str(), b::embed<"shaders/ui/crosshair-frag.glsl">().str());
-	m_mesh.set_data(VERTICES, INDICES);
+	m_mesh.init(VERTICES, INDICES);
 }
 
 void Crosshair::render(vec2 window_size) {
