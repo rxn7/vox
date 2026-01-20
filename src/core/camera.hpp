@@ -12,7 +12,7 @@ public:
 	[[nodiscard]] vec3 get_forward_direction() const;
 	[[nodiscard]] vec3 get_right_direction() const;
 
-	[[nodiscard]] inline const vec3 &get_position() const { return m_position; }
+	[[nodiscard]] inline vec3 get_position() const { return m_position; }
 	[[nodiscard]] inline f32 get_pitch() const { return m_pitch; }
 	[[nodiscard]] inline f32 get_yaw() const { return m_yaw; }
 	[[nodiscard]] inline f32 get_fov() const { return m_fov; }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/singleton.hpp"
-#include "shader.hpp"
+#include "core/render/shader.hpp"
 
 class TextRenderer {
 SINGLETON_CLASS(TextRenderer);
@@ -10,8 +10,8 @@ public:
 	~TextRenderer();
 
 	void init();
-	void update_screen_size(const vec2 &size);
-	void render_text(std::string_view text, const vec2 &position, f32 size = 16.0f);
+	void update_screen_size(vec2 size);
+	void render_text(std::string_view text, vec2 position, f32 size = 16.0f);
 
 	[[nodiscard]] static constexpr u8 get_font_index(char c) {
 		if(c < 32 || c > 126) [[unlikely]] {

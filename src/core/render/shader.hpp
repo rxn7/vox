@@ -21,11 +21,11 @@ public:
 		set_uniform(name, [value](i32 location) { glUniform1f(location, value); });
 	}
 
-	inline void set_uniform_vec2(std::string_view name, const vec2 &value) {
+	inline void set_uniform_vec2(std::string_view name, vec2 value) {
 		set_uniform(name, [value](i32 location) { glUniform2f(location, value.x, value.y); });
 	}
 
-	inline void set_uniform_ivec2(std::string_view name, const vec2 &value) {
+	inline void set_uniform_ivec2(std::string_view name, vec2 value) {
 		set_uniform(name, [value](i32 location) { glUniform2i(location, value.x, value.y); });
 	}
 

@@ -38,7 +38,7 @@ void TextRenderer::init() {
 	m_initialized = true;
 }
 
-void TextRenderer::render_text(std::string_view text, const vec2 &position, f32 size) {
+void TextRenderer::render_text(std::string_view text, vec2 position, f32 size) {
 	PROFILE_FUNC();
 
 	if(text.empty()) [[unlikely]] {
@@ -69,7 +69,7 @@ void TextRenderer::render_text(std::string_view text, const vec2 &position, f32 
 	glBindVertexArray(0);
 }
 
-void TextRenderer::update_screen_size(const vec2 &size) {
+void TextRenderer::update_screen_size(vec2 size) {
 	PROFILE_FUNC();
 	m_shader.set_uniform_vec2("u_screen_size", size);
 }
