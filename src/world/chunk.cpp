@@ -11,7 +11,7 @@ Chunk::Chunk(World &world, ivec3 position)
 
 	for(u32 x = 0; x < CHUNK_WIDTH; ++x) {
 		for(u32 z = 0; z < CHUNK_WIDTH; ++z) {
-			const u32 max_y = rand() % (CHUNK_WIDTH - 1) + 1;
+			const u32 max_y = rand() % (4) + 12;
 
 			for(u32 y = 0; y < max_y; ++y) {
 				if(y == max_y - 1) {

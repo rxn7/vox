@@ -26,7 +26,7 @@ template <size_t N>
 constexpr auto clean_func_name(const char(&s)[N]) {
     std::string_view v(s, N);
 
-    // strip args: foo(int) -> foo
+    // strip args: foo(i32) -> foo
     v = v.substr(0, v.find('(')); 
 
     // strip template args: foo<int> -> foo

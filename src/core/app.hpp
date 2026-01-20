@@ -9,6 +9,10 @@ public:
 	~App();
 	void run();
 
+	static App &get_instance() { return *sp_instance; }
+	inline f32 get_delta_time() const { return m_delta_time; }
+	inline ivec2 get_window_size() const { return m_window_size; }
+
 private:
 	bool init();
 	bool init_glfw();

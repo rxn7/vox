@@ -56,13 +56,13 @@ void ChunkRenderer::render(const mat4 &camera_matrix) {
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, m_indirect_buffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_packed_chunk_positions_ssbo);
 
-	if(wireframe) {
+	if(m_use_wireframe) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	} 
 
 	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (void*)0, m_draw_commands.size(), 0);
 
-	if(wireframe) {
+	if(m_use_wireframe) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }

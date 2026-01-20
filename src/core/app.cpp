@@ -100,6 +100,8 @@ void App::render_imgui() {
 }
 
 bool App::init() {
+	ProfilerTimePoint start = ProfilerClock::now();
+
 	if(!init_glfw())	return false;
 	if(!init_opengl())	return false;
 	if(!init_imgui())	return false;
@@ -109,10 +111,13 @@ bool App::init() {
 	Input::get_instance().set_mouse_mode(mp_window, GLFW_CURSOR_DISABLED);
 	mp_game = std::make_unique<Game>();
 
-	constexpr float VRAM_USAGE_PER_CHUNK = (ChunkRenderer::VERTEX_SLOT_SIZE * sizeof(u32) + ChunkRenderer::INDEX_SLOT_SIZE * sizeof(u32)) / 1000.0f;
+	constexpr f32 VRAM_USAGE_PER_CHUNK = (ChunkRenderer::VERTEX_SLOT_SIZE * sizeof(u32) + ChunkRenderer::INDEX_SLOT_SIZE * sizeof(u32)) / 1000.0f;
 
 	std::println("ChunkRenderer VRAM usage: {} KB per chunk", VRAM_USAGE_PER_CHUNK);
 	std::println("ChunkRenderer Total VRAM usage: {} KB", VRAM_USAGE_PER_CHUNK * ChunkRenderer::MAX_CHUNKS);
+
+	ProfilerTimePoint end = ProfilerClock::now();
+	std::println("App initialization took {} ms", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
 	return true;
 }

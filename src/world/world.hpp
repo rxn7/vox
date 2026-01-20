@@ -5,6 +5,11 @@
 
 typedef ivec3 ChunkPosition;
 
+struct BlockPosition {
+	ChunkPosition chunk_position;
+	u8vec3 local_position;
+};
+
 class World {
 public:
 	World();
@@ -12,8 +17,9 @@ public:
 
 	void render(ChunkRenderer &renderer);
 
-	BlockID get_block(const vec3 &global_position) const;
-	const Chunk *get_chunk(const ChunkPosition &position) const;
+	BlockPosition global_to_local(vec3 global_position) const;
+	BlockID get_block(vec3 global_position) const;
+	const Chunk *get_chunk(ChunkPosition position) const;
 
 private:
 	std::unordered_map<ChunkPosition, std::unique_ptr<Chunk>> m_chunks; 

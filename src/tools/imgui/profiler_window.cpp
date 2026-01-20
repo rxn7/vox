@@ -60,7 +60,7 @@ void ProfilerWindow::render() {
 void ProfilerWindow::render_node_recursive(const std::vector<ProfilerNode> &nodes, i16 node_idx) {
 	const ProfilerNode &node = nodes[node_idx];
 
-	float duration_ratio_to_parent;
+	f32 duration_ratio_to_parent;
 	if(node.parent != -1) {
 		duration_ratio_to_parent = node.duration_us / nodes[node.parent].duration_us;
 	} else {

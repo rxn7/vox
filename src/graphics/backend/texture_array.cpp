@@ -31,7 +31,7 @@ bool TextureArray::load(std::span<const std::string_view> paths) {
 	for(i32 i = 0; i < texture_count; i++) {
 		const std::string_view path = paths[i];
 
-		int width, height, channels;
+		i32 width, height, channels;
 		const u8 *data = stbi_load(path.data(), &width, &height, &channels, 4);
 
 		if(data == nullptr) [[unlikely]] {

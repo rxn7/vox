@@ -35,7 +35,7 @@ public:
 	static constexpr u32 MAX_VERTICES = MAX_CHUNKS * VERTEX_SLOT_SIZE;
 	static constexpr u32 MAX_INDICES =	MAX_CHUNKS * INDEX_SLOT_SIZE;
 
-	bool wireframe = false;
+	bool m_use_wireframe = false;
 
 private:
 	u32 m_vao;
