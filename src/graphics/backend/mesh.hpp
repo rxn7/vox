@@ -9,7 +9,7 @@ public:
 	~Mesh();
 
 	void set_data(std::span<const Vertex> vertices, std::span<const u16> indices);
-	void draw() const;
+	void render() const;
 	
 private:
 	bool m_created = false;

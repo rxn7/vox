@@ -2,6 +2,7 @@
 
 #include "game/player/player.hpp"
 #include "world/world.hpp"
+#include "ui/crosshair.hpp"
 #include "graphics/backend/camera.hpp"
 #include "graphics/renderers/chunk_renderer.hpp"
 #include "graphics/renderers/text_renderer.hpp"
@@ -21,6 +22,7 @@ public:
 private:
 	ChunkRenderer m_chunk_renderer;
 	TextRenderer m_text_renderer;
+	Crosshair m_crosshair;
 	Camera m_camera;
 
 	Player m_player;

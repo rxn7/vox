@@ -1,6 +1,7 @@
 #include "game/game.hpp"
 #include "graphics/renderers/chunk_renderer.hpp"
 #include "graphics/renderers/text_renderer.hpp"
+#include "tools/fps_counter.hpp"
 #include "core/app.hpp"
 #include "core/input.hpp"
 
@@ -8,6 +9,7 @@ Game::Game()
 : m_camera(vec3(0, 30.0f, 0), 80.0f), m_player(m_camera) {
 	m_chunk_renderer.init();
 	m_text_renderer.init();
+	m_crosshair.init();
 }
 
 Game::~Game() {
@@ -40,9 +42,11 @@ void Game::render_ui() {
 	PROFILE_FUNC();
 
 	m_text_renderer.render_text("Vox Engine", vec2(0, 0), 16.0f);
+	m_text_renderer.render_text(std::format("FPS: {}", FpsCounter::get_instance().get_frame_rate()), vec2(0, 16), 16.0f);
 
-	const ivec2 window_size = App::get_instance().get_window_size();
-	
+	const vec2 window_size = App::get_instance().get_window_size();
+	m_crosshair.render(window_size);
+
 	if(m_chunk_renderer.m_use_wireframe) {
 		m_text_renderer.render_text("[wireframe]", vec2(0, window_size.y - 16.0f), 16.0f);
 	}

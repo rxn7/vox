@@ -1,5 +1,6 @@
 #include "core/app.hpp"
 #include "core/input.hpp"
+#include "tools/fps_counter.hpp"
 #include "tools/profiler/scope_timer.hpp"
 #include "graphics/renderers/chunk_renderer.hpp"
 
@@ -43,6 +44,7 @@ void App::run() {
 		last_frame = current_frame;
 
 		profiler.new_frame();
+		FpsCounter::get_instance().tick();
 		input.new_frame();
 
 		glfwPollEvents();

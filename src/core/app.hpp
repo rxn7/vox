@@ -1,7 +1,7 @@
 #pragma once
 
-#include "tools/imgui/profiler_window.hpp"
 #include "game/game.hpp"
+#include "tools/imgui/profiler_window.hpp"
 
 class App {
 public:
@@ -33,6 +33,7 @@ private:
 private:
 	GLFWwindow *mp_window = nullptr;
 	ivec2 m_window_size;
+
 	f32 m_delta_time;
 
 	ProfilerWindow m_profiler_window;

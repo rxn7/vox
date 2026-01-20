@@ -15,7 +15,7 @@ Mesh::~Mesh() {
 	glDeleteBuffers(1, &m_ebo);
 }
 
-void Mesh::draw() const {
+void Mesh::render() const {
 	PROFILE_FUNC();
 
 	glBindVertexArray(m_vao);

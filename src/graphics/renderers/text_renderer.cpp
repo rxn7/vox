@@ -15,7 +15,7 @@ TextRenderer::~TextRenderer() {
 }
 
 void TextRenderer::init() {
-	m_shader.load(b::embed<"shaders/text-vert.glsl">().str(), b::embed<"shaders/text-frag.glsl">().str());
+	m_shader.load(b::embed<"shaders/ui/text-vert.glsl">().str(), b::embed<"shaders/ui/text-frag.glsl">().str());
 
 	m_staging_buffer.reserve(STAGING_BUFFER_SIZE);
 
