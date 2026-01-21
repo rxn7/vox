@@ -127,14 +127,7 @@ bool Player::check_collision(World &world) {
 	for(i32 x = min_x; x <= max_x; ++x) {
 		for(i32 y = min_y; y <= max_y; ++y) {
 			for(i32 z = min_z; z <= max_z; ++z) {
-				const BlockPosition check_position = world.get_block_position(
-					vec3(
-						static_cast<f32>(x) + 0.5f, 
-						static_cast<f32>(y) + 0.5f, 
-						static_cast<f32>(z) + 0.5f
-					)
-				);
-
+				const BlockPosition check_position(vec3(x, y, z) + 0.5f);
 				const BlockID block_id = world.get_block(check_position);
 				const BlockType &block_type = BlockRegistry::get(block_id);
 
@@ -175,9 +168,7 @@ void Player::handle_block_interaction(World &world) {
 		};
 
 		if(!player_aabb.overlap(block_aabb)) {
-			const vec3 last_center = vec3(raycast_result.previous_grid_position) + 0.5f;
-			const BlockPosition place_position = world.get_block_position(last_center);
-
+			const BlockPosition place_position(vec3(raycast_result.previous_grid_position) + 0.5f);
 			world.set_block(place_position, BlockID::Stone);
 		}
 	} else if(left_click) {

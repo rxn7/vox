@@ -124,7 +124,7 @@ bool Chunk::should_draw_face(i8 x, i8 y, i8 z) const {
 
 	BlockID block;
 	if(x < 0 || x >= CHUNK_WIDTH || y < 0 || y >= CHUNK_WIDTH || z < 0 || z >= CHUNK_WIDTH) {
-		const BlockPosition block_position = m_world.get_block_position(get_global_position() + vec3(x, y, z));
+		const BlockPosition block_position(get_global_position() + vec3(x, y, z));
 		block = m_world.get_block(block_position);
 	} else {
 		block = get_block({x, y, z});

@@ -1,5 +1,6 @@
 #include "vox/world/world.hpp"
 #include "vox/world/block_registry.hpp"
+#include "vox/world/chunk.hpp"
 
 World::World() {
 	for(i32 x = -4; x < 4; ++x) {
@@ -43,7 +44,7 @@ RaycastResult World::raycast(vec3 start, vec3 dir, f32 max_distance) const {
 	while(distance_traveled < max_distance) {
 		const vec3 test_position = vec3(grid_position) + 0.5f;
 
-		const BlockPosition block_position = get_block_position(test_position);
+		const BlockPosition block_position(test_position);
 		const BlockID block_id = get_block(block_position);
 
 		if(block_id != BlockID::Air) {
@@ -74,31 +75,6 @@ RaycastResult World::raycast(vec3 start, vec3 dir, f32 max_distance) const {
 	return RaycastResult{
 		.hit = false,
 		.distance = distance_traveled,
-	};
-}
-
-BlockPosition World::get_block_position(vec3 global_position) {
-	PROFILE_FUNC();
-
-	const i32 x = static_cast<i32>(std::floor(global_position.x));
-	const i32 y = static_cast<i32>(std::floor(global_position.y));
-	const i32 z = static_cast<i32>(std::floor(global_position.z));
-
-	const i32 cx = static_cast<i32>(std::floor(static_cast<f32>(x) / CHUNK_WIDTH));
-	const i32 cy = static_cast<i32>(std::floor(static_cast<f32>(y) / CHUNK_WIDTH));
-	const i32 cz = static_cast<i32>(std::floor(static_cast<f32>(z) / CHUNK_WIDTH));
-
-	const auto safe_mod = [](i32 a, i32 n) { return (a % n + n) % n; };
-
-	const u8vec3 local_position(
-		safe_mod(static_cast<i32>(std::floor(global_position.x)), CHUNK_WIDTH),
-		safe_mod(static_cast<i32>(std::floor(global_position.y)), CHUNK_WIDTH),
-		safe_mod(static_cast<i32>(std::floor(global_position.z)), CHUNK_WIDTH)
-	);
-
-	return BlockPosition{
-		.chunk_position = ChunkPosition(cx, cy, cz),
-		.local_position = local_position
 	};
 }
 
@@ -144,4 +120,26 @@ Chunk *World::get_chunk(ChunkPosition position) const {
 		return nullptr;
 	
 	return it->second.get();
+}
+
+BlockPosition::BlockPosition(vec3 global_position) {
+	PROFILE_FUNC();
+
+	const i32 x = static_cast<i32>(std::floor(global_position.x));
+	const i32 y = static_cast<i32>(std::floor(global_position.y));
+	const i32 z = static_cast<i32>(std::floor(global_position.z));
+
+	const auto safe_mod = [](i32 a, i32 n) { return (a % n + n) % n; };
+
+	local_position = {
+		safe_mod(x, CHUNK_WIDTH),
+		safe_mod(y, CHUNK_WIDTH),
+		safe_mod(z, CHUNK_WIDTH)
+	};
+
+	chunk_position = {
+		static_cast<i32>(std::floor(static_cast<f32>(x) / CHUNK_WIDTH)),
+		static_cast<i32>(std::floor(static_cast<f32>(y) / CHUNK_WIDTH)),
+		static_cast<i32>(std::floor(static_cast<f32>(z) / CHUNK_WIDTH))
+	};
 }

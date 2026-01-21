@@ -2,13 +2,12 @@
 
 #include "vox/world/world.hpp"
 #include "vox/world/aabb.hpp"
+#include "vox/world/physics_constants.hpp"
 #include "vox/graphics/backend/camera.hpp"
 
-constexpr f32 GRAVITY = 20.0f;
 constexpr f32 TERMINAL_VELOCITY = 20.0f;
 constexpr f32 PLAYER_HEIGHT = 1.6f;
 constexpr f32 PLAYER_WIDTH = 0.3f;
-
 constexpr f32 REACH_DISTANCE = 5.0f;
 
 constexpr f32 JUMP_HEIGHT = 1.25f;
