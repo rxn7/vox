@@ -72,10 +72,12 @@ void Chunk::generate_mesh_and_upload(WorldRenderer &renderer) {
 				const auto add_quad = [&](FaceID face_id, u8vec3 bl, u8vec3 br, u8vec3 tr, u8vec3 tl) {
 					const TextureID texture_id = block_type.get_texture_id(face_id);
 
-					s_tmp_vertices.push_back(Packer::pack_vertex(x + bl.x, y + bl.y, z + bl.z, texture_id, face_id));
-					s_tmp_vertices.push_back(Packer::pack_vertex(x + br.x, y + br.y, z + br.z, texture_id, face_id));
-					s_tmp_vertices.push_back(Packer::pack_vertex(x + tr.x, y + tr.y, z + tr.z, texture_id, face_id));
-					s_tmp_vertices.push_back(Packer::pack_vertex(x + tl.x, y + tl.y, z + tl.z, texture_id, face_id));
+                    const u8 ao = rand() % 5;
+
+					s_tmp_vertices.push_back(Packer::pack_vertex(x + bl.x, y + bl.y, z + bl.z, texture_id, face_id, ao));
+					s_tmp_vertices.push_back(Packer::pack_vertex(x + br.x, y + br.y, z + br.z, texture_id, face_id, ao));
+					s_tmp_vertices.push_back(Packer::pack_vertex(x + tr.x, y + tr.y, z + tr.z, texture_id, face_id, ao));
+					s_tmp_vertices.push_back(Packer::pack_vertex(x + tl.x, y + tl.y, z + tl.z, texture_id, face_id, ao));
 					
 					s_tmp_indices.push_back(index_offset + 0);
 					s_tmp_indices.push_back(index_offset + 1);

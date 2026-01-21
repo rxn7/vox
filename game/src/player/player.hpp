@@ -4,7 +4,7 @@
 #include "vox/world/aabb.hpp"
 #include "vox/graphics/backend/camera.hpp"
 
-constexpr f32 GRAVITY = 9.81f;
+constexpr f32 GRAVITY = 20.0f;
 constexpr f32 TERMINAL_VELOCITY = 20.0f;
 constexpr f32 PLAYER_HEIGHT = 1.6f;
 constexpr f32 PLAYER_WIDTH = 0.3f;

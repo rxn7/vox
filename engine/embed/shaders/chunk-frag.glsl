@@ -3,6 +3,7 @@
 flat in uint v_texture_id;
 in vec3 v_normal;
 in vec2 v_uv;
+in float v_ao;
 
 uniform sampler2DArray u_textures;
 
@@ -20,5 +21,5 @@ void main() {
 	else if(v_normal.y < -0.5) 
 		brightness = 0.5;
 
-	f_color = vec4(color.rgb * brightness, color.a);
+	f_color = vec4(color.rgb * brightness * v_ao, color.a);
 }

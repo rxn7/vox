@@ -12,6 +12,7 @@ uniform mat4 u_camera_matrix;
 flat out uint v_texture_id;
 out vec3 v_normal;
 out vec2 v_uv;
+out float v_ao;
 
 const vec3 NORMALS[6] = vec3[](
     vec3( 1,  0,  0), // 0: Right
@@ -29,9 +30,12 @@ void main() {
 
     v_texture_id = bitfieldExtract(a_packed_vertex, 15, 9);
     uint face_id = bitfieldExtract(a_packed_vertex, 24, 3);
+    
+    uint ao = bitfieldExtract(a_packed_vertex, 27, 2);
+    v_ao = 1.0 - (ao * 0.2);
 
     v_normal = NORMALS[face_id];
-
+    
     uint p = a_packed_chunk_pos[gl_DrawIDARB];
     int chunk_x = int(p << 18) >> 18;
     int chunk_z = int(p << 4) >> 18;
@@ -44,7 +48,6 @@ void main() {
     );
 
     gl_Position = u_camera_matrix * vec4(world_pos, 1.0);
-
 
     if (face_id <= 1) {
         v_uv = vec2(local_z, local_y);
