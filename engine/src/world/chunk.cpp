@@ -43,6 +43,10 @@ void Chunk::render(WorldRenderer &renderer) {
 
 void Chunk::generate_mesh_and_upload(WorldRenderer &renderer) {
 	PROFILE_FUNC();
+    
+    if(m_alloc.is_valid()) {
+        renderer.free_chunk_mesh(m_alloc);
+    }
 
 	static std::vector<u32> s_tmp_vertices{};
 	s_tmp_vertices.reserve(4096);

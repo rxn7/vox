@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vox/graphics/renderers/world_renderer.hpp"
 #include "vox/tools/profiler/profiler.hpp"
 
 struct ProfilerWindowEntry {
@@ -13,7 +14,7 @@ struct ProfilerWindowEntryCmp {
 
 class ProfilerWindow {
 public:
-	void render();
+	void render(std::optional<std::reference_wrapper<WorldRenderer>> world_renderer_wrapper = std::nullopt);
 
 private:
 	void render_node_recursive(const std::vector<ProfilerNode> &nodes, i16 node_idx);

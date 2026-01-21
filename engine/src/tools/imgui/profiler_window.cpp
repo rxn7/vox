@@ -1,8 +1,11 @@
 #include "vox/tools/imgui/profiler_window.hpp"
+#include "imgui.h"
+#include "vox/core/allocators/offset_allocator.hpp"
+#include "vox/graphics/renderers/world_renderer.hpp"
 #include "vox/tools/profiler/profiler.hpp"
 #include "vox/tools/profiler/scope_timer.hpp"
 
-void ProfilerWindow::render() {
+void ProfilerWindow::render(std::optional<std::reference_wrapper<WorldRenderer>> world_renderer_wrapper) {
 	PROFILE_FUNC();
 
 	if(!ImGui::Begin("Profiler")) {
@@ -29,6 +32,18 @@ void ProfilerWindow::render() {
 	if(ImGui::Button("Hide All")) {
 		m_hide_all_triggered = true;
 	}
+    
+    if(world_renderer_wrapper.has_value()) {
+        if(ImGui::CollapsingHeader("World Renderer")) {
+            const WorldRenderer &world_renderer = world_renderer_wrapper->get();
+
+            const OffsetAllocator &vertex_allocator = world_renderer.get_vertex_allocator();
+            ImGui::Text("Vertex allocator usage: %d / %d (%d%%)", vertex_allocator.get_used_memory(), vertex_allocator.get_total_memory(), static_cast<u32>(static_cast<f32>(vertex_allocator.get_used_memory()) / vertex_allocator.get_total_memory() * 100));
+
+            const OffsetAllocator &index_allocator = world_renderer.get_index_allocator();
+            ImGui::Text("Index allocator usage: %d / %d (%d%%)", index_allocator.get_used_memory(), index_allocator.get_total_memory(), static_cast<u32>(static_cast<f32>(index_allocator.get_used_memory()) / index_allocator.get_total_memory() * 100));
+        }
+    }
 
 	ImGui::Text("Frame Duration: %.2fus", m_frame_duration_us);
 
