@@ -3,7 +3,7 @@
 #include "GLFW/glfw3.h"
 #include "vox/world/block_registry.hpp"
 #include "vox/core/input.hpp"
-#include "vox/tools/profiler/scope_timer.hpp"
+#include "vox/tools/profiler/profiler_scope_timer.hpp"
 #include "vox/world/world.hpp"
 
 constexpr f32 HALF_PLAYER_WIDTH = PLAYER_WIDTH / 2.0f;

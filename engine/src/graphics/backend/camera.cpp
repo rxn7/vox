@@ -1,5 +1,5 @@
 #include "vox/graphics/backend/camera.hpp"
-#include "vox/tools/profiler/scope_timer.hpp"
+#include "vox/tools/profiler/profiler_scope_timer.hpp"
 
 constexpr f32 NEAR_PLANE = 0.1f;
 constexpr f32 FAR_PLANE = 1000.0f;

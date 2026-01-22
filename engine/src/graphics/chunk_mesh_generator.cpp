@@ -3,7 +3,7 @@
 #include "vox/graphics/face_data.hpp"
 #include "vox/graphics/graphics_settings.hpp"
 #include "vox/graphics/renderers/world_renderer.hpp"
-#include "vox/tools/profiler/scope_timer.hpp"
+#include "vox/tools/profiler/profiler_scope_timer.hpp"
 #include "vox/world/block_registry.hpp"
 #include "vox/world/block_type.hpp"
 

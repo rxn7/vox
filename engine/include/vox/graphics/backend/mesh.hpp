@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vox/tools/profiler/scope_timer.hpp"
+#include "vox/tools/profiler/profiler_scope_timer.hpp"
 
 template<typename Vertex>
 class Mesh {

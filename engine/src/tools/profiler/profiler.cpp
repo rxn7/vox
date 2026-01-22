@@ -1,34 +1,39 @@
 #include "vox/tools/profiler/profiler.hpp"
+#include <chrono>
 
 #ifdef NDEBUG
+void Profiler::begin() { }
 
-void Profiler::new_frame() {
-	m_frame_start = ProfilerClock::now();
-}
-void Profiler::end_frame() {
-	m_frame_duration_us = std::chrono::duration<f32, std::micro>(ProfilerClock::now() - m_frame_start).count();
-}
+void Profiler::end() { }
+
 i16 Profiler::start_scope([[maybe_unused]] const char *name) { return 0; }
-void Profiler::end_scope([[maybe_unused]] f32 duration_us) {}
 
+void Profiler::end_scope([[maybe_unused]] u32 duration_us) { }
+
+bool Profiler::should_end([[maybe_unused]] ProfilerClock::duration target_duration) { return false; }
 #else 
 
-void Profiler::new_frame() {
-	m_frame_start = ProfilerClock::now();
-
+void Profiler::begin() {
+	m_begin_time = ProfilerClock::now();
 	m_current_node_idx = 0;
 }
 
-void Profiler::end_frame() {
-	m_frame_duration_us = std::chrono::duration<f32, std::micro>(ProfilerClock::now() - m_frame_start).count();
+void Profiler::end() {
+    m_duration = ProfilerClock::now() - m_begin_time;
+    m_buffer[0].duration_us = std::chrono::duration_cast<std::chrono::microseconds>(m_duration).count();
 
 	m_results.swap(m_buffer);
 	m_buffer.clear();
 }
 
+bool Profiler::should_end(ProfilerClock::duration target_duration) {
+    const ProfilerTimePoint now = ProfilerClock::now();
+    return (now - m_begin_time) >= target_duration;
+}
+
 i16 Profiler::start_scope(const char *name) {
 	if(m_buffer.empty()) {
-        m_buffer.push_back({ .name = "Root", .duration_us = m_frame_duration_us });
+        m_buffer.push_back({ .name = "", .duration_us = 1 });
         m_current_node_idx = 0;
     }
 
@@ -68,7 +73,7 @@ i16 Profiler::start_scope(const char *name) {
 	return new_index;
 }
 
-void Profiler::end_scope(f32 duration_us) {
+void Profiler::end_scope(u32 duration_us) {
 	ProfilerNode &node = m_buffer[m_current_node_idx];
 	node.duration_us += duration_us;
 	++node.calls;

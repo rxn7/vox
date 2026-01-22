@@ -7,7 +7,7 @@ typedef ProfilerClock::time_point ProfilerTimePoint;
 
 struct ProfilerNode {
 	const char *name;
-	f32 duration_us = 0.0f;
+	u32 duration_us = 0.0f;
 	u16 calls = 0;
 	u8 depth = 0;
 
@@ -20,28 +20,32 @@ struct ProfilerNode {
 class Profiler {
 SINGLETON_CLASS(Profiler);
 public:
-	void new_frame();
-	void end_frame();
+	void begin();
+	void end();
+    
+    bool should_end(ProfilerClock::duration target_duration);
 
 	i16 start_scope(const char *name);
-	void end_scope(f32 duration_us);
+	void end_scope(u32 duration_us);
 
-	inline f32 get_frame_duration_us() const { 
-        return m_frame_duration_us; 
-    }
 #ifndef NDEBUG
 	inline std::span<const ProfilerNode> get_results() const { 
         return m_results; 
     }
-#endif
+
+    inline ProfilerClock::duration get_duration() const {
+        return m_duration;
+    }
 
 private:
-    ProfilerTimePoint m_frame_start;
-    f32 m_frame_duration_us = 0.0f;
+    bool m_paused;
 
-#ifndef NDEBUG
+    ProfilerTimePoint m_begin_time;
+    ProfilerClock::duration m_duration;
+
 	std::vector<ProfilerNode> m_buffer;
 	std::vector<ProfilerNode> m_results;
+
 	i16 m_current_node_idx = 0;
 #endif
 };

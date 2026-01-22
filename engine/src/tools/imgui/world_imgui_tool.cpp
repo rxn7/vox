@@ -1,6 +1,6 @@
 #include "vox/tools/imgui/world_imgui_tool.hpp"
 #include "imgui.h"
-#include "vox/tools/profiler/scope_timer.hpp"
+#include "vox/tools/profiler/profiler_scope_timer.hpp"
 
 void WorldImGuiTool::render(World &world, std::optional<std::reference_wrapper<WorldRenderer>> world_renderer_wrapper) {
     PROFILE_FUNC();

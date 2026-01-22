@@ -1,17 +1,18 @@
 #pragma once
 
+#ifndef NDEBUG
 #include "vox/tools/profiler/profiler.hpp"
 
-class ScopeTimer {
+class ProfilerScopeTimer {
 public:
-	explicit inline ScopeTimer(const char *name) : m_name(name) { 
+	explicit inline ProfilerScopeTimer(const char *name) : m_name(name) { 
         Profiler::get_instance().start_scope(m_name);
         m_start = ProfilerClock::now();
     }
 
-	inline ~ScopeTimer() {
-		const auto end = ProfilerClock::now();
-		const f32 duration = std::chrono::duration<f32, std::micro>(end - m_start).count();
+	inline ~ProfilerScopeTimer() {
+		const ProfilerTimePoint end = ProfilerClock::now();
+		const u32 duration = std::chrono::duration_cast<std::chrono::microseconds>(end - m_start).count();
 
 		Profiler::get_instance().end_scope(duration);
 	}
@@ -20,6 +21,7 @@ private:
 	const char *m_name;
     ProfilerTimePoint m_start;
 };
+#endif
 
 #ifndef NDEBUG
 template <size_t N>
@@ -55,8 +57,8 @@ constexpr auto clean_func_name(const char(&s)[N]) {
 
 #define GLUE(a, b) a##b
 #define COMBINE(a, b) GLUE(a, b)
-#define PROFILE_SCOPE(name) ScopeTimer COMBINE(__scope_timer__, __COUNTER__)(name);
-#define PROFILE_FUNC() ScopeTimer COMBINE(__scope_timer__, __COUNTER__)( \
+#define PROFILE_SCOPE(name) ProfilerScopeTimer COMBINE(__scope_timer__, __COUNTER__)(name);
+#define PROFILE_FUNC() ProfilerScopeTimer COMBINE(__scope_timer__, __COUNTER__)( \
     ({ \
         static constexpr auto _static_name = clean_func_name(RAW_FUNC_SIG); \
         _static_name.data(); \

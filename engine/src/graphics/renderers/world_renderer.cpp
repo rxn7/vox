@@ -2,7 +2,7 @@
 #include "vox/graphics/backend/packer.hpp"
 #include "vox/graphics/renderers/world_renderer.hpp"
 #include "vox/graphics/resources/texture_paths.hpp"
-#include "vox/tools/profiler/scope_timer.hpp"
+#include "vox/tools/profiler/profiler_scope_timer.hpp"
 
 #include <battery/embed.hpp>
 #include <optional>

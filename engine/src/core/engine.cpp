@@ -2,7 +2,7 @@
 #include "vox/core/i_game.hpp"
 #include "vox/core/input.hpp"
 #include "vox/tools/fps_counter.hpp"
-#include "vox/tools/profiler/scope_timer.hpp"
+#include "vox/tools/profiler/profiler_scope_timer.hpp"
 
 #include <stb_image.h>
 
@@ -24,6 +24,9 @@ Engine::~Engine() {
 }
 
 void Engine::run_game(IGame *game) {
+	Profiler &profiler = Profiler::get_instance();
+    profiler.begin();
+
 	if(!init())
 		return;
 
@@ -32,13 +35,9 @@ void Engine::run_game(IGame *game) {
         return;
 
 	f64 last_frame, current_frame; last_frame = current_frame = glfwGetTime();
-
-	Profiler &profiler = Profiler::get_instance();
 	Input &input = Input::get_instance();
 
 	while(!glfwWindowShouldClose(m_window.get_glfw_window())) {
-		profiler.new_frame();
-
 		current_frame = glfwGetTime();
 		m_delta_time = current_frame - last_frame;
 
@@ -59,7 +58,10 @@ void Engine::run_game(IGame *game) {
 			glfwSwapBuffers(m_window.get_glfw_window());
 		}
 
-		profiler.end_frame();
+        if(profiler.should_end(PROFILING_DURATION)) {
+            profiler.end();
+            profiler.begin();
+        }
 	}
     
     mp_game = nullptr;
