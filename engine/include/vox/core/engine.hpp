@@ -4,7 +4,7 @@
 #include "vox/core/window.hpp"
 #include "vox/tools/imgui/profiler_imgui_tool.hpp"
 
-constexpr ProfilerClock::duration PROFILING_DURATION = std::chrono::milliseconds(3000);
+constexpr f32 PROFILING_DURATION_US = 3'000'000;
 
 class Engine {
 public:

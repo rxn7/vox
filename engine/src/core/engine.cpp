@@ -25,7 +25,7 @@ Engine::~Engine() {
 
 void Engine::run_game(IGame *game) {
 	Profiler &profiler = Profiler::get_instance();
-    profiler.begin();
+    profiler.begin(PROFILING_DURATION_US);
 
 	if(!init())
 		return;
@@ -58,10 +58,7 @@ void Engine::run_game(IGame *game) {
 			glfwSwapBuffers(m_window.get_glfw_window());
 		}
 
-        if(profiler.should_end(PROFILING_DURATION)) {
-            profiler.end();
-            profiler.begin();
-        }
+        profiler.update(m_delta_time);
 	}
     
     mp_game = nullptr;

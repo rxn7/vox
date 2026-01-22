@@ -20,7 +20,7 @@ void ProfilerImGuiTool::render() {
     return;
 #else
 
-	ImGui::Checkbox("Paused", &m_paused);
+	ImGui::Checkbox("Paused", &Profiler::get_instance().m_paused);
 
 	if(ImGui::Button("Expand All")) {
 		m_expand_all_triggered = true;
@@ -55,7 +55,7 @@ void ProfilerImGuiTool::render_node_recursive(std::span<const ProfilerNode> node
 #ifndef NDEBUG
 	const ProfilerNode &node = nodes[node_idx];
 
-    const f32 duration_ratio_to_total = static_cast<f32>(node.duration_us) / std::chrono::duration_cast<std::chrono::microseconds>(Profiler::get_instance().get_duration()).count();
+    const f32 duration_ratio_to_total = static_cast<f32>(node.duration_us) / Profiler::get_instance().get_duration_us();
 
 	f32 duration_ratio_to_parent;
 	if(node.parent != -1) {

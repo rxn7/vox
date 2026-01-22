@@ -5,8 +5,8 @@
 
 class ProfilerScopeTimer {
 public:
-	explicit inline ProfilerScopeTimer(const char *name) : m_name(name) { 
-        Profiler::get_instance().start_scope(m_name);
+	explicit inline ProfilerScopeTimer(const char *name) { 
+        Profiler::get_instance().start_scope(name);
         m_start = ProfilerClock::now();
     }
 
@@ -18,7 +18,6 @@ public:
 	}
 
 private:
-	const char *m_name;
     ProfilerTimePoint m_start;
 };
 #endif
@@ -57,6 +56,7 @@ constexpr auto clean_func_name(const char(&s)[N]) {
 
 #define GLUE(a, b) a##b
 #define COMBINE(a, b) GLUE(a, b)
+
 #define PROFILE_SCOPE(name) ProfilerScopeTimer COMBINE(__scope_timer__, __COUNTER__)(name);
 #define PROFILE_FUNC() ProfilerScopeTimer COMBINE(__scope_timer__, __COUNTER__)( \
     ({ \

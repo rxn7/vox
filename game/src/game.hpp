@@ -28,6 +28,9 @@ public:
 	inline const Camera &get_camera() const { 
         return m_camera; 
     }
+    
+private:
+    void handle_input();
 
 private:
 	Player m_player;

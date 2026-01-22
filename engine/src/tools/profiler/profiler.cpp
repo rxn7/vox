@@ -1,34 +1,41 @@
 #include "vox/tools/profiler/profiler.hpp"
-#include <chrono>
 
 #ifdef NDEBUG
-void Profiler::begin() { }
+void Profiler::begin([[maybe_unused]] f32 target_duration_us) { }
 
 void Profiler::end() { }
+
+void Profiler::update([[maybe_unused]] f32 dt) { }
 
 i16 Profiler::start_scope([[maybe_unused]] const char *name) { return 0; }
 
 void Profiler::end_scope([[maybe_unused]] u32 duration_us) { }
-
-bool Profiler::should_end([[maybe_unused]] ProfilerClock::duration target_duration) { return false; }
 #else 
 
-void Profiler::begin() {
-	m_begin_time = ProfilerClock::now();
+void Profiler::begin(f32 target_duration_us) {
+    m_target_duration_us = target_duration_us;
+    m_elapsed_us = 0.0f;
 	m_current_node_idx = 0;
 }
 
 void Profiler::end() {
-    m_duration = ProfilerClock::now() - m_begin_time;
-    m_buffer[0].duration_us = std::chrono::duration_cast<std::chrono::microseconds>(m_duration).count();
+    m_duration_us =  m_elapsed_us;
+
+    if(!m_buffer.empty()) {
+        m_buffer[0].duration_us = m_duration_us;
+    }
 
 	m_results.swap(m_buffer);
 	m_buffer.clear();
 }
 
-bool Profiler::should_end(ProfilerClock::duration target_duration) {
-    const ProfilerTimePoint now = ProfilerClock::now();
-    return (now - m_begin_time) >= target_duration;
+void Profiler::update(f32 dt) {
+    m_elapsed_us += dt * 1'000'000.0f;
+
+    if(!m_paused && m_elapsed_us >= m_target_duration_us) {
+        end();
+        begin(m_target_duration_us);
+    }
 }
 
 i16 Profiler::start_scope(const char *name) {

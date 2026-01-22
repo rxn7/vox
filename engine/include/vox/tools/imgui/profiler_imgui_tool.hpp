@@ -12,8 +12,6 @@ private:
 	u64 get_current_mem_usage();
 
 private:
-	bool m_paused = false;
-
 	bool m_expand_all_triggered = false;
 	bool m_hide_all_triggered = false;
 

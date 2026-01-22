@@ -25,20 +25,8 @@ bool Game::init() {
 
 void Game::update(f32 delta_time) {
 	PROFILE_FUNC();
-
-	Input &input = Input::get_instance();
-	if(input.is_key_just_pressed(GLFW_KEY_F1)) {
-		m_world_renderer.m_use_wireframe ^= true;
-	}
-	if(input.is_key_just_pressed(GLFW_KEY_F2)) {
-		m_player.m_fly_enabled ^= true;
-	}
-	if(input.is_key_just_pressed(GLFW_KEY_ESCAPE)) {
-		if(input.get_mouse_mode() == GLFW_CURSOR_DISABLED)
-			input.set_mouse_mode(GLFW_CURSOR_NORMAL);
-		else
-			input.set_mouse_mode(GLFW_CURSOR_DISABLED);
-	}
+    
+    handle_input();
 
 	m_player.update(m_world, delta_time);
 }
@@ -81,6 +69,25 @@ void Game::render_ui() {
 void Game::render_imgui() {
     m_world_imgui_tool.render(m_world, m_world_renderer);
     m_graphics_imgui_tool.render(m_world);
+}
+
+void Game::handle_input() {
+    Input &input = Input::get_instance();
+	if(input.is_key_just_pressed(GLFW_KEY_F1)) {
+		m_world_renderer.m_use_wireframe ^= true;
+	}
+
+	if(input.is_key_just_pressed(GLFW_KEY_F2)) {
+		m_player.m_fly_enabled ^= true;
+	}
+
+	if(input.is_key_just_pressed(GLFW_KEY_ESCAPE)) {
+		if(input.get_mouse_mode() == GLFW_CURSOR_DISABLED) {
+			input.set_mouse_mode(GLFW_CURSOR_NORMAL);
+        } else {
+			input.set_mouse_mode(GLFW_CURSOR_DISABLED);
+        }
+	}
 }
 
 void Game::handle_window_resize(ivec2 window_size) {

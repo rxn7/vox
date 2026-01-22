@@ -20,10 +20,9 @@ struct ProfilerNode {
 class Profiler {
 SINGLETON_CLASS(Profiler);
 public:
-	void begin();
+	void begin(f32 target_duration_us);
 	void end();
-    
-    bool should_end(ProfilerClock::duration target_duration);
+    void update(f32 dt);
 
 	i16 start_scope(const char *name);
 	void end_scope(u32 duration_us);
@@ -33,15 +32,17 @@ public:
         return m_results; 
     }
 
-    inline ProfilerClock::duration get_duration() const {
-        return m_duration;
+    inline f32 get_duration_us() const {
+        return m_duration_us;
     }
+    
+public:
+    bool m_paused = false;
 
 private:
-    bool m_paused;
-
-    ProfilerTimePoint m_begin_time;
-    ProfilerClock::duration m_duration;
+    f32 m_elapsed_us;
+    f32 m_duration_us;
+    f32 m_target_duration_us;
 
 	std::vector<ProfilerNode> m_buffer;
 	std::vector<ProfilerNode> m_results;
