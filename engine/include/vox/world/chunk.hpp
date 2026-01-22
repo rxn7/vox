@@ -42,10 +42,6 @@ public:
     }
 
 private:
-	void generate_mesh_and_upload(WorldRenderer &renderer);
-	u8 calculate_vertex_ao(bool side1_occluded, bool side2_occluded, bool corner_occluded) const;
-
-private:
 	World &m_world;
 	std::array<BlockID, TOTAL_BLOCKS> m_blocks;
 
