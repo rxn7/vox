@@ -33,6 +33,7 @@ public:
 	~World();
 
 	void render(WorldRenderer &renderer);
+	void regenerate_all_chunks();
 
 	RaycastResult raycast(vec3 start, vec3 dir, f32 max_distance) const;
 

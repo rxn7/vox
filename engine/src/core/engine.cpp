@@ -1,4 +1,5 @@
 #include "vox/core/engine.hpp"
+#include "vox/core/i_game.hpp"
 #include "vox/core/input.hpp"
 #include "vox/tools/fps_counter.hpp"
 #include "vox/tools/profiler/scope_timer.hpp"
@@ -7,14 +8,12 @@
 
 Engine *Engine::sp_instance = nullptr;
 
-Engine::Engine(std::unique_ptr<IGame> game) : mp_game(std::move(game)) { 
+Engine::Engine() { 
     assert(sp_instance == nullptr);
     sp_instance = this;
 }
 
 Engine::~Engine() { 
-    mp_game.reset();
-
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
@@ -24,10 +23,11 @@ Engine::~Engine() {
 	glfwTerminate();
 }
 
-void Engine::run() { 
+void Engine::run_game(IGame *game) {
 	if(!init())
 		return;
-        
+
+    mp_game = game;
     if(!mp_game->init())
         return;
 
@@ -61,6 +61,8 @@ void Engine::run() {
 
 		profiler.end_frame();
 	}
+    
+    mp_game = nullptr;
 }
 
 void Engine::update() { 
@@ -92,7 +94,8 @@ void Engine::render() {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
+        
+        m_profiler_imgui_tool.render();
 		mp_game->render_imgui();
 
 		ImGui::EndFrame();

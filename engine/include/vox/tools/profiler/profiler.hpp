@@ -26,9 +26,13 @@ public:
 	i16 start_scope(const char *name);
 	void end_scope(f32 duration_us);
 
-	inline f32 get_frame_duration_us() const { return m_frame_duration_us; }
+	inline f32 get_frame_duration_us() const { 
+        return m_frame_duration_us; 
+    }
 #ifndef NDEBUG
-	inline std::span<const ProfilerNode> get_results() const { return m_results; }
+	inline std::span<const ProfilerNode> get_results() const { 
+        return m_results; 
+    }
 #endif
 
 private:

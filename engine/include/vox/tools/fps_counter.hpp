@@ -5,8 +5,11 @@
 class FpsCounter {
 SINGLETON_CLASS(FpsCounter);
 public:
-	inline u32 get_frame_rate() const { return m_frame_rate; }
 	void tick();
+
+	inline u32 get_frame_rate() const { 
+        return m_frame_rate; 
+    }
 
 private:
 	u32 m_frame_rate = 0;

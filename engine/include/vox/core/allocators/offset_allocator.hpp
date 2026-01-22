@@ -13,8 +13,13 @@ public:
 	std::optional<Allocation> allocate(u32 size_needed);
 	void free(Allocation alloc);
 
-	inline u32 get_total_memory() const { return m_total_size; }
-	inline u32 get_used_memory() const { return m_total_size - m_current_free_space; }
+	inline u32 get_total_memory() const { 
+        return m_total_size; 
+    }
+
+	inline u32 get_used_memory() const {
+        return m_total_size - m_current_free_space; 
+    }
 
 private:
 	u32 m_total_size;

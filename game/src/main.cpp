@@ -2,10 +2,14 @@
 #include "game.hpp"
 
 i32 main(i32 argc, char **argv) {
-    std::unique_ptr<Game> game = std::make_unique<Game>();
+	Engine engine;
 
-	Engine engine(std::move(game));
-	engine.run();
+    // NOTE: its wrote in this weird way to ensure destructor on Game gets called before the engine.
+    // we could use heap allocation but i prefer to keep it on stack
+    {
+        Game game;
+        engine.run_game(&game);
+    }
 
 	return 0;
 }

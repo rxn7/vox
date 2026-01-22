@@ -34,8 +34,13 @@ public:
     [[nodiscard]] std::optional<ChunkMeshAllocation> allocate_chunk_mesh(u32 vertex_count, u32 index_count);
     void free_chunk_mesh(const ChunkMeshAllocation &alloc);
     
-    inline const OffsetAllocator &get_vertex_allocator() const { return m_vertex_allocator; }
-    inline const OffsetAllocator &get_index_allocator() const { return m_index_allocator; }
+    inline const OffsetAllocator &get_vertex_allocator() const {
+        return m_vertex_allocator; 
+    }
+
+    inline const OffsetAllocator &get_index_allocator() const {
+        return m_index_allocator; 
+    }
 	
 public:
 	bool m_use_wireframe = false;

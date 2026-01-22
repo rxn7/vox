@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vox/graphics/resources/texture_id.hpp"
-#include "vox/world/face_id.hpp"
+#include "vox/graphics/face_id.hpp"
 
 struct BlockTextures {
 	constexpr BlockTextures() = default;

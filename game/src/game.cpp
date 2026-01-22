@@ -79,7 +79,8 @@ void Game::render_ui() {
 }
 
 void Game::render_imgui() {
-    m_profiler_window.render(m_world_renderer);
+    m_world_imgui_tool.render(m_world, m_world_renderer);
+    m_graphics_imgui_tool.render(m_world);
 }
 
 void Game::handle_window_resize(ivec2 window_size) {

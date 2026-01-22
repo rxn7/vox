@@ -21,6 +21,14 @@ void World::render(WorldRenderer &renderer) {
     }
 }
 
+void World::regenerate_all_chunks() {
+	PROFILE_FUNC();
+
+	for(auto &[position, chunk] : m_chunks) {
+		chunk->set_dirty();
+	}
+}
+
 RaycastResult World::raycast(vec3 start, vec3 dir, f32 max_distance) const {
 	PROFILE_FUNC();
 

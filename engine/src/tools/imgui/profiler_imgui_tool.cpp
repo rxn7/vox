@@ -1,11 +1,8 @@
-#include "vox/tools/imgui/profiler_window.hpp"
-#include "imgui.h"
-#include "vox/core/allocators/offset_allocator.hpp"
-#include "vox/graphics/renderers/world_renderer.hpp"
+#include "vox/tools/imgui/profiler_imgui_tool.hpp"
 #include "vox/tools/profiler/profiler.hpp"
 #include "vox/tools/profiler/scope_timer.hpp"
 
-void ProfilerWindow::render(std::optional<std::reference_wrapper<WorldRenderer>> world_renderer_wrapper) {
+void ProfilerImGuiTool::render() {
 	PROFILE_FUNC();
 
 	if(!ImGui::Begin("Profiler")) {
@@ -33,18 +30,6 @@ void ProfilerWindow::render(std::optional<std::reference_wrapper<WorldRenderer>>
 		m_hide_all_triggered = true;
 	}
     
-    if(world_renderer_wrapper.has_value()) {
-        if(ImGui::CollapsingHeader("World Renderer")) {
-            const WorldRenderer &world_renderer = world_renderer_wrapper->get();
-
-            const OffsetAllocator &vertex_allocator = world_renderer.get_vertex_allocator();
-            ImGui::Text("Vertex allocator usage: %dKB / %dKB (%d%%)", vertex_allocator.get_used_memory() / 1024, vertex_allocator.get_total_memory() / 1024, static_cast<u32>(static_cast<f32>(vertex_allocator.get_used_memory()) / vertex_allocator.get_total_memory() * 100));
-
-            const OffsetAllocator &index_allocator = world_renderer.get_index_allocator();
-            ImGui::Text("Index allocator usage: %dKB / %dKB (%d%%)", index_allocator.get_used_memory() / 1024, index_allocator.get_total_memory() / 1024, static_cast<u32>(static_cast<f32>(index_allocator.get_used_memory()) / index_allocator.get_total_memory() * 100));
-        }
-    }
-
 	ImGui::Text("Frame Duration: %.2fus", m_frame_duration_us);
 
 	if(m_data.empty()) {
@@ -72,7 +57,7 @@ void ProfilerWindow::render(std::optional<std::reference_wrapper<WorldRenderer>>
 	ImGui::End();
 }
 
-void ProfilerWindow::render_node_recursive(const std::vector<ProfilerNode> &nodes, i16 node_idx) {
+void ProfilerImGuiTool::render_node_recursive(const std::vector<ProfilerNode> &nodes, i16 node_idx) {
 	const ProfilerNode &node = nodes[node_idx];
 
 	f32 duration_ratio_to_parent;
@@ -137,7 +122,7 @@ void ProfilerWindow::render_node_recursive(const std::vector<ProfilerNode> &node
 	ImGui::PopID();
 }
 
-void ProfilerWindow::update() {
+void ProfilerImGuiTool::update() {
 	const Profiler &profiler = Profiler::get_instance();
 
 #ifndef NDEBUG
@@ -151,7 +136,7 @@ void ProfilerWindow::update() {
 	m_frame_duration_us = profiler.get_frame_duration_us();
 }
 
-u64 ProfilerWindow::get_current_mem_usage() {
+u64 ProfilerImGuiTool::get_current_mem_usage() {
 #ifndef __linux__
 	return 0;
 #endif

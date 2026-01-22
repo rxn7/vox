@@ -14,7 +14,8 @@ class Chunk {
 public:
 	Chunk(World &world, ivec3 position);
 
-	void render(WorldRenderer &renderer);
+    void render(WorldRenderer &world_renderer);
+	bool is_block_transparent(i8 x, i8 y, i8 z) const;
 
 	constexpr vec3 get_global_position() const { 
 		return vec3(m_position) * CHUNK_WIDTH; 
@@ -24,7 +25,7 @@ public:
 		return v.y * CHUNK_WIDTH * CHUNK_WIDTH + v.z * CHUNK_WIDTH + v.x;
 	}
 
-	constexpr inline BlockID get_block(u8vec3 v) const { 
+	inline BlockID get_block(u8vec3 v) const { 
 		return m_blocks[get_block_idx(v)]; 
 	}
 
@@ -35,10 +36,14 @@ public:
 	inline void set_dirty() {
 		m_is_dirty = true;
 	}
+    
+    inline ChunkMeshAllocation &get_alloc() { 
+        return m_alloc; 
+    }
 
 private:
 	void generate_mesh_and_upload(WorldRenderer &renderer);
-	bool should_draw_face(i8 x, i8 y, i8 z) const;
+	u8 calculate_vertex_ao(bool side1_occluded, bool side2_occluded, bool corner_occluded) const;
 
 private:
 	World &m_world;
@@ -49,7 +54,5 @@ private:
 	bool m_is_dirty = false;
 
     ChunkMeshAllocation m_alloc;
-
 	u32 m_index_count = 0;
 };
-

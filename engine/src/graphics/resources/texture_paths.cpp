@@ -2,6 +2,7 @@
 
 #define TEXTURE_PATH(name) "assets/textures/" name
 
+// TODO: This should be in game code not engine
 // NOTE: its done that way to make explicit assignment to a specific BlockID.
 inline constexpr auto TEXTURE_PATHS = []() {
     std::array<std::string_view, static_cast<sz>(TextureID::SIZE)> paths{};

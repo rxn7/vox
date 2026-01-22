@@ -2,18 +2,26 @@
 
 #include "vox/core/i_game.hpp"
 #include "vox/core/window.hpp"
-#include "vox/tools/imgui/profiler_window.hpp"
+#include "vox/tools/imgui/profiler_imgui_tool.hpp"
 
 class Engine {
 public:
-	Engine(std::unique_ptr<IGame> p_game);
+	Engine();
 	~Engine();
 
-	void run();
+	void run_game(IGame *game);
 
-	static Engine &get_instance() { return *sp_instance; }
-    inline Window &get_window() { return m_window; }
-	inline f32 get_delta_time() const { return m_delta_time; }
+	static Engine &get_instance() { 
+        return *sp_instance; 
+    }
+
+    inline Window &get_window() { 
+        return m_window; 
+    }
+
+	inline f32 get_delta_time() const { 
+        return m_delta_time; 
+    }
 
 private:
 	bool init();
@@ -34,8 +42,9 @@ private:
     Window m_window;
 	f32 m_delta_time;
 
-	ProfilerWindow m_profiler_window;
-    std::unique_ptr<IGame> mp_game;
-
+    IGame *mp_game;
+    
+    ProfilerImGuiTool m_profiler_imgui_tool;
+    
 	static Engine *sp_instance;
 };

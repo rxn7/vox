@@ -1,5 +1,6 @@
 #include "player/player.hpp"
 
+#include "GLFW/glfw3.h"
 #include "vox/world/block_registry.hpp"
 #include "vox/core/input.hpp"
 #include "vox/tools/profiler/scope_timer.hpp"
@@ -145,8 +146,10 @@ void Player::handle_block_interaction(World &world) {
 	PROFILE_FUNC();
 
 	Input &input = Input::get_instance();
-	const bool left_click = input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_LEFT);
-	const bool right_click = input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_RIGHT);
+    
+    const bool mouse_locked = input.get_mouse_mode() == GLFW_CURSOR_DISABLED;
+	const bool wish_to_break = mouse_locked && input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_LEFT);
+	const bool wish_to_place = mouse_locked && input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_RIGHT);
 
 	const vec3 ray_start = m_position;
 	const vec3 ray_dir = m_camera.get_forward_direction();
@@ -160,7 +163,7 @@ void Player::handle_block_interaction(World &world) {
 
 	m_last_highlighted_block_position = raycast_result.hit_block_position;
 
-	if(right_click) {
+	if(wish_to_place) {
 		const AABB player_aabb = calculate_aabb();
 		const AABB block_aabb = {
 			.min = vec3(raycast_result.previous_grid_position) - 0.5f,
@@ -171,7 +174,7 @@ void Player::handle_block_interaction(World &world) {
 			const BlockPosition place_position(vec3(raycast_result.previous_grid_position) + 0.5f);
 			world.set_block(place_position, BlockID::Stone);
 		}
-	} else if(left_click) {
+	} else if(wish_to_break) {
 		world.set_block(raycast_result.hit_block_position, BlockID::Air);
 	}
 }
