@@ -13,8 +13,19 @@ constexpr f32 REACH_DISTANCE = 5.0f;
 constexpr f32 JUMP_HEIGHT = 1.25f;
 const f32 JUMP_FORCE = std::sqrt(2.0f * JUMP_HEIGHT * GRAVITY);
 
-constexpr f32 SENSITIVITY = 0.002f;
-constexpr f32 MOVE_SPEED = 4.0f;
+constexpr f32 CAMERA_SENSITIVITY = 0.002f;
+
+constexpr f32 GROUND_ACCELERATION = 80.0f;
+constexpr f32 GROUND_FRICTION = 10.0f;
+
+constexpr f32 MOVE_SPEED = 3.0f;
+
+constexpr f32 AIR_ACCELERATION = 30.0f;
+constexpr f32 AIR_FRICTION = 5.0f;
+
+constexpr f32 FLY_ACCELERATION = 100.0f;
+constexpr f32 FLY_MAX_SPEED = 8.0f;
+constexpr f32 FLY_FRICTION = 5.0f;
 
 class Player {
 public:
@@ -28,6 +39,8 @@ public:
 private:
 	void handle_movement(World &world, f32 dt);
 	void handle_mouse_movement();
+    void accelerate(vec3 wish_dir, f32 acceleration, f32 max_speed, f32 dt);
+    void apply_friction(f32 friction, f32 dt);
 	bool check_collision(World &world);
 	void handle_block_interaction(World &world); 
 

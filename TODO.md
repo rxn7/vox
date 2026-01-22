@@ -1,5 +1,4 @@
 # TODO
-- Profiler accumulate calls for a second or longer
 - Proper player velocity
 - Proper player physics (dont simply apply velocity, check if each block inbetween this and next position is not solid)
 - Procedural world generation

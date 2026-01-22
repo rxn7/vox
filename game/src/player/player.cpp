@@ -1,10 +1,13 @@
 #include "player/player.hpp"
 
 #include "GLFW/glfw3.h"
+#include "glm/ext.hpp"
 #include "vox/world/block_registry.hpp"
 #include "vox/core/input.hpp"
 #include "vox/tools/profiler/profiler_scope_timer.hpp"
+#include "vox/world/physics_constants.hpp"
 #include "vox/world/world.hpp"
+#include <algorithm>
 
 constexpr f32 HALF_PLAYER_WIDTH = PLAYER_WIDTH / 2.0f;
 constexpr vec3 UP = vec3(0.0f, 1.0f, 0.0f);
@@ -49,29 +52,37 @@ void Player::handle_movement(World &world, f32 dt) {
 	if(glm::length2(wish_dir) > 0.0001f) {
 		wish_dir = glm::normalize(wish_dir);
 	}
-
-	m_horizontal_velocity = wish_dir * MOVE_SPEED * dt;
-
-	if(m_fly_enabled) {
-		const f32 input_y = static_cast<f32>(input.is_key_pressed(GLFW_KEY_SPACE)) - static_cast<f32>(input.is_key_pressed(GLFW_KEY_LEFT_SHIFT));
-		m_vertical_velocity = input_y * MOVE_SPEED;
-	} else {
-		m_vertical_velocity -= GRAVITY * dt;
-
-		if(m_vertical_velocity < -TERMINAL_VELOCITY) {
-			m_vertical_velocity = -TERMINAL_VELOCITY;
-		}
-
-		if(m_is_grounded && input.is_key_pressed(GLFW_KEY_SPACE)) {
-			m_vertical_velocity = JUMP_FORCE;
-			m_is_grounded = false;
-		}
-	}
+    
+    if(m_fly_enabled) {
+        wish_dir.y = static_cast<f32>(input.is_key_pressed(GLFW_KEY_SPACE)) - static_cast<f32>(input.is_key_pressed(GLFW_KEY_LEFT_SHIFT));
+        if(glm::length2(wish_dir) > 0.0001f) {
+            wish_dir = glm::normalize(wish_dir);
+        }
+        
+        accelerate(wish_dir, FLY_ACCELERATION, FLY_MAX_SPEED, dt);
+        apply_friction(FLY_FRICTION, dt);
+    } else {
+        if(m_is_grounded) {
+            accelerate(wish_dir, GROUND_ACCELERATION, MOVE_SPEED, dt);
+            apply_friction(GROUND_FRICTION, dt);
+        } else {
+            accelerate(wish_dir, AIR_ACCELERATION, MOVE_SPEED, dt);
+            apply_friction(AIR_FRICTION, dt);
+        }
+        
+        m_vertical_velocity -= GRAVITY * dt;
+        m_vertical_velocity = std::max(m_vertical_velocity, -TERMINAL_VELOCITY);
+        
+        if(m_is_grounded && input.is_key_pressed(GLFW_KEY_SPACE)) {
+            m_vertical_velocity = JUMP_FORCE;
+            m_is_grounded = false;
+        }
+    }
 
 	const auto horizontal_move = [&](u8 axis) {
-		m_position[axis] += m_horizontal_velocity[axis];
+		m_position[axis] += m_horizontal_velocity[axis] * dt;
 		if(check_collision(world)) {
-			m_position[axis] -= m_horizontal_velocity[axis];
+			m_position[axis] -= m_horizontal_velocity[axis] * dt;
 			m_horizontal_velocity[axis] = 0.0f;
 		}
 	};
@@ -79,19 +90,27 @@ void Player::handle_movement(World &world, f32 dt) {
 	horizontal_move(0);
 	horizontal_move(2);
 
-	m_position.y += m_vertical_velocity * dt;
-	if(check_collision(world)) {
-		m_position.y -= m_vertical_velocity * dt;
+    if(!m_fly_enabled) {
+        m_position.y += m_vertical_velocity * dt;
+        if(check_collision(world)) {
+            m_position.y -= m_vertical_velocity * dt;
 
-		if(m_vertical_velocity < 0.0f) {
-			m_is_grounded = true;
-			m_vertical_velocity = 0.0f;
-		} else if(m_vertical_velocity > 0.0f) {
-			m_vertical_velocity = 0.0f;
-		}
-	} else {
-		m_is_grounded = false;
-	}
+            if(m_vertical_velocity < 0.0f) {
+                m_is_grounded = true;
+                m_vertical_velocity = 0.0f;
+            } else if(m_vertical_velocity > 0.0f) {
+                m_vertical_velocity = 0.0f;
+            }
+        } else {
+            m_is_grounded = false;
+        }
+    } else {
+        m_position.y += m_horizontal_velocity.y * dt;
+        if(check_collision(world)) {
+            m_position.y -= m_horizontal_velocity.y * dt;
+            m_horizontal_velocity.y = 0.0f;
+        }
+    }
 }
 
 void Player::handle_mouse_movement() {
@@ -104,11 +123,37 @@ void Player::handle_mouse_movement() {
 	}
 
 	const vec2 mouse_delta = input.get_mouse_delta();
-	m_camera.m_yaw += mouse_delta.x * SENSITIVITY;
-	m_camera.m_pitch -= mouse_delta.y * SENSITIVITY;
+	m_camera.m_yaw += mouse_delta.x * CAMERA_SENSITIVITY;
+	m_camera.m_pitch -= mouse_delta.y * CAMERA_SENSITIVITY;
 
 	m_camera.m_pitch = glm::clamp(m_camera.m_pitch, -glm::half_pi<f32>() + glm::radians(1.0f), glm::half_pi<f32>() - glm::radians(1.0f));
 	m_camera.m_yaw = glm::mod(m_camera.m_yaw, glm::two_pi<f32>());
+}
+
+void Player::accelerate(vec3 wish_dir, f32 acceleration, f32 max_speed, f32 dt) {
+    const f32 current_speed = glm::dot(m_horizontal_velocity, wish_dir);
+    const f32 add_speed = max_speed - current_speed;
+    
+    if(add_speed <= 0.0f) {
+        return;
+    }
+    
+    const f32 accel_speed = glm::min(acceleration * dt, add_speed);
+
+    m_horizontal_velocity += wish_dir * accel_speed;
+}
+
+void Player::apply_friction(f32 friction, f32 dt) {
+    const f32 speed = m_horizontal_velocity.length();
+    if(speed < 0.0001f) {
+        m_horizontal_velocity = vec3(0.0f);
+        return;
+    }
+    
+    const f32 drop = speed * friction * dt;
+    const f32 new_speed = glm::max(0.0f, speed - drop);
+    
+    m_horizontal_velocity *= (new_speed / speed);
 }
 
 bool Player::check_collision(World &world) {
