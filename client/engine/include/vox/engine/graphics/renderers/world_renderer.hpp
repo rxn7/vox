@@ -19,7 +19,7 @@ public:
 	void init();
 	void render(const mat4 &camera_matrix);
 
-	void update_chunk(const Chunk &chunk);
+	void update_chunk(Chunk &chunk);
 	void remove_chunk(const Chunk &chunk);
 
 	void upload_chunk_mesh(const ChunkMeshAllocation &alloc, std::span<const u32> vertices, std::span<const u32> indices);

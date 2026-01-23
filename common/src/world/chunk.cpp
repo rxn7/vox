@@ -21,8 +21,8 @@ Chunk::Chunk(World &world, ChunkPosition position)
 			}
 		}
 	}
-
-	set_dirty(true);
+    
+    set_dirty(true);
 }
 
 bool Chunk::is_block_transparent(i8 x, i8 y, i8 z) const {

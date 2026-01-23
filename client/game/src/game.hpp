@@ -3,6 +3,7 @@
 #include "player/player.hpp"
 #include "ui/crosshair.hpp"
 
+#include "vox/common/helper/signal.hpp"
 #include "vox/common/world/world.hpp"
 #include "vox/engine/core/i_game.hpp"
 #include "vox/engine/tools/imgui/graphics_imgui_tool.hpp"
@@ -23,6 +24,7 @@ public:
 	void render_3d(f32 aspect_ratio) override;
 	void render_ui() override;
 	void render_imgui() override;
+
 	void handle_window_resize(ivec2 window_size) override;
 
 	inline const Camera &get_camera() const { 
@@ -45,4 +47,6 @@ private:
     
     WorldImGuiTool m_world_imgui_tool;
     GraphicsImGuiTool m_graphics_imgui_tool;
+
+    CallbackID m_chunk_removed_callback;
 };

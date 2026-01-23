@@ -9,9 +9,13 @@
 
 Game::Game() 
 : m_camera(vec3(0, 30.0f, 0), 80.0f), m_player(m_camera) {
+    m_chunk_removed_callback = m_world.m_chunk_removed_signal.connect([&](Chunk &chunk) {
+        m_world_renderer.remove_chunk(chunk);
+    });
 }
 
 Game::~Game() {
+    m_world.m_chunk_removed_signal.disconnect(m_chunk_removed_callback);
 }
 
 bool Game::init() {
@@ -19,6 +23,8 @@ bool Game::init() {
 	m_text_renderer.init();
 	m_block_outline_renderer.init();
 	m_crosshair.init();
+
+    m_world.create_initial_chunks();
 
     return true;
 }
@@ -28,13 +34,16 @@ void Game::update(f32 delta_time) {
     
     handle_input();
 	m_player.update(m_world, delta_time);
-
-	for(auto &[position, chunk] : m_world.get_chunks()) {
-		if(chunk.is_dirty()) {
-			m_world_renderer.update_chunk(chunk);
-			chunk.set_dirty(false);
-		}
-	}
+    
+    if(Input::get_instance().is_key_just_pressed(GLFW_KEY_F)) {
+        m_world.remove_chunk(ChunkPosition());
+    }
+    
+    for(auto &[position, chunk] : m_world.get_chunks()) {
+        if(chunk.is_dirty()) {
+            m_world_renderer.update_chunk(chunk);
+        }
+    }
 }
 
 void Game::render_3d(f32 aspect_ratio) {

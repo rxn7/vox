@@ -3,9 +3,10 @@
 #include "vox/common/profiler/profiler_scope_timer.hpp"
 #include "vox/common/resources/texture_id.hpp"
 #include "vox/common/world/block_face_id.hpp"
+#include "vox/common/world/chunk_position.hpp"
 
 namespace Packer {
-	static constexpr u32 pack_chunk_position(i16vec3 p) {
+	static constexpr u32 pack_chunk_position(ChunkPosition p) {
         PROFILE_FUNC();
 
         u32 packed = 0;

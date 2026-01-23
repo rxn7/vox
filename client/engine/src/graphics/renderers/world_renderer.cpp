@@ -70,9 +70,9 @@ void WorldRenderer::render(const mat4 &camera_matrix) {
 	}
 }
 
-void WorldRenderer::update_chunk(const Chunk &chunk) {
+void WorldRenderer::update_chunk(Chunk &chunk) {
 	PROFILE_FUNC();
-
+    
 	const ChunkPosition position = chunk.get_position();
 
 	const auto it = m_chunk_meshes.find(position);
@@ -81,6 +81,7 @@ void WorldRenderer::update_chunk(const Chunk &chunk) {
 	}
 
 	m_chunk_meshes.at(position).generate_and_upload(chunk, *this);
+    chunk.set_dirty(false);
 }
 
 void WorldRenderer::remove_chunk(const Chunk &chunk) {
@@ -95,6 +96,8 @@ void WorldRenderer::remove_chunk(const Chunk &chunk) {
 
 	ChunkMesh &mesh = it->second;
 	free_chunk_mesh(mesh.m_alloc);
+
+    m_chunk_meshes.erase(it);
 }
 
 void WorldRenderer::upload_chunk_mesh(const ChunkMeshAllocation &alloc, std::span<const u32> vertices, std::span<const u32> indices) {

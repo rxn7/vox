@@ -1,11 +1,10 @@
 #pragma once
 
+#include "vox/common/world/world_constants.hpp"
 #include "vox/common/world/block_id.hpp"
+#include "vox/common/world/chunk_position.hpp"
 
-constexpr u32 CHUNK_WIDTH = 16;
 constexpr u32 TOTAL_BLOCKS = CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_WIDTH;
-
-typedef ivec3 ChunkPosition;
 
 class World;
 

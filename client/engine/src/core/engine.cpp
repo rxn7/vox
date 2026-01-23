@@ -93,6 +93,9 @@ void Engine::render() {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
         
+        const bool enable_imgui_input = Input::get_instance().get_mouse_mode() == GLFW_CURSOR_NORMAL;
+        ImGui::GetIO().SetAppAcceptingEvents(enable_imgui_input);
+        
         m_profiler_imgui_tool.render();
 		mp_game->render_imgui();
 

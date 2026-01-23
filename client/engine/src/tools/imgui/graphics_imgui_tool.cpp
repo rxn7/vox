@@ -11,7 +11,7 @@ void GraphicsImGuiTool::render(std::optional<std::reference_wrapper<World>> worl
     GraphicsSettingsState &state = GraphicsSettings::get_instance().m_state;
     if(ImGui::Checkbox("Ambient Occlusion", &state.ambient_occlusion_enabled)) {
         if(world.has_value()) {
-            world->get().regenerate_all_chunks();
+            world->get().mark_all_chunks_dirty();
         }
     }
     

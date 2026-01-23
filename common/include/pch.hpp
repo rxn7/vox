@@ -10,6 +10,7 @@
 #include <map>
 #include <span>
 #include <memory>
+#include <atomic>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -46,3 +47,4 @@ typedef uint64_t u64;
 typedef size_t sz;
 
 #include "vox/common/profiler/profiler_scope_timer.hpp"
+#include "vox/common/helper/signal.hpp"
