@@ -10,11 +10,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CONFIGURATION_TYPES "Release;Debug" CACHE STRING "" FORCE)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-add_subdirectory(engine)
-add_subdirectory(game)
+include(cmake/imgui.cmake)
+include(cmake/glad.cmake)
+include(cmake/glfw.cmake)
+include(cmake/glm.cmake)
+include(cmake/embed.cmake)
 
-enable_testing()
-add_subdirectory(tests EXCLUDE_FROM_ALL)
+add_subdirectory(common)
+add_subdirectory(server)
+add_subdirectory(client)
 
 if(EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
     file(CREATE_LINK
