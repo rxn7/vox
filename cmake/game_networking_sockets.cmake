@@ -22,10 +22,12 @@ FetchContent_MakeAvailable(GameNetworkingSockets)
 
 if(TARGET GameNetworkingSockets)
     set_target_properties(GameNetworkingSockets PROPERTIES CXX_STANDARD 23)
+    target_compile_options(GameNetworkingSockets PRIVATE -w) # supress warnings
 endif()
 
 if(TARGET GameNetworkingSockets_s)
     set_target_properties(GameNetworkingSockets_s PROPERTIES CXX_STANDARD 23)
+    target_compile_options(GameNetworkingSockets_s PRIVATE -w) # supress warnings
 endif()
 
 if(TARGET libprotobuf)
