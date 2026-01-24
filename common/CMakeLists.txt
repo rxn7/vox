@@ -32,4 +32,4 @@ target_include_directories(vox_common PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(vox_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_precompile_headers(vox_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/pch.hpp)
 
-target_link_libraries(vox_common PUBLIC glm::glm)
+target_link_libraries(vox_common PUBLIC glm::glm GameNetworkingSockets)

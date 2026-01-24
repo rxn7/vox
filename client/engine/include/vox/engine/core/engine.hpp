@@ -30,6 +30,7 @@ private:
 	bool init_glfw();
 	bool init_opengl();
 	bool init_imgui();
+    bool init_networking();
 
 	void update();
 	void render();

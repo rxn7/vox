@@ -1,7 +1,12 @@
 #include "vox/engine/core/engine.hpp"
+#include "steam/steamnetworkingtypes.h"
 #include "vox/engine/core/i_game.hpp"
 #include "vox/engine/core/input.hpp"
 #include "vox/engine/tools/fps_counter.hpp"
+
+#include <print>
+#include <steam/steamnetworkingsockets.h>
+#include <steam/isteamnetworkingutils.h>
 
 #include <stb_image.h>
 
@@ -18,8 +23,9 @@ Engine::~Engine() {
 	ImGui::DestroyContext();
     
     m_window.destroy();
-
 	glfwTerminate();
+
+    GameNetworkingSockets_Kill();
 }
 
 void Engine::run_game(IGame *game) {
@@ -197,6 +203,16 @@ bool Engine::init_imgui() {
 	}
 	
 	return true;
+}
+
+bool Engine::init_networking() {
+    SteamDatagramErrMsg err_msg;
+    if(!GameNetworkingSockets_Init(nullptr, err_msg)) {
+        std::println("Failed to initialize Game Networking Sockets: {}", err_msg);
+        return false;
+    }
+    
+    return true;
 }
 
 void Engine::error_callback_glfw(i32 error, const char *description) {
