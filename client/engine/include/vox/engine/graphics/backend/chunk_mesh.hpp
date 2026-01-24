@@ -6,11 +6,11 @@
 class WorldRenderer;
 
 struct ChunkMeshAllocation {
-    OffsetAllocator::Allocation vertex_alloc;
-    OffsetAllocator::Allocation index_alloc;
+    OffsetAllocator::Allocation m_vertex_alloc;
+    OffsetAllocator::Allocation m_index_alloc;
     
     inline bool is_valid() const {
-        return vertex_alloc.size > 0 && index_alloc.size > 0;
+        return m_vertex_alloc.m_size > 0 && m_index_alloc.m_size > 0;
     };
 };
 

@@ -19,11 +19,11 @@ private:
 
 private:
     struct Entry {
-        const char *name;
-        f32 duration_us;
+        const char *m_name;
+        f32 m_duration_us;
     };
 
     struct ProfilerWindowEntryCmp {
-        bool operator()(const Entry &a, const Entry &b) const { return a.duration_us > b.duration_us; }
+        bool operator()(const Entry &a, const Entry &b) const { return a.m_duration_us > b.m_duration_us; }
     };
 };

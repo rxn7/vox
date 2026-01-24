@@ -3,9 +3,9 @@
 #include "vox/common/world/block_face_id.hpp"
 
 struct FaceData {
-	i8vec3 normal;
-	i8vec3 tangent1;
-	i8vec3 tangent2;
+	i8vec3 m_normal;
+	i8vec3 m_tangent1;
+	i8vec3 m_tangent2;
 };
 
 constexpr FaceData get_face_data(BlockFaceID face_id) {

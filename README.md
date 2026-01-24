@@ -1,8 +1,14 @@
 # VOX
-C++ Voxel Engine (possibly game in the future) made with modern OpenGL (core 4.3).
+C++ Voxel Engine (possibly a game in the future) made with modern OpenGL (core 4.3).
 
 # Building
-Only linux is supported (may work on windows, but not tested).
+#### Only linux is supported (may work on windows, but not tested).
+
+## Requirements
+- libopenssl 
+- libprotobuf
+
+## Commands
 ```bash
 mkdir build
 cd build

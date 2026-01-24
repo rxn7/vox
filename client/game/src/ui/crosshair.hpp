@@ -6,10 +6,10 @@
 struct CrosshairVertex {
 	static inline void setup_attributes() {
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(CrosshairVertex), (void*)offsetof(CrosshairVertex, uv));
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(CrosshairVertex), (void*)offsetof(CrosshairVertex, m_uv));
 	}
 
-	vec2 uv;
+	vec2 m_uv;
 };
 
 

@@ -6,10 +6,10 @@
 #include <glm/gtx/hash.hpp>
 
 struct RaycastResult {
-	bool hit = false;
-	BlockPosition hit_block_position; // used for breaking blocks
-	ivec3 previous_grid_position; // used for placing blocks
-	f32 distance = 0.0f;
+	bool m_did_hit = false;
+	BlockPosition m_hit_block_position; // used for breaking blocks
+	ivec3 m_previous_grid_position; // used for placing blocks
+	f32 m_distance = 0.0f;
 };
 
 class World {

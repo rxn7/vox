@@ -70,12 +70,12 @@ RaycastResult World::raycast(vec3 start, vec3 dir, f32 max_distance) const {
 		if(block_id != BlockID::Air) {
 			const BlockType &block_type = BlockRegistry::get(block_id);
 
-			if(block_type.is_solid) {
+			if(block_type.m_is_solid) {
 				return RaycastResult{
-					.hit = true,
-					.hit_block_position = block_position,
-					.previous_grid_position = last_grid_position,
-					.distance = distance_traveled
+					.m_did_hit = true,
+					.m_hit_block_position = block_position,
+					.m_previous_grid_position = last_grid_position,
+					.m_distance = distance_traveled
 				};
 			}
 		}
@@ -93,8 +93,8 @@ RaycastResult World::raycast(vec3 start, vec3 dir, f32 max_distance) const {
 	}
 
 	return RaycastResult{
-		.hit = false,
-		.distance = distance_traveled,
+		.m_did_hit = false,
+		.m_distance = distance_traveled,
 	};
 }
 

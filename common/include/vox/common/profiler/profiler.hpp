@@ -6,15 +6,15 @@ typedef std::chrono::high_resolution_clock ProfilerClock;
 typedef ProfilerClock::time_point ProfilerTimePoint;
 
 struct ProfilerNode {
-	const char *name;
-	u32 duration_us = 0.0f;
-	u16 calls = 0;
-	u8 depth = 0;
+	const char *m_name;
+	u32 m_duration_us = 0.0f;
+	u16 m_calls = 0;
+	u8 m_depth = 0;
 
-	i16 parent = -1;
-	i16 first_child = -1;
-	i16 last_child = -1;
-	i16 next_sibling = -1;
+	i16 m_parent = -1;
+	i16 m_first_child = -1;
+	i16 m_last_child = -1;
+	i16 m_next_sibling = -1;
 };
 
 class Profiler {

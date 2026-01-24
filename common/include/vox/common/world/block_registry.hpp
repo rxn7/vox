@@ -11,6 +11,6 @@ namespace BlockRegistry {
             return true;
         }
 
-        return get(id).is_transparent;
+        return get(id).m_is_transparent;
     }
 };

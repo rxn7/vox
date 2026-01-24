@@ -1,16 +1,16 @@
 #pragma once
 
-#include "vox/common/world/world.hpp"
+#include "vox/common/world/block_position.hpp"
 #include "vox/engine/graphics/backend/mesh.hpp"
 #include "vox/engine/graphics/backend/shader.hpp"
 
 struct BlockOutlineVertex {
 	static void setup_attributes() {
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BlockOutlineVertex), (void*)offsetof(BlockOutlineVertex, position));
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BlockOutlineVertex), (void*)offsetof(BlockOutlineVertex, m_position));
 	}
 
-	vec3 position;
+	vec3 m_position;
 };
 
 class BlockOutlineRenderer {

@@ -33,9 +33,9 @@ std::optional<OffsetAllocator::Allocation> OffsetAllocator::allocate(u32 size_ne
 }
 
 void OffsetAllocator::free(Allocation alloc) {
-	m_current_free_space += alloc.size;
+	m_current_free_space += alloc.m_size;
 
-	auto it = m_free_blocks.insert({alloc.offset, alloc.size}).first;
+	auto it = m_free_blocks.insert({alloc.m_offset, alloc.m_size}).first;
 
 	const u32 this_block_end = it->first + it->second;
 

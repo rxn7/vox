@@ -27,7 +27,7 @@ void ChunkMesh::generate_and_upload(const Chunk &chunk, WorldRenderer &renderer)
 		renderer.free_chunk_mesh(m_alloc);
 	}
 
-    const bool ao_enabled = GraphicsSettings::get_instance().m_state.ambient_occlusion_enabled;
+    const bool ao_enabled = GraphicsSettings::get_instance().m_state.m_ambient_occlusion_enabled;
 
 	u32 index_offset = 0;
 	for(i8 y = 0; y < CHUNK_WIDTH; ++y) {

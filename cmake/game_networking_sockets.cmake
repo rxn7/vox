@@ -1,35 +1,45 @@
-# for some reason GNS expects GetTypeName to return std::string while it actually returns std::string_view (which would be better)
-set(GNS_PATCH_CMD 
-    sed -i "s/msg.GetTypeName().c_str()/std::string(msg.GetTypeName()).c_str()/g"
-    src/steamnetworkingsockets/steamnetworkingsockets_internal.h
-    src/steamnetworkingsockets/clientlib/steamnetworkingsockets_connections.cpp
-    src/steamnetworkingsockets/clientlib/csteamnetworkingsockets.cpp
-    src/steamnetworkingsockets/clientlib/steamnetworkingsockets_udp.cpp
+set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
+set(ABSL_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    absl
+    GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git
+    GIT_TAG 20240116.1
 )
+FetchContent_MakeAvailable(absl)
 
+set(protobuf_MODULE_COMPATIBLE ON CACHE BOOL "")
+set(protobuf_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(protobuf_BUILD_PROTOC_BINARIES ON CACHE BOOL "" FORCE)
+set(protobuf_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    protobuf
+    GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
+    GIT_TAG v25.3
+)
+FetchContent_MakeAvailable(protobuf)
+
+set(GAMENETWORKINGSOCKETS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GAMENETWORKINGSOCKETS_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     GameNetworkingSockets 
     GIT_REPOSITORY https://github.com/ValveSoftware/GameNetworkingSockets
     GIT_TAG v1.4.1
     GIT_PROGRESS TRUE
-    PATCH_COMMAND ${GNS_PATCH_CMD}
 )
-
-set(GAMENETWORKINGSOCKETS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(GAMENETWORKINGSOCKETS_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-
-FetchContent_MakeAvailable(GameNetworkingSockets)
-
-if(TARGET GameNetworkingSockets)
-    set_target_properties(GameNetworkingSockets PROPERTIES CXX_STANDARD 23)
-    target_compile_options(GameNetworkingSockets PRIVATE -w) # supress warnings
-endif()
-
-if(TARGET GameNetworkingSockets_s)
-    set_target_properties(GameNetworkingSockets_s PROPERTIES CXX_STANDARD 23)
-    target_compile_options(GameNetworkingSockets_s PRIVATE -w) # supress warnings
+FetchContent_GetProperties(GameNetworkingSockets)
+if(NOT GameNetworkingSockets_POPULATED)
+    FetchContent_Populate(GameNetworkingSockets)
+    add_subdirectory(
+        ${gamenetworkingsockets_SOURCE_DIR} 
+        ${gamenetworkingsockets_BINARY_DIR} 
+        EXCLUDE_FROM_ALL
+    )
 endif()
 
 if(TARGET libprotobuf)
-    set_target_properties(libprotobuf PROPERTIES CXX_STANDARD 23)
+    target_compile_options(libprotobuf PRIVATE -w) # supress warnings
+endif()
+
+if(TARGET GameNetworkingSockets_s)
+    target_compile_options(GameNetworkingSockets_s PRIVATE -w) # supress warnings
 endif()

@@ -173,7 +173,7 @@ bool Player::check_collision(World &world) {
 				const BlockID block_id = world.get_block(check_position);
 				const BlockType &block_type = BlockRegistry::get(block_id);
 
-				if(block_type.is_solid) {
+				if(block_type.m_is_solid) {
 					return true;
 				}
 			}
@@ -197,28 +197,28 @@ void Player::handle_block_interaction(World &world) {
 
 	const RaycastResult raycast_result = world.raycast(ray_start, ray_dir, REACH_DISTANCE);
 		
-	if(!raycast_result.hit) {
+	if(!raycast_result.m_did_hit) {
 		m_last_highlighted_block_position = std::nullopt;
 		return;
 	}
 
-	m_last_highlighted_block_position = raycast_result.hit_block_position;
+	m_last_highlighted_block_position = raycast_result.m_hit_block_position;
 
 	if(wish_to_place) {
 		const AABB player_aabb = calculate_aabb();
 		const AABB block_aabb = {
-			.min = vec3(raycast_result.previous_grid_position) - 0.5f,
-			.max = vec3(raycast_result.previous_grid_position) + 1.0f,
+			.min = vec3(raycast_result.m_previous_grid_position) - 0.5f,
+			.max = vec3(raycast_result.m_previous_grid_position) + 1.0f,
 		};
 
 		if(!player_aabb.overlap(block_aabb)) {
-			const BlockPosition place_position(vec3(raycast_result.previous_grid_position) + 0.5f);
+			const BlockPosition place_position(vec3(raycast_result.m_previous_grid_position) + 0.5f);
             
             // TODO: Send place packet to server
 			world.set_block(place_position, BlockID::Stone);
 		}
 	} else if(wish_to_break) {
         // TODO: Send break packet to server
-		world.set_block(raycast_result.hit_block_position, BlockID::Air);
+		world.set_block(raycast_result.m_hit_block_position, BlockID::Air);
 	}
 }

@@ -7,11 +7,11 @@
 #include "vox/engine/graphics/backend/texture_array.hpp"
 
 struct DrawElementsIndirectCommand {
-	u32 index_count;
-	u32 instance_count;
-	u32 first_index;
-	i32 base_vertex;
-	u32 base_instance;
+	u32 m_index_count;
+	u32 m_instance_count;
+	u32 m_first_index;
+	i32 m_base_vertex;
+	u32 m_base_instance;
 };
 
 class WorldRenderer {

@@ -3,7 +3,7 @@
 #include "vox/common/helper/singleton.hpp"
 
 struct GraphicsSettingsState {
-    bool ambient_occlusion_enabled = true;
+    bool m_ambient_occlusion_enabled = true;
 };
 
 // TODO: Common Settings base class with load & save

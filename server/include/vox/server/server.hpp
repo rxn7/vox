@@ -2,7 +2,7 @@
 
 class Server {
 public:
-    void start(u16 port);
+    bool start(u16 port);
     void stop();
 
 private:

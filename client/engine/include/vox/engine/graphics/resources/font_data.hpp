@@ -3,7 +3,7 @@
 constexpr u32 CHARACTER_COUNT = 95;
 
 struct alignas(4) PackedFontData {
-	std::array<u8, CHARACTER_COUNT * 8> bytes;
+	std::array<u8, CHARACTER_COUNT * 8> m_bytes;
 };
 
 constexpr PackedFontData FONT_DATA = {{

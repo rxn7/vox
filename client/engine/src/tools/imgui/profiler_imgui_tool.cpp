@@ -53,11 +53,11 @@ void ProfilerImGuiTool::render_node_recursive(std::span<const ProfilerNode> node
 #ifndef NDEBUG
 	const ProfilerNode &node = nodes[node_idx];
 
-    const f32 duration_ratio_to_total = static_cast<f32>(node.duration_us) / Profiler::get_instance().get_duration_us();
+    const f32 duration_ratio_to_total = static_cast<f32>(node.m_duration_us) / Profiler::get_instance().get_duration_us();
 
 	f32 duration_ratio_to_parent;
-	if(node.parent != -1) {
-		duration_ratio_to_parent = static_cast<f32>(node.duration_us) / nodes[node.parent].duration_us;
+	if(node.m_parent != -1) {
+		duration_ratio_to_parent = static_cast<f32>(node.m_duration_us) / nodes[node.m_parent].m_duration_us;
 	} else {
 		duration_ratio_to_parent = duration_ratio_to_total;
 	}
@@ -77,13 +77,13 @@ void ProfilerImGuiTool::render_node_recursive(std::span<const ProfilerNode> node
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_Selected;
-	if(node.first_child == -1) {
+	if(node.m_first_child == -1) {
 		flags |= ImGuiTreeNodeFlags_Leaf;
 	} else {
 		flags |= ImGuiTreeNodeFlags_OpenOnArrow;
 	}
  
-	if(node.depth == 0) {
+	if(node.m_depth == 0) {
 		flags |= ImGuiTreeNodeFlags_DefaultOpen;
 	}
 
@@ -95,36 +95,39 @@ void ProfilerImGuiTool::render_node_recursive(std::span<const ProfilerNode> node
 
 	const i32 duration_to_total_percentage = std::clamp(static_cast<i32>(duration_ratio_to_total * 100), 0, 100);
 	const i32 duration_to_parent_percentage = std::clamp(static_cast<i32>(duration_ratio_to_parent * 100), 0, 100);
-    const u32 average_duration = static_cast<f32>(node.duration_us) / node.calls;
+    const u32 average_duration = static_cast<f32>(node.m_duration_us) / node.m_calls;
     
     const std::string avg_str = FormatHelper::duration(std::chrono::microseconds(average_duration));
-    const std::string total_str = FormatHelper::duration(std::chrono::microseconds(node.duration_us));
+    const std::string total_str = FormatHelper::duration(std::chrono::microseconds(node.m_duration_us));
 
-	const bool open = ImGui::TreeNodeEx("##Node", flags, "%s", node.name);
+	const bool open = ImGui::TreeNodeEx("##Node", flags, "%s", node.m_name);
     ImGui::SameLine();
     
     if(node_idx != 0) {
         ImGui::PushStyleColor(ImGuiCol_Text, fg_color);
-        ImGui::Text("\t|\tavg %s\t|\t%u cls\t|\ttot %s\t|\t%u%% par\t|\t%u%% tot", avg_str.c_str(), node.calls, total_str.c_str(), duration_to_parent_percentage, duration_to_total_percentage);
+        ImGui::Text("\t|\tavg %s\t|\t%u cls\t|\ttot %s\t|\t%u%% par\t|\t%u%% tot", avg_str.c_str(), node.m_calls, total_str.c_str(), duration_to_parent_percentage, duration_to_total_percentage);
         ImGui::PopStyleColor();
     } else {
         ImGui::Text("Root");
     }
     
     if(open) {
-		std::vector<i16> children_idxs;
-		i16 child = node.first_child;
+		static std::vector<i16> s_children_idxs;
+        s_children_idxs.clear();
+        s_children_idxs.reserve(64);
+
+		i16 child = node.m_first_child;
 
 		while(child != -1) {
-			children_idxs.push_back(child);
-			child = nodes[child].next_sibling;
+			s_children_idxs.push_back(child);
+			child = nodes[child].m_next_sibling;
 		}
 
-		std::sort(children_idxs.begin(), children_idxs.end(), [&](i16 a, i16 b) {
-			return nodes[a].duration_us > nodes[b].duration_us;
+		std::sort(s_children_idxs.begin(), s_children_idxs.end(), [&](i16 a, i16 b) -> bool {
+			return nodes[a].m_duration_us > nodes[b].m_duration_us;
 		});
 
-		for(i16 child_idx : children_idxs) {
+		for(i16 child_idx : s_children_idxs) {
 			render_node_recursive(nodes, child_idx);
 		}
 

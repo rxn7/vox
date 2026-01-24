@@ -26,7 +26,7 @@ void TextRenderer::init() {
 	// Static font data
 	glGenBuffers(1, &m_font_ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_font_ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(FONT_DATA.bytes), FONT_DATA.bytes.data(), GL_STATIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(FONT_DATA.m_bytes), FONT_DATA.m_bytes.data(), GL_STATIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_font_ssbo);
 
 	// Dynamic text data
