@@ -4,8 +4,8 @@
 class OffsetAllocator {
 public:
 	struct Allocation {
-		u32 offset;
-		u32 size;
+		u32 offset = 0;
+		u32 size = 0;
 	};
 
 	OffsetAllocator(u32 total_size);
@@ -22,7 +22,7 @@ public:
     }
 
 private:
-	u32 m_total_size;
+	u32 m_total_size = 0;
 	u32 m_current_free_space = 0;
 
 	// <offset, free space>
