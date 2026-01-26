@@ -82,6 +82,7 @@ void Engine::render() {
 	{
 		PROFILE_SCOPE("Render 3D");
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 		
 		const f32 aspect_ratio = f32(m_window.get_size().x) / f32(m_window.get_size().y);
 		mp_game->render_3d(aspect_ratio);
@@ -90,6 +91,7 @@ void Engine::render() {
 	{
 		PROFILE_SCOPE("Render UI");
 		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
 
 		mp_game->render_ui();
 	}

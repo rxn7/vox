@@ -69,48 +69,116 @@ void Game::update(f32 delta_time) {
 void Game::render_3d(f32 aspect_ratio) {
 	PROFILE_FUNC();
 
-	const mat4 camera_matrix = m_camera.get_matrix(aspect_ratio);
+	const mat4 view_matrix = m_camera.get_view_matrix();
+	const mat4 proj_matrix = m_camera.get_projection_matrix(aspect_ratio);
+	m_text_renderer.update_3d(proj_matrix, view_matrix);
 
+	const mat4 camera_matrix = proj_matrix * view_matrix;
 	m_world_renderer.render(camera_matrix);
 
 	const std::optional<BlockPosition> &last_highlighted_block_position = m_player.get_last_highlighted_block_position();
 	if(last_highlighted_block_position.has_value()) {
 		m_block_outline_renderer.render(last_highlighted_block_position.value(), camera_matrix);
 	}
+
+	if(m_render_subchunk_debug) {
+		for(auto &[position, chunk] : m_world.get_chunks()) {
+			u32 idx = 0;
+			for(const auto &subchunk : chunk.get_subchunks()) {
+				const vec3 global_position = vec3(position.x, idx, position.y) * SUBCHUNK_SIZE;
+				if(subchunk == nullptr) {
+					++idx;
+					continue;
+				}
+
+				++idx;
+
+				TextRenderCommand3D cmd;
+				cmd.text = std::format("{} {} {}", global_position.x, global_position.y, global_position.z);
+				cmd.position = global_position;
+				cmd.size = 1.0f;
+				cmd.horizontal_align = TextHorizontalAlign::Center;
+				cmd.vertical_align = TextVerticalAlign::Middle;
+				cmd.billboard = true;
+
+				const float t = global_position.y / static_cast<f32>(CHUNK_HEIGHT);
+				cmd.color = vec4(
+					1.0f,
+					glm::min(1.0f, (1.0f - t) * 2.0f),
+					glm::max(0.0f, 1.0f - t * 2.0f),
+					1.0f
+				);
+
+				m_text_renderer.render_text_3d(cmd);
+			}
+		}
+	}
 }
 
 void Game::render_ui() {
 	PROFILE_FUNC();
+	m_text_renderer.update_2d(Engine::get_instance().get_window().get_size());
 
-	m_text_renderer.render_text("Vox Engine", vec2(0, 0), 16.0f);
-	m_text_renderer.render_text(std::format("fps: {}", FpsCounter::get_instance().get_frame_rate()), vec2(0, 16), 16.0f);
-	m_text_renderer.render_text(std::format("pos: {}", m_camera.m_position), vec2(0, 32), 16.0f);
+	{
+		TextRenderCommand2D cmd;
+		cmd.text = "Vox Engine";
+		cmd.position = vec2(0, 0);
+		cmd.size = 16.0f;
+
+		m_text_renderer.render_text_2d(cmd);
+	}
+
+	{
+		TextRenderCommand2D cmd;
+		cmd.text = std::format("fps: {}", FpsCounter::get_instance().get_frame_rate());
+		cmd.position = vec2(0, 16);
+		cmd.size = 16.0f;
+
+		m_text_renderer.render_text_2d(cmd);
+	}
 
 	const ivec2 window_size = Engine::get_instance().get_window().get_size();
 	m_crosshair.render(window_size);
 
 	if(m_world_renderer.m_use_wireframe) {
-		m_text_renderer.render_text("[wireframe]", vec2(0, window_size.y - 16.0f), 16.0f);
+		TextRenderCommand2D cmd;
+		cmd.text = "[wireframe]";
+		cmd.position = vec2(0, window_size.y - 16.0f);
+		cmd.size = 16.0f;
+
+		m_text_renderer.render_text_2d(cmd);
 	}
 
 	if(m_player.m_fly_enabled) {
-		m_text_renderer.render_text("[fly]", vec2(0, window_size.y - 32.0f), 16.0f);
+		TextRenderCommand2D cmd;
+		cmd.text = "[fly]";
+		cmd.position = vec2(0, window_size.y - 32.0f);
+		cmd.size = 16.0f;
+
+		m_text_renderer.render_text_2d(cmd);
 	}
 }
 
 void Game::render_imgui() {
+	PROFILE_FUNC();
     m_world_imgui_tool.render(m_world, m_world_renderer);
     m_graphics_imgui_tool.render(m_world);
 }
 
 void Game::handle_input() {
+	PROFILE_FUNC();
+
     Input &input = Input::get_instance();
 	if(input.is_key_just_pressed(GLFW_KEY_F1)) {
-		m_world_renderer.m_use_wireframe ^= true;
+		m_world_renderer.m_use_wireframe ^= 1;
 	}
 
 	if(input.is_key_just_pressed(GLFW_KEY_F2)) {
-		m_player.m_fly_enabled ^= true;
+		m_player.m_fly_enabled ^= 1;
+	}
+
+	if(input.is_key_just_pressed(GLFW_KEY_F3)) {
+		m_render_subchunk_debug ^= 1;
 	}
 
 	if(input.is_key_just_pressed(GLFW_KEY_ESCAPE)) {
@@ -124,5 +192,4 @@ void Game::handle_input() {
 
 void Game::handle_window_resize(ivec2 window_size) {
 	PROFILE_FUNC();
-	m_text_renderer.handle_window_resize(window_size);
 }

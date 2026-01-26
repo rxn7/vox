@@ -1,5 +1,7 @@
 #version 430 core
 
+uniform vec4 u_color;
+
 in vec2 v_uv;
 in flat int v_char_index;
 
@@ -22,5 +24,5 @@ void main() {
         discard;
     }
 
-    f_color = vec4(1.0, 1.0, 1.0, 1.0);
+    f_color = u_color;
 }

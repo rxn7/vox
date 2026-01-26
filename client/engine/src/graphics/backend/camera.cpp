@@ -7,16 +7,22 @@ Camera::Camera(vec3 position, f32 fov)
 : m_position(position), m_fov(fov) {
 }
 
-mat4 Camera::get_matrix(f32 aspect_ratio) const {
+mat4 Camera::get_view_matrix() const {
 	PROFILE_FUNC();
 
 	constexpr vec3 UP = vec3(0.0f, 1.0f, 0.0f);
 	const vec3 forward = get_forward_direction();
-
-	const mat4 projection_matrix = glm::perspective(glm::radians(m_fov), aspect_ratio, NEAR_PLANE, FAR_PLANE);
 	const mat4 view_matrix = glm::lookAt(m_position, m_position + forward, UP);
 
-	return projection_matrix * view_matrix;
+	return view_matrix;
+}
+
+mat4 Camera::get_projection_matrix(f32 aspect_ratio) const {
+	PROFILE_FUNC();
+
+	const mat4 projection_matrix = glm::perspective(glm::radians(m_fov), aspect_ratio, NEAR_PLANE, FAR_PLANE);
+
+	return projection_matrix;
 }
 
 vec3 Camera::get_forward_direction() const {

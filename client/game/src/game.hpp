@@ -48,5 +48,7 @@ private:
     WorldImGuiTool m_world_imgui_tool;
     GraphicsImGuiTool m_graphics_imgui_tool;
 
+	bool m_render_subchunk_debug = false;
+
     CallbackID m_chunk_removed_callback;
 };
