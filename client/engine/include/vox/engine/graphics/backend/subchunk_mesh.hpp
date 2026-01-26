@@ -5,7 +5,7 @@
 
 class WorldRenderer;
 
-struct ChunkMeshAllocation {
+struct SubChunkMeshAllocation {
     OffsetAllocator::Allocation m_vertex_alloc;
     OffsetAllocator::Allocation m_index_alloc;
     
@@ -14,19 +14,20 @@ struct ChunkMeshAllocation {
     };
 };
 
-class ChunkMesh {
+class SubChunkMesh {
 public:
-    ChunkMesh(ChunkPosition position) : m_position(position) {}
-    void generate_and_upload(const Chunk &chunk, WorldRenderer &renderer);
+    SubChunkMesh(SubChunkPosition position) : m_position(position) {}
 
-    inline ChunkPosition get_position() const {
+    void generate_and_upload(const SubChunk &chunk, WorldRenderer &renderer);
+
+    inline SubChunkPosition get_position() const {
         return m_position;
     }
 
 public:
 	u32 m_index_count = 0;
-    ChunkMeshAllocation m_alloc;
+    SubChunkMeshAllocation m_alloc;
     
 private:
-    ChunkPosition m_position;
+    SubChunkPosition m_position;
 };

@@ -23,4 +23,6 @@ namespace FormatHelper {
 		
 		return std::format("{:.2f}s", ns_count / 1'000'000'000);
 	}
+
+	std::string memory(u64 bytes);
 }

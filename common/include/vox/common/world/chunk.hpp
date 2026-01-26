@@ -1,51 +1,61 @@
 #pragma once
 
+#include "vox/common/world/block_position.hpp"
 #include "vox/common/world/world_constants.hpp"
 #include "vox/common/world/block_id.hpp"
 #include "vox/common/world/chunk_position.hpp"
-
-constexpr u32 TOTAL_BLOCKS = CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_WIDTH;
+#include <bitset>
 
 class World;
+class SubChunk;
 
 class Chunk {
 public:
 	Chunk(World &world, ChunkPosition position);
 
-	bool is_block_transparent(i8 x, i8 y, i8 z) const;
+	BlockID get_block(LocalBlockPosition pos) const;
 
-	constexpr vec3 get_global_position() const { 
-		return vec3(m_position) * CHUNK_WIDTH; 
+	void set_block(LocalBlockPosition pos, BlockID value);
+
+	bool is_block_transparent(i8 x, i16 y, i8 z) const;
+
+	void set_all_non_empty_subchunks_dirty();
+
+	inline bool is_dirty(u32 subchunk_idx) const {
+		return m_dirty_subchunks_bitmap[subchunk_idx];
 	}
 
-	constexpr u16 get_block_idx(u8vec3 v) const {
-		return v.y * CHUNK_WIDTH * CHUNK_WIDTH + v.z * CHUNK_WIDTH + v.x;
+	inline void set_dirty(u32 subchunk_idx, bool value) {
+		m_dirty_subchunks_bitmap[subchunk_idx] = value;
 	}
 
-	inline BlockID get_block(u8vec3 v) const { 
-		return m_blocks[get_block_idx(v)]; 
-	}
-
-	inline void set_block(u8vec3 pos, BlockID value) {
-		m_blocks[pos.y * CHUNK_WIDTH * CHUNK_WIDTH + pos.z * CHUNK_WIDTH + pos.x] = value;
-	}
-
-	inline bool is_dirty() const {
-		return m_is_dirty;
-	}
-
-	inline void set_dirty(bool value) {
-		m_is_dirty = value;
+	inline bool has_dirty_subchunks() const {
+		return m_dirty_subchunks_bitmap.any();
 	}
 
 	inline ChunkPosition get_position() const { 
 		return m_position; 
 	}
 
-private:
-	World &m_world;
-	std::array<BlockID, TOTAL_BLOCKS> m_blocks;
+	constexpr vec3 get_global_position() const { 
+		return vec3(m_position.x, 0, m_position.y) * CHUNK_WIDTH; 
+	}
 
+	inline const std::array<std::unique_ptr<SubChunk>, SUBCHUNK_COUNT> &get_subchunks() const {
+		return m_subchunks;
+	}
+
+	inline SubChunk *get_subchunk(u32 idx) const {
+		if(idx >= SUBCHUNK_COUNT) {
+			return nullptr;
+		}
+		return m_subchunks[idx].get();
+	}
+
+private:
 	ChunkPosition m_position;
-	bool m_is_dirty;
+	World &m_world;
+
+	std::array<std::unique_ptr<SubChunk>, SUBCHUNK_COUNT> m_subchunks;
+	std::bitset<SUBCHUNK_COUNT> m_dirty_subchunks_bitmap;
 };

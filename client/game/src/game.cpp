@@ -1,5 +1,6 @@
 #include "game.hpp"
 
+#include "vox/common/world/subchunk.hpp"
 #include "vox/engine/graphics/renderers/world_renderer.hpp"
 #include "vox/engine/graphics/renderers/text_renderer.hpp"
 #include "vox/engine/tools/fps_counter.hpp"
@@ -8,9 +9,14 @@
 #include "vox/common/world/world.hpp"
 
 Game::Game() 
-: m_camera(vec3(0, 30.0f, 0), 80.0f), m_player(m_camera) {
+: m_camera(vec3(0, 120.0f, 0), 75.0f), m_player(m_camera) {
     m_chunk_removed_callback = m_world.m_chunk_removed_signal.connect([&](Chunk &chunk) {
-        m_world_renderer.remove_chunk(chunk);
+		for(const auto &subchunk : chunk.get_subchunks()) {
+			if(subchunk == nullptr) {
+				continue;	
+			}
+			m_world_renderer.remove_subchunk(*subchunk);
+		}
     });
 }
 
@@ -35,13 +41,17 @@ void Game::update(f32 delta_time) {
     handle_input();
 	m_player.update(m_world, delta_time);
     
-    if(Input::get_instance().is_key_just_pressed(GLFW_KEY_F)) {
-        m_world.remove_chunk(ChunkPosition());
-    }
-    
     for(auto &[position, chunk] : m_world.get_chunks()) {
-        if(chunk.is_dirty()) {
-            m_world_renderer.update_chunk(chunk);
+        if(chunk.has_dirty_subchunks()) {
+			for(const auto &subchunk : chunk.get_subchunks()) {
+				if(subchunk == nullptr) {
+					continue;
+				}
+
+				if(chunk.is_dirty(subchunk->m_idx)) {
+					m_world_renderer.update_subchunk(*subchunk);
+				}
+			}
         }
     }
 }
@@ -63,7 +73,8 @@ void Game::render_ui() {
 	PROFILE_FUNC();
 
 	m_text_renderer.render_text("Vox Engine", vec2(0, 0), 16.0f);
-	m_text_renderer.render_text(std::format("FPS: {}", FpsCounter::get_instance().get_frame_rate()), vec2(0, 16), 16.0f);
+	m_text_renderer.render_text(std::format("fps: {}", FpsCounter::get_instance().get_frame_rate()), vec2(0, 16), 16.0f);
+	m_text_renderer.render_text(std::format("pos: {}", m_camera.m_position), vec2(0, 32), 16.0f);
 
 	const ivec2 window_size = Engine::get_instance().get_window().get_size();
 	m_crosshair.render(window_size);

@@ -1,6 +1,7 @@
 #include "vox/common/world/world.hpp"
 #include "vox/common/world/block_registry.hpp"
 #include "vox/common/world/chunk.hpp"
+#include "vox/common/world/subchunk.hpp"
 
 World::World() { }
 
@@ -9,17 +10,22 @@ World::~World() {}
 void World::create_initial_chunks() {
 	for(i32 x = -4; x < 4; ++x) {
 		for(i32 z = -4; z < 4; ++z) {
-            create_chunk(ChunkPosition(x, 0, z));
+            create_chunk(ChunkPosition(x, z));
 		}
 	}
 }
 
 void World::create_chunk(ChunkPosition position) {
-    const auto result = m_chunks.emplace(position, Chunk(*this, position));
+    const auto result = m_chunks.emplace(
+		std::piecewise_construct,
+		std::forward_as_tuple(position),
+		std::forward_as_tuple(*this, position)
+	);
+
     if(result.second) {
         Chunk &chunk = result.first->second;
         m_chunk_added_signal.emit(chunk);
-        chunk.set_dirty(true);
+        chunk.set_all_non_empty_subchunks_dirty();
     }
 }
 
@@ -37,7 +43,7 @@ void World::mark_all_chunks_dirty() {
 	PROFILE_FUNC();
 
 	for(auto &[position, chunk] : m_chunks) {
-		chunk.set_dirty(true);
+		chunk.set_all_non_empty_subchunks_dirty();
 	}
 }
 
@@ -101,35 +107,54 @@ RaycastResult World::raycast(vec3 start, vec3 dir, f32 max_distance) const {
 BlockID World::get_block(BlockPosition position) const {
 	PROFILE_FUNC();
 
-	const Chunk *chunk = get_chunk(position.chunk_position);
+	if(!position.is_valid()) {
+		return BlockID::Air;
+	}
+
+	const Chunk *chunk = get_chunk(position.m_chunk_position);
 	if(chunk == nullptr) {
 		return BlockID::Air;
 	}
 
-	return chunk->get_block(position.local_position);
+	return chunk->get_block(position.m_local_position);
 }
 
 void World::set_block(BlockPosition position, BlockID value) {
 	PROFILE_FUNC();
 
-	Chunk *chunk = get_chunk(position.chunk_position);
+	Chunk *chunk = get_chunk(position.m_chunk_position);
 	if(chunk == nullptr) {
 		return;
 	}
 
-	chunk->set_block(position.local_position, value);
-	chunk->set_dirty(true);
+	chunk->set_block(position.m_local_position, value);
 
-	for(i8 i = 0; i < 3; ++i) {
-		if(position.local_position[i] == 0 || position.local_position[i] == CHUNK_WIDTH - 1) {
-			ivec3 offset(0);
-			offset[i] = position.local_position[i] == 0 ? -1 : 1;
+	const auto mark_neighbour_dirty = [&](ivec3 offset) {
+		const BlockPosition neighbour_pos = BlockPosition(vec3(position.get_global_position()) + vec3(offset));
 
-			if(Chunk *neighbour_chunk = get_chunk(ivec3(position.chunk_position) + offset)) {
-				neighbour_chunk->set_dirty(true);
-			}
+		if(Chunk *neighbour_chunk = get_chunk(neighbour_pos.m_chunk_position)) {
+			const u32 subchunk_idx = neighbour_pos.m_local_position.y / SUBCHUNK_SIZE;
+			neighbour_chunk->set_dirty(subchunk_idx, true);
 		}
-	}
+    };
+
+	if(position.m_local_position.x == 0) 
+		mark_neighbour_dirty({-1, 0, 0});
+
+	if(position.m_local_position.x == SUBCHUNK_SIZE - 1) 
+		mark_neighbour_dirty({1, 0, 0});
+
+	if(position.m_local_position.z == 0) 
+		mark_neighbour_dirty({0, 0, -1});
+
+	if(position.m_local_position.z == SUBCHUNK_SIZE - 1) 
+		mark_neighbour_dirty({0, 0, 1});
+
+	if(position.m_local_position.y % SUBCHUNK_SIZE == 0) 
+		mark_neighbour_dirty({0, -1, 0});
+
+	if(position.m_local_position.y % SUBCHUNK_SIZE == SUBCHUNK_SIZE - 1) 
+		mark_neighbour_dirty({0, 1, 0});
 }
 
 Chunk *World::get_chunk(ChunkPosition position) const {

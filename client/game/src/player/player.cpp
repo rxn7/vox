@@ -24,9 +24,9 @@ void Player::update(World &world, f32 dt) {
 
 AABB Player::calculate_aabb() const {
 	return AABB {
-		.min = vec3(m_position.x - HALF_PLAYER_WIDTH, m_position.y - PLAYER_HEIGHT, m_position.z - HALF_PLAYER_WIDTH),
+		.m_min = vec3(m_position.x - HALF_PLAYER_WIDTH, m_position.y - PLAYER_HEIGHT, m_position.z - HALF_PLAYER_WIDTH),
 																/* + 0.2f to prevent camera clipping through the ceiling */
-		.max = vec3(m_position.x + HALF_PLAYER_WIDTH, m_position.y + 0.2f, m_position.z + HALF_PLAYER_WIDTH)
+		.m_max = vec3(m_position.x + HALF_PLAYER_WIDTH, m_position.y + 0.2f, m_position.z + HALF_PLAYER_WIDTH)
 	};
 }
 
@@ -157,19 +157,19 @@ bool Player::check_collision(World &world) {
 
 	const AABB aabb = calculate_aabb();
 
-	const i32 min_x = static_cast<i32>(std::floor(aabb.min.x));
-	const i32 max_x = static_cast<i32>(std::floor(aabb.max.x));
+	const i32 min_x = static_cast<i32>(std::floor(aabb.m_min.x));
+	const i32 max_x = static_cast<i32>(std::floor(aabb.m_max.x));
 
-	const i32 min_y = static_cast<i32>(std::floor(aabb.min.y));
-	const i32 max_y = static_cast<i32>(std::floor(aabb.max.y));
+	const i32 min_y = static_cast<i32>(std::floor(aabb.m_min.y));
+	const i32 max_y = static_cast<i32>(std::floor(aabb.m_max.y));
 
-	const i32 min_z = static_cast<i32>(std::floor(aabb.min.z));
-	const i32 max_z = static_cast<i32>(std::floor(aabb.max.z));
+	const i32 min_z = static_cast<i32>(std::floor(aabb.m_min.z));
+	const i32 max_z = static_cast<i32>(std::floor(aabb.m_max.z));
 
 	for(i32 x = min_x; x <= max_x; ++x) {
 		for(i32 y = min_y; y <= max_y; ++y) {
 			for(i32 z = min_z; z <= max_z; ++z) {
-				const BlockPosition check_position(vec3(x, y, z) + 0.5f);
+				const BlockPosition check_position = BlockPosition(vec3(x, y, z) + 0.5f);
 				const BlockID block_id = world.get_block(check_position);
 				const BlockType &block_type = BlockRegistry::get(block_id);
 
@@ -207,8 +207,8 @@ void Player::handle_block_interaction(World &world) {
 	if(wish_to_place) {
 		const AABB player_aabb = calculate_aabb();
 		const AABB block_aabb = {
-			.min = vec3(raycast_result.m_previous_grid_position) - 0.5f,
-			.max = vec3(raycast_result.m_previous_grid_position) + 1.0f,
+			.m_min = vec3(raycast_result.m_previous_grid_position) - 0.5f,
+			.m_max = vec3(raycast_result.m_previous_grid_position) + 1.0f,
 		};
 
 		if(!player_aabb.overlap(block_aabb)) {

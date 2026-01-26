@@ -25,9 +25,9 @@ const vec3 NORMALS[6] = vec3[](
 void main() {
     uint p = a_packed_chunk_pos[gl_DrawIDARB];
     ivec3 chunk_position = ivec3(
-        bitfieldExtract(int(p), 0, 14),
-        bitfieldExtract(int(p), 14, 4),
-        bitfieldExtract(int(p), 18, 14)
+        bitfieldExtract(int(p), 0, 12),
+        bitfieldExtract(int(p), 12, 8),
+        bitfieldExtract(int(p), 20, 12)
     );
 
     vec3 local_position = vec3(

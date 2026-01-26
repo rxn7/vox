@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vox/common/helper/signal.hpp"
 #include "vox/common/world/chunk.hpp"
 #include "vox/common/world/block_position.hpp"
 

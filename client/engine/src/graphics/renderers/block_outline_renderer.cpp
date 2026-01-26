@@ -34,7 +34,7 @@ void BlockOutlineRenderer::init() {
 void BlockOutlineRenderer::render(BlockPosition block_position, const mat4 &camera_matrix) {
     PROFILE_FUNC();
 
-	const vec3 global_position = vec3(block_position.local_position) + vec3(block_position.chunk_position) * static_cast<f32>(CHUNK_WIDTH);
+	const vec3 global_position = vec3(block_position.m_local_position) + vec3(block_position.m_chunk_position.x, 0, block_position.m_chunk_position.y) * CHUNK_WIDTH;
 
 	mat4 model = mat4(1.0f);
 	model = glm::translate(model, global_position - vec3(0.005f));

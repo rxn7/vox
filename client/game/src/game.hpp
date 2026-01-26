@@ -35,7 +35,6 @@ private:
     void handle_input();
 
 private:
-	Player m_player;
 	World m_world;
 
 	WorldRenderer m_world_renderer;
@@ -44,6 +43,7 @@ private:
 
 	Crosshair m_crosshair;
 	Camera m_camera;
+	Player m_player;
     
     WorldImGuiTool m_world_imgui_tool;
     GraphicsImGuiTool m_graphics_imgui_tool;

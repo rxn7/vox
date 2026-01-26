@@ -1,14 +1,14 @@
 #pragma once
 
 struct AABB {
-	vec3 min;
-	vec3 max;
+	vec3 m_min;
+	vec3 m_max;
 
 	constexpr bool overlap(const AABB &other) const {
 		return (
-			min.x < other.max.x && max.x > other.min.x &&
-			min.y < other.max.y && max.y > other.min.y &&
-			min.z < other.max.z && max.z > other.min.z
+			m_min.x < other.m_max.x && m_max.x > other.m_min.x &&
+			m_min.y < other.m_max.y && m_max.y > other.m_min.y &&
+			m_min.z < other.m_max.z && m_max.z > other.m_min.z
 		);
 	}
 };

@@ -6,17 +6,17 @@
 #include "vox/common/world/chunk_position.hpp"
 
 namespace Packer {
-	static constexpr u32 pack_chunk_position(ChunkPosition p) {
+	static u32 pack_subchunk_position(SubChunkPosition p) {
         PROFILE_FUNC();
 
         u32 packed = 0;
-        packed = glm::bitfieldInsert(packed, static_cast<u32>(p.x), 0, 14);
-        packed = glm::bitfieldInsert(packed, static_cast<u32>(p.y), 14, 4);
-        packed = glm::bitfieldInsert(packed, static_cast<u32>(p.z), 18, 14);
+        packed = glm::bitfieldInsert(packed, static_cast<u32>(p.x), 0, 12);
+        packed = glm::bitfieldInsert(packed, static_cast<u32>(p.y), 12, 8);
+        packed = glm::bitfieldInsert(packed, static_cast<u32>(p.z), 20, 12);
         return packed;
 	}
 
-	static constexpr u32 pack_vertex(u8 x, u8 y, u8 z, TextureID texture_id, BlockFaceID face_id, u8 ambient_occlusion) {
+	static u32 pack_vertex(u8 x, u8 y, u8 z, TextureID texture_id, BlockFaceID face_id, u8 ambient_occlusion) {
         PROFILE_FUNC();
 
         u32 packed = 0;

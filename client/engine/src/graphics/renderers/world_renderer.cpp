@@ -1,4 +1,5 @@
 #include "vox/common/world/chunk.hpp"
+#include "vox/common/world/subchunk.hpp"
 #include "vox/engine/core/allocators/offset_allocator.hpp"
 #include "vox/engine/graphics/backend/packer.hpp"
 #include "vox/engine/graphics/renderers/world_renderer.hpp"
@@ -17,10 +18,10 @@ void WorldRenderer::init() {
 	glNamedBufferStorage(m_ebo, MAX_INDICES * sizeof(u32), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	glCreateBuffers(1, &m_indirect_buffer);
-	glNamedBufferStorage(m_indirect_buffer, MAX_VISIBLE_CHUNKS * sizeof(DrawElementsIndirectCommand), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glNamedBufferStorage(m_indirect_buffer, MAX_VISIBLE_SUBCHUNKS * sizeof(DrawElementsIndirectCommand), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	glCreateBuffers(1, &m_packed_chunk_positions_ssbo);
-	glNamedBufferStorage(m_packed_chunk_positions_ssbo, MAX_VISIBLE_CHUNKS * sizeof(u32), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glNamedBufferStorage(m_packed_chunk_positions_ssbo, MAX_VISIBLE_SUBCHUNKS * sizeof(u32), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 	glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, sizeof(u32));
 
@@ -35,10 +36,10 @@ void WorldRenderer::render(const mat4 &camera_matrix) {
 	PROFILE_FUNC();
 
 	m_draw_commands.clear();
-	m_packed_chunk_positions.clear();
+	m_packed_subchunk_positions.clear();
 
-	for(auto &mesh : m_chunk_meshes) {
-		render_chunk_mesh(mesh.second);
+	for(auto &mesh : m_subchunk_meshes) {
+		render_subchunk_mesh(mesh.second);
 	}
 
 	if(m_draw_commands.empty()) {
@@ -54,7 +55,7 @@ void WorldRenderer::render(const mat4 &camera_matrix) {
 	glBindVertexArray(m_vao);
 
 	glNamedBufferSubData(m_indirect_buffer, 0, m_draw_commands.size() * sizeof(DrawElementsIndirectCommand), m_draw_commands.data());
-	glNamedBufferSubData(m_packed_chunk_positions_ssbo, 0, m_packed_chunk_positions.size() * sizeof(u32), m_packed_chunk_positions.data());	
+	glNamedBufferSubData(m_packed_chunk_positions_ssbo, 0, m_packed_subchunk_positions.size() * sizeof(u32), m_packed_subchunk_positions.data());	
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, m_indirect_buffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_packed_chunk_positions_ssbo);
@@ -70,37 +71,36 @@ void WorldRenderer::render(const mat4 &camera_matrix) {
 	}
 }
 
-void WorldRenderer::update_chunk(Chunk &chunk) {
+void WorldRenderer::update_subchunk(SubChunk &subchunk) {
 	PROFILE_FUNC();
-    
-	const ChunkPosition position = chunk.get_position();
 
-	const auto it = m_chunk_meshes.find(position);
-	if(it == m_chunk_meshes.end()) {
-		m_chunk_meshes.emplace(position, ChunkMesh(position));
+	const SubChunkPosition position = subchunk.get_position();
+
+	const auto it = m_subchunk_meshes.find(position);
+	if(it == m_subchunk_meshes.end()) {
+		m_subchunk_meshes.emplace(position, SubChunkMesh(position));
 	}
 
-	m_chunk_meshes.at(position).generate_and_upload(chunk, *this);
-    chunk.set_dirty(false);
+	m_subchunk_meshes.at(position).generate_and_upload(subchunk, *this);
 }
 
-void WorldRenderer::remove_chunk(const Chunk &chunk) {
+void WorldRenderer::remove_subchunk(const SubChunk &subchunk) {
 	PROFILE_FUNC();
 
-	const ChunkPosition position = chunk.get_position();
+	const SubChunkPosition position = subchunk.get_position();
 
-	const auto it = m_chunk_meshes.find(position);
-	if(it == m_chunk_meshes.end()) {
+	const auto it = m_subchunk_meshes.find(position);
+	if(it == m_subchunk_meshes.end()) {
 		return;
 	}
 
-	ChunkMesh &mesh = it->second;
-	free_chunk_mesh(mesh.m_alloc);
+	SubChunkMesh &mesh = it->second;
+	free_subchunk_mesh(mesh.m_alloc);
 
-    m_chunk_meshes.erase(it);
+    m_subchunk_meshes.erase(it);
 }
 
-void WorldRenderer::upload_chunk_mesh(const ChunkMeshAllocation &alloc, std::span<const u32> vertices, std::span<const u32> indices) {
+void WorldRenderer::upload_subchunk_mesh(const SubChunkMeshAllocation &alloc, std::span<const u32> vertices, std::span<const u32> indices) {
 	PROFILE_FUNC();
     
     if(vertices.size() > alloc.m_vertex_alloc.m_size) [[unlikely]] {
@@ -123,7 +123,7 @@ void WorldRenderer::upload_chunk_mesh(const ChunkMeshAllocation &alloc, std::spa
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, index_offset, indices.size_bytes(), indices.data());
 }
 
-void WorldRenderer::render_chunk_mesh(const ChunkMesh &mesh) {
+void WorldRenderer::render_subchunk_mesh(const SubChunkMesh &mesh) {
 	PROFILE_FUNC();
 
 	DrawElementsIndirectCommand cmd = {
@@ -135,10 +135,10 @@ void WorldRenderer::render_chunk_mesh(const ChunkMesh &mesh) {
 	};
 	
 	m_draw_commands.push_back(cmd);
-	m_packed_chunk_positions.push_back(Packer::pack_chunk_position(mesh.get_position()));
+	m_packed_subchunk_positions.push_back(Packer::pack_subchunk_position(mesh.get_position()));
 }
 
-std::optional<ChunkMeshAllocation> WorldRenderer::allocate_chunk_mesh(u32 vertex_count, u32 index_count) {
+std::optional<SubChunkMeshAllocation> WorldRenderer::allocate_subchunk_mesh(u32 vertex_count, u32 index_count) {
     PROFILE_FUNC();
     
     std::optional<OffsetAllocator::Allocation> vertex_alloc = m_vertex_allocator.allocate(vertex_count);
@@ -153,13 +153,13 @@ std::optional<ChunkMeshAllocation> WorldRenderer::allocate_chunk_mesh(u32 vertex
         return std::nullopt;
     }
     
-    return ChunkMeshAllocation{
+    return SubChunkMeshAllocation{
         .m_vertex_alloc = *vertex_alloc,
         .m_index_alloc = *index_alloc
     };
 }
 
-void WorldRenderer::free_chunk_mesh(const ChunkMeshAllocation &alloc) {
+void WorldRenderer::free_subchunk_mesh(const SubChunkMeshAllocation &alloc) {
     if(alloc.m_vertex_alloc.m_size > 0) {
         m_vertex_allocator.free(alloc.m_vertex_alloc);
     }
