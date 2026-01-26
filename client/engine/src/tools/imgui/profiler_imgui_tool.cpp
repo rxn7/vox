@@ -73,7 +73,7 @@ void ProfilerImGuiTool::render_node_recursive(std::span<const ProfilerNode> node
 
     const ImVec4 fg_color = get_entry_color(duration_ratio_to_parent);
 
-	ImGui::PushID(node_idx);
+	ImGui::PushID(std::format("{}{}", node_idx, node.m_name).c_str());
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_Selected;

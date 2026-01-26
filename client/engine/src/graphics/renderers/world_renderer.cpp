@@ -6,6 +6,8 @@
 #include "vox/engine/graphics/resources/texture_paths.hpp"
 
 void WorldRenderer::init() {
+	PROFILE_FUNC();
+
 	m_shader.load(b::embed<"shaders/chunk-vert.glsl">().str(), b::embed<"shaders/chunk-frag.glsl">().str());
 	m_textures.load(TexturePaths::get_all());
 

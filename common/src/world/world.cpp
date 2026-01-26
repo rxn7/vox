@@ -8,35 +8,37 @@ World::World() { }
 World::~World() {}
 
 void World::create_initial_chunks() {
+	PROFILE_FUNC();
+
 	for(i32 x = -4; x < 4; ++x) {
 		for(i32 z = -4; z < 4; ++z) {
-            create_chunk(ChunkPosition(x, z));
+			create_chunk(ChunkPosition(x, z));
 		}
 	}
 }
 
 void World::create_chunk(ChunkPosition position) {
-    const auto result = m_chunks.emplace(
+	const auto result = m_chunks.emplace(
 		std::piecewise_construct,
 		std::forward_as_tuple(position),
 		std::forward_as_tuple(*this, position)
 	);
 
-    if(result.second) {
-        Chunk &chunk = result.first->second;
-        m_chunk_added_signal.emit(chunk);
-        chunk.set_all_non_empty_subchunks_dirty();
-    }
+	if(result.second) {
+		Chunk &chunk = result.first->second;
+		m_chunk_added_signal.emit(chunk);
+		chunk.set_all_non_empty_subchunks_dirty();
+	}
 }
 
 void World::remove_chunk(ChunkPosition position) {
-    const auto it = m_chunks.find(position);
-    if(it == m_chunks.end()) {
-        return;
-    }
-    
-    m_chunk_removed_signal.emit(it->second);
-    m_chunks.erase(it);
+	const auto it = m_chunks.find(position);
+	if(it == m_chunks.end()) {
+		return;
+	}
+	
+	m_chunk_removed_signal.emit(it->second);
+	m_chunks.erase(it);
 }
 
 void World::mark_all_chunks_dirty() {
@@ -129,40 +131,56 @@ void World::set_block(BlockPosition position, BlockID value) {
 
 	chunk->set_block(position.m_local_position, value);
 
-	const auto mark_neighbour_dirty = [&](ivec3 offset) {
-		const BlockPosition neighbour_pos = BlockPosition(vec3(position.get_global_position()) + vec3(offset));
+	const u32 sub_idx = position.m_local_position.y / SUBCHUNK_SIZE;
+	const u32 local_y = position.m_local_position.y % SUBCHUNK_SIZE;
 
-		if(Chunk *neighbour_chunk = get_chunk(neighbour_pos.m_chunk_position)) {
-			const u32 subchunk_idx = neighbour_pos.m_local_position.y / SUBCHUNK_SIZE;
-			neighbour_chunk->set_dirty(subchunk_idx, true);
+	chunk->set_dirty(sub_idx, true);
+
+	const u32 lx = position.m_local_position.x;
+	const u32 ly = position.m_local_position.y;
+	const u32 lz = position.m_local_position.z;
+
+	const i32 x_min = (lx == 0) ? -1 : 0;
+	const i32 x_max = (lx == SUBCHUNK_SIZE - 1) ? 1 : 0;
+
+	const i32 z_min = (lz == 0) ? -1 : 0;
+	const i32 z_max = (lz == SUBCHUNK_SIZE - 1) ? 1 : 0;
+
+	const u32 current_sub_idx = ly / SUBCHUNK_SIZE;
+	const u32 local_y_in_sub = ly % SUBCHUNK_SIZE;
+
+	const i32 y_min = (local_y_in_sub == 0) ? -1 : 0;
+	const i32 y_max = (local_y_in_sub == SUBCHUNK_SIZE - 1) ? 1 : 0;
+
+	for(i32 dx = x_min; dx <= x_max; ++dx) {
+		for(i32 dz = z_min; dz <= z_max; ++dz) {
+			Chunk *target_chunk = chunk;
+			if(dx != 0 || dz != 0) {
+				target_chunk = get_chunk(ChunkPosition(position.m_chunk_position.x + dx, position.m_chunk_position.y + dz));
+			}
+
+			if(target_chunk != nullptr) {
+				for(i32 dy = y_min; dy <= y_max; ++dy) {
+					const i32 target_idx = static_cast<i32>(current_sub_idx) + dy;
+
+					if(target_idx < 0 || target_idx >= SUBCHUNK_SIZE) { 
+						continue;
+					}
+
+					target_chunk->set_dirty((u32)target_idx, true);
+				}
+			}
 		}
-    };
-
-	if(position.m_local_position.x == 0) 
-		mark_neighbour_dirty({-1, 0, 0});
-
-	if(position.m_local_position.x == SUBCHUNK_SIZE - 1) 
-		mark_neighbour_dirty({1, 0, 0});
-
-	if(position.m_local_position.z == 0) 
-		mark_neighbour_dirty({0, 0, -1});
-
-	if(position.m_local_position.z == SUBCHUNK_SIZE - 1) 
-		mark_neighbour_dirty({0, 0, 1});
-
-	if(position.m_local_position.y % SUBCHUNK_SIZE == 0) 
-		mark_neighbour_dirty({0, -1, 0});
-
-	if(position.m_local_position.y % SUBCHUNK_SIZE == SUBCHUNK_SIZE - 1) 
-		mark_neighbour_dirty({0, 1, 0});
+	}
 }
 
 Chunk *World::get_chunk(ChunkPosition position) const {
 	PROFILE_FUNC();
 
 	const auto it = m_chunks.find(position);
-	if(it == m_chunks.end())
+	if(it == m_chunks.end()) {
 		return nullptr;
+	}
 	
 	return &it->second;
 }

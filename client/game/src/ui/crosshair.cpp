@@ -16,6 +16,8 @@ constexpr std::array<CrosshairVertex, 4> VERTICES = {
 constexpr std::array<u16, 6> INDICES = { 0, 1, 2, 2, 3, 0 };
 
 void Crosshair::init() {
+	PROFILE_FUNC();
+
 	m_shader.load(b::embed<"shaders/ui/crosshair-vert.glsl">().str(), b::embed<"shaders/ui/crosshair-frag.glsl">().str());
 	m_mesh.init(VERTICES, INDICES);
 }

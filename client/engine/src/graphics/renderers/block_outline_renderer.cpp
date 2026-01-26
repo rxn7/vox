@@ -27,6 +27,8 @@ constexpr std::array<u16, 36> INDICES = {
 };
 
 void BlockOutlineRenderer::init() {
+	PROFILE_FUNC();
+
 	m_shader.load(b::embed<"shaders/block-outline-vert.glsl">().str(), b::embed<"shaders/block-outline-frag.glsl">().str());
 	m_mesh.init(VERTICES, INDICES);
 }

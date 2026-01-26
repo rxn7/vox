@@ -15,7 +15,9 @@ Game::Game()
 			if(subchunk == nullptr) {
 				continue;	
 			}
+
 			m_world_renderer.remove_subchunk(*subchunk);
+			chunk.remove_subchunk(subchunk->m_idx);
 		}
     });
 }
@@ -25,6 +27,8 @@ Game::~Game() {
 }
 
 bool Game::init() {
+	PROFILE_FUNC();
+
 	m_world_renderer.init();
 	m_text_renderer.init();
 	m_block_outline_renderer.init();
@@ -49,6 +53,12 @@ void Game::update(f32 delta_time) {
 				}
 
 				if(chunk.is_dirty(subchunk->m_idx)) {
+					if(subchunk->is_empty()) {
+						m_world_renderer.remove_subchunk(*subchunk);
+						chunk.remove_subchunk(subchunk->m_idx);
+						continue;
+					}
+
 					m_world_renderer.update_subchunk(*subchunk);
 				}
 			}

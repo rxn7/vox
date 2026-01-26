@@ -21,6 +21,8 @@ public:
 
 	void set_all_non_empty_subchunks_dirty();
 
+	void remove_subchunk(u32 idx);
+
 	inline bool is_dirty(u32 subchunk_idx) const {
 		return m_dirty_subchunks_bitmap[subchunk_idx];
 	}

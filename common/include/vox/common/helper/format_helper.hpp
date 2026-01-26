@@ -1,14 +1,14 @@
 #pragma once
 
 namespace FormatHelper {
-    template <typename Rep, typename Period>
-    std::string duration(std::chrono::duration<Rep, Period> d) {
+	template <typename Rep, typename Period>
+	std::string duration(std::chrono::duration<Rep, Period> d) {
 		const f64 ns_count = std::chrono::duration_cast<std::chrono::duration<f64, std::nano>>(d).count();
 		
 		if(ns_count == 0) {
 			return "0ns";
 		} 
-        
+		
 		if(glm::abs(ns_count) < 1000.0) {
 			return std::format("{}ns", ns_count);
 		} 

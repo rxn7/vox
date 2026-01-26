@@ -9,7 +9,7 @@ Chunk::Chunk(World &world, ChunkPosition position)
 : m_world(world), m_position(position) {
 	for(u32 x = 0; x < CHUNK_WIDTH; ++x) {
 		for(u32 z = 0; z < CHUNK_WIDTH; ++z) {
-			const u32 max_y = 60;
+			const u32 max_y = SUBCHUNK_SIZE * 4 - 1;
 
 			for(u32 y = 0; y < max_y; ++y) {
 				if(y == max_y - 1) {
@@ -62,14 +62,14 @@ void Chunk::set_block(LocalBlockPosition pos, BlockID value) {
 
 	subchunk->set_block({pos.x, pos.y % SUBCHUNK_SIZE, pos.z}, value);
 
-	// check if the subchunk is empty and remove it
-	if(value == BlockID::Air) {
-		if(subchunk->is_empty()) {
-			m_subchunks[subchunk_idx].reset();
-		}
-	}
-
 	m_dirty_subchunks_bitmap[subchunk_idx] = true;
+}
+
+void Chunk::remove_subchunk(u32 idx) {
+	PROFILE_FUNC();
+
+	m_subchunks[idx] = nullptr;
+	m_dirty_subchunks_bitmap[idx] = false;
 }
 
 bool Chunk::is_block_transparent(i8 x, i16 y, i8 z) const {
