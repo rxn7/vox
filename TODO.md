@@ -1,5 +1,8 @@
 # TODO
 
+## Debug
+- Chunk outline renderer
+
 ## Features
 - Internal server for singleplayer -- working on rn
 - Remote server for multiplayer
