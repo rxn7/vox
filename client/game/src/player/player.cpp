@@ -203,12 +203,12 @@ void Player::handle_block_interaction(World &world) {
 		return;
 	}
 
-    if(input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
-        m_block_in_hand = world.get_block(raycast_result.m_hit_block_position);
-        if(m_block_in_hand == BlockID::Air) {
-            m_block_in_hand = BlockID::Stone;
-        }
-    }
+	if(input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
+		m_block_in_hand = world.get_block(raycast_result.m_hit_block_position);
+		if(m_block_in_hand == BlockID::Air) {
+			m_block_in_hand = BlockID::Stone;
+		}
+	}
 
 	m_last_highlighted_block_position = raycast_result.m_hit_block_position;
 
@@ -221,8 +221,8 @@ void Player::handle_block_interaction(World &world) {
 
 		if(!player_aabb.overlap(block_aabb)) {
 			const BlockPosition place_position(vec3(raycast_result.m_previous_grid_position) + 0.5f);
-            
-            // TODO: Send place packet to server
+			
+			// TODO: Send place packet to server
 			world.set_block(place_position, m_block_in_hand);
 		}
 	} else if(wish_to_break) {

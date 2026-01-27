@@ -5,20 +5,20 @@ project(vox LANGUAGES CXX C)
 
 # remove enable exceptions flags
 if(MSVC)
-    foreach(flag_var
-        CMAKE_CXX_FLAGS 
-        CMAKE_CXX_FLAGS_DEBUG 
-        CMAKE_CXX_FLAGS_RELEASE
-        CMAKE_CXX_FLAGS_MINSIZEREL 
-        CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+	foreach(flag_var
+		CMAKE_CXX_FLAGS 
+		CMAKE_CXX_FLAGS_DEBUG 
+		CMAKE_CXX_FLAGS_RELEASE
+		CMAKE_CXX_FLAGS_MINSIZEREL 
+		CMAKE_CXX_FLAGS_RELWITHDEBINFO)
 
-        if(${flag_var} MATCHES "/EHsc")
-            string(REPLACE "/EHsc" "" ${flag_var} "${${flag_var}}")
-        endif()
-        
-        string(REPLACE "/EHs" "" ${flag_var} "${${flag_var}}")
-        string(REPLACE "/EHc" "" ${flag_var} "${${flag_var}}")
-    endforeach()
+		if(${flag_var} MATCHES "/EHsc")
+			string(REPLACE "/EHsc" "" ${flag_var} "${${flag_var}}")
+		endif()
+		
+		string(REPLACE "/EHs" "" ${flag_var} "${${flag_var}}")
+		string(REPLACE "/EHc" "" ${flag_var} "${${flag_var}}")
+	endforeach()
 endif()
 
 
