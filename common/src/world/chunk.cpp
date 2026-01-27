@@ -14,6 +14,12 @@ Chunk::Chunk(World &world, ChunkPosition position)
 			for(u32 y = 0; y < max_y; ++y) {
 				if(y == max_y - 1) {
 					set_block(LocalBlockPosition(x, y, z), BlockID::Grass);
+
+					if(rand() % 20 == 0) {
+						for(u32 i = 0; i < 5; ++i) {
+							set_block(LocalBlockPosition(x, y + i, z), BlockID::Log);
+						}
+					}
 				} else if(y < max_y - 5) {
 					set_block(LocalBlockPosition(x, y, z), BlockID::Stone);
 				} else {

@@ -5,5 +5,7 @@ enum class TextureID : u16 {
 	GrassTop,
 	GrassSide,
 	Stone,
+	LogTopBot,
+	LogSide,
 	SIZE,
 };

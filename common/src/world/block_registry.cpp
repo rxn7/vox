@@ -11,6 +11,7 @@ constexpr auto BLOCK_REGISTRY = []() {
     SET_BLOCK(Stone, BlockType("Stone", TextureID::Stone));
 
     SET_BLOCK(Grass, BlockType("Grass", BlockTextures(TextureID::GrassTop, TextureID::GrassSide, TextureID::Dirt)));
+    SET_BLOCK(Log, BlockType("Log", BlockTextures(TextureID::LogTopBot, TextureID::LogSide, TextureID::LogTopBot)));
 
     return blocks;
 }();

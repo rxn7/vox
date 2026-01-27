@@ -54,6 +54,7 @@ private:
 	f32 m_vertical_velocity = 0.0f;
 	vec3 m_horizontal_velocity;
 
+	BlockID m_block_in_hand = BlockID::Stone;
 	std::optional<BlockPosition> m_last_highlighted_block_position;
 
 	bool m_is_grounded = false;

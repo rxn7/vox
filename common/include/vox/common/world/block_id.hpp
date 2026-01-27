@@ -5,5 +5,6 @@ enum class BlockID : u8 {
 	Dirt,
 	Grass,
 	Stone,
+	Log,
 	SIZE,
 };
