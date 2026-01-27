@@ -20,7 +20,8 @@ public:
 	
 	bool init() override;
 
-	void update(f32 delta_time) override;
+	void tick() override;
+	void update(f64 alpha, f32 delta_time) override;
 	void render_3d(f32 aspect_ratio) override;
 	void render_ui() override;
 	void render_imgui() override;

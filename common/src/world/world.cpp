@@ -78,12 +78,12 @@ RaycastResult World::raycast(vec3 start, vec3 dir, f32 max_distance) const {
 		if(block_id != BlockID::Air) {
 			const BlockType &block_type = BlockRegistry::get(block_id);
 
-			if(block_type.m_is_solid) {
+			if(block_type.is_solid()) {
 				return RaycastResult{
-					.m_did_hit = true,
-					.m_hit_block_position = block_position,
-					.m_previous_grid_position = last_grid_position,
-					.m_distance = distance_traveled
+					.did_hit = true,
+					.hit_block_position = block_position,
+					.previous_grid_position = last_grid_position,
+					.distance = distance_traveled
 				};
 			}
 		}
@@ -101,8 +101,8 @@ RaycastResult World::raycast(vec3 start, vec3 dir, f32 max_distance) const {
 	}
 
 	return RaycastResult{
-		.m_did_hit = false,
-		.m_distance = distance_traveled,
+		.did_hit = false,
+		.distance = distance_traveled,
 	};
 }
 
@@ -113,32 +113,32 @@ BlockID World::get_block(BlockPosition position) const {
 		return BlockID::Air;
 	}
 
-	const Chunk *chunk = get_chunk(position.m_chunk_position);
+	const Chunk *chunk = get_chunk(position.chunk_position);
 	if(chunk == nullptr) {
 		return BlockID::Air;
 	}
 
-	return chunk->get_block(position.m_local_position);
+	return chunk->get_block(position.local_position);
 }
 
 void World::set_block(BlockPosition position, BlockID value) {
 	PROFILE_FUNC();
 
-	Chunk *chunk = get_chunk(position.m_chunk_position);
+	Chunk *chunk = get_chunk(position.chunk_position);
 	if(chunk == nullptr) {
 		return;
 	}
 
-	chunk->set_block(position.m_local_position, value);
+	chunk->set_block(position.local_position, value);
 
-	const u32 sub_idx = position.m_local_position.y / SUBCHUNK_SIZE;
-	const u32 local_y = position.m_local_position.y % SUBCHUNK_SIZE;
+	const u32 sub_idx = position.local_position.y / SUBCHUNK_SIZE;
+	const u32 local_y = position.local_position.y % SUBCHUNK_SIZE;
 
 	chunk->set_dirty(sub_idx, true);
 
-	const u32 lx = position.m_local_position.x;
-	const u32 ly = position.m_local_position.y;
-	const u32 lz = position.m_local_position.z;
+	const u32 lx = position.local_position.x;
+	const u32 ly = position.local_position.y;
+	const u32 lz = position.local_position.z;
 
 	const i32 x_min = (lx == 0) ? -1 : 0;
 	const i32 x_max = (lx == SUBCHUNK_SIZE - 1) ? 1 : 0;
@@ -156,7 +156,7 @@ void World::set_block(BlockPosition position, BlockID value) {
 		for(i32 dz = z_min; dz <= z_max; ++dz) {
 			Chunk *target_chunk = chunk;
 			if(dx != 0 || dz != 0) {
-				target_chunk = get_chunk(ChunkPosition(position.m_chunk_position.x + dx, position.m_chunk_position.y + dz));
+				target_chunk = get_chunk(ChunkPosition(position.chunk_position.x + dx, position.chunk_position.y + dz));
 			}
 
 			if(target_chunk != nullptr) {

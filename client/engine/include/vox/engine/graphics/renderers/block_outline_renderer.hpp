@@ -7,10 +7,10 @@
 struct BlockOutlineVertex {
 	static void setup_attributes() {
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BlockOutlineVertex), (void*)offsetof(BlockOutlineVertex, m_position));
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BlockOutlineVertex), (void*)offsetof(BlockOutlineVertex, position));
 	}
 
-	vec3 m_position;
+	vec3 position;
 };
 
 class BlockOutlineRenderer {

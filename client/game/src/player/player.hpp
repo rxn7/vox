@@ -16,27 +16,51 @@ const f32 JUMP_FORCE = std::sqrt(2.0f * JUMP_HEIGHT * GRAVITY);
 constexpr f32 CAMERA_SENSITIVITY = 0.002f;
 
 constexpr f32 GROUND_ACCELERATION = 80.0f;
-constexpr f32 GROUND_FRICTION = 10.0f;
+constexpr f32 GROUND_FRICTION = 8.0f;
 
-constexpr f32 MOVE_SPEED = 3.0f;
+constexpr f32 MOVE_SPEED = 4.0f;
 
 constexpr f32 AIR_ACCELERATION = 30.0f;
-constexpr f32 AIR_FRICTION = 5.0f;
+constexpr f32 AIR_FRICTION = 2.0f;
 
 constexpr f32 FLY_ACCELERATION = 100.0f;
 constexpr f32 FLY_MAX_SPEED = 8.0f;
 constexpr f32 FLY_FRICTION = 5.0f;
+
+struct PlayerInputState {
+	f32 input_x = 0.0f;
+	f32 input_z = 0.0f;
+	bool wish_to_jump = false;
+
+	bool wish_to_place_block = false;
+	bool wish_to_break_block = false;
+	bool wish_to_copy_block = false;
+};
 
 class Player {
 public:
 	Player(Camera &cam);
 	~Player();
 
-	void update(World &world, f32 dt);
+	void tick(World &world);
+	void update(f64 alpha);
 	AABB calculate_aabb() const;
-	const std::optional<BlockPosition> &get_last_highlighted_block_position() const { return m_last_highlighted_block_position; }
+
+	// physics position
+	vec3 get_position() const { 
+		return m_position; 
+	}
+
+	BlockID get_block_in_hand() const {
+		return m_block_in_hand;
+	}
+
+	const std::optional<BlockPosition> &get_last_highlighted_block_position() const { 
+		return m_last_highlighted_block_position; 
+	}
 
 private:
+	void handle_input();
 	void handle_movement(World &world, f32 dt);
 	void handle_mouse_movement();
 	void accelerate(vec3 wish_dir, f32 acceleration, f32 max_speed, f32 dt);
@@ -49,7 +73,10 @@ public:
 
 private:
 	Camera &m_camera;
-	vec3 &m_position;
+	PlayerInputState m_input_state;
+
+	vec3 m_prev_position;
+	vec3 m_position;
 
 	f32 m_vertical_velocity = 0.0f;
 	vec3 m_horizontal_velocity = vec3(0.0f);

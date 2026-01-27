@@ -94,7 +94,7 @@ bool Chunk::is_block_transparent(i8 x, i16 y, i8 z) const {
 	}
 
 	const BlockType &block_type = BlockRegistry::get(block);
-	return block_type.m_is_transparent;
+	return block_type.is_transparent();
 }
 
 void Chunk::set_all_non_empty_subchunks_dirty() {

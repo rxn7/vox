@@ -23,21 +23,21 @@ struct LocalBlockPosition {
 // block position in the world
 struct BlockPosition {
 	constexpr BlockPosition() {}
-	constexpr BlockPosition(ChunkPosition chunk_position, LocalBlockPosition local_position) : m_chunk_position(chunk_position), m_local_position(local_position) {}
+	constexpr BlockPosition(ChunkPosition chunk_position, LocalBlockPosition local_position) : chunk_position(chunk_position), local_position(local_position) {}
 	BlockPosition(vec3 global_position);
 
 	inline bool is_valid() const {
-		return m_local_position.y < CHUNK_HEIGHT && m_local_position.x < CHUNK_WIDTH && m_local_position.z < CHUNK_WIDTH;
+		return local_position.y < CHUNK_HEIGHT && local_position.x < CHUNK_WIDTH && local_position.z < CHUNK_WIDTH;
 	}
 
 	inline bool operator==(const BlockPosition &other) const {
-		return m_chunk_position == other.m_chunk_position && m_local_position == other.m_local_position;
+		return chunk_position == other.chunk_position && local_position == other.local_position;
 	}
 
 	inline ivec3 get_global_position() const {
-		return ivec3(m_chunk_position.x * SUBCHUNK_SIZE, 0, m_chunk_position.y * SUBCHUNK_SIZE) + ivec3(m_local_position);
+		return ivec3(chunk_position.x * SUBCHUNK_SIZE, 0, chunk_position.y * SUBCHUNK_SIZE) + ivec3(local_position);
 	}
 
-	ChunkPosition m_chunk_position;
-	LocalBlockPosition m_local_position;
+	ChunkPosition chunk_position;
+	LocalBlockPosition local_position;
 };

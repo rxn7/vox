@@ -1,12 +1,13 @@
 #include "game.hpp"
 
-#include "vox/common/world/subchunk.hpp"
 #include "vox/engine/graphics/renderers/world_renderer.hpp"
 #include "vox/engine/graphics/renderers/text_renderer.hpp"
 #include "vox/engine/tools/fps_counter.hpp"
 #include "vox/engine/core/engine.hpp"
 #include "vox/engine/core/input.hpp"
 #include "vox/common/world/world.hpp"
+#include "vox/common/world/block_registry.hpp"
+#include "vox/common/world/subchunk.hpp"
 
 Game::Game() 
 : m_camera(vec3(0.0f, 120.0f, 0.0f), 75.0f), m_player(m_camera) {
@@ -17,7 +18,7 @@ Game::Game()
 			}
 
 			m_world_renderer.remove_subchunk(*subchunk);
-			chunk.remove_subchunk(subchunk->m_idx);
+			chunk.remove_subchunk(subchunk->get_idx());
 		}
 	});
 }
@@ -39,11 +40,17 @@ bool Game::init() {
 	return true;
 }
 
-void Game::update(f32 delta_time) {
+void Game::tick() {
+	PROFILE_FUNC();
+
+	m_player.tick(m_world);
+}
+
+void Game::update(f64 alpha, f32 delta_time) {
 	PROFILE_FUNC();
 	
 	handle_input();
-	m_player.update(m_world, delta_time);
+	m_player.update(alpha);
 	
 	for(auto &[position, chunk] : m_world.get_chunks()) {
 		if(chunk.has_dirty_subchunks()) {
@@ -52,10 +59,10 @@ void Game::update(f32 delta_time) {
 					continue;
 				}
 
-				if(chunk.is_dirty(subchunk->m_idx)) {
+				if(chunk.is_dirty(subchunk->get_idx())) {
 					if(subchunk->is_empty()) {
 						m_world_renderer.remove_subchunk(*subchunk);
-						chunk.remove_subchunk(subchunk->m_idx);
+						chunk.remove_subchunk(subchunk->get_idx());
 						continue;
 					}
 
@@ -142,7 +149,7 @@ void Game::render_ui() {
 
 	{
 		TextRenderCommand2D cmd;
-		cmd.text = std::format("pos: {:2f} {:2f} {:2f}", m_camera.m_position.x, m_camera.m_position.y, m_camera.m_position.z);
+		cmd.text = std::format("pos: {:.2f} {:.2f} {:.2f}", m_player.get_position().x, m_player.get_position().y, m_player.get_position().z);
 		cmd.position = vec2(0, 32);
 		cmd.size = 16.0f;
 
@@ -163,6 +170,16 @@ void Game::render_ui() {
 		cmd.text = "[fly]";
 		cmd.position = vec2(0, window_size.y - 32.0f);
 		cmd.size = 16.0f;
+
+		m_text_renderer.render_text_2d(cmd);
+	}
+
+	{
+		TextRenderCommand2D cmd;
+		cmd.text = std::format("block: {}", BlockRegistry::get(m_player.get_block_in_hand()).get_name());
+		cmd.position = vec2(window_size.x * 0.5f, 16.0f);
+		cmd.size = 16.0f;
+		cmd.horizontal_align = TextHorizontalAlign::Center;
 
 		m_text_renderer.render_text_2d(cmd);
 	}

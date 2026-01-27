@@ -16,14 +16,4 @@ private:
 	bool m_hide_all_triggered = false;
 
 	u64 m_mem_used = 0;
-
-private:
-	struct Entry {
-		const char *m_name;
-		f32 m_duration_us;
-	};
-
-	struct ProfilerWindowEntryCmp {
-		bool operator()(const Entry &a, const Entry &b) const { return a.m_duration_us > b.m_duration_us; }
-	};
 };

@@ -1,5 +1,6 @@
 #include "player/player.hpp"
 
+#include "vox/common/system/tick_loop.hpp"
 #include "vox/engine/core/input.hpp"
 #include "vox/common/world/block_registry.hpp"
 #include "vox/common/world/physics_constants.hpp"
@@ -15,20 +16,51 @@ Player::Player(Camera &cam) : m_camera(cam), m_position(cam.m_position) {
 Player::~Player() {
 }
 
-void Player::update(World &world, f32 dt) {
+void Player::tick(World &world) {
 	PROFILE_FUNC();
 
-	handle_movement(world, dt);
-	handle_mouse_movement();
+	if(Input::get_instance().get_mouse_mode() != GLFW_CURSOR_DISABLED) {
+		return;
+	}
+
+	m_prev_position = m_position;
+	handle_movement(world, TickLoop::TICK_DURATION_SECONDS);
+		
 	handle_block_interaction(world);
+
+	m_input_state = PlayerInputState();
+}
+
+void Player::update(f64 alpha) {
+	PROFILE_FUNC();
+
+	handle_input();
+	handle_mouse_movement();
+
+	const vec3 visual_position = glm::mix(m_prev_position, m_position, alpha);
+	m_camera.m_position = visual_position;
 }
 
 AABB Player::calculate_aabb() const {
 	return AABB {
-		.m_min = vec3(m_position.x - HALF_PLAYER_WIDTH, m_position.y - PLAYER_HEIGHT, m_position.z - HALF_PLAYER_WIDTH),
+		.min = vec3(m_position.x - HALF_PLAYER_WIDTH, m_position.y - PLAYER_HEIGHT, m_position.z - HALF_PLAYER_WIDTH),
 																/* + 0.2f to prevent camera clipping through the ceiling */
-		.m_max = vec3(m_position.x + HALF_PLAYER_WIDTH, m_position.y + 0.2f, m_position.z + HALF_PLAYER_WIDTH)
+		.max = vec3(m_position.x + HALF_PLAYER_WIDTH, m_position.y + 0.2f, m_position.z + HALF_PLAYER_WIDTH)
 	};
+}
+
+void Player::handle_input() {
+	PROFILE_FUNC();
+
+	Input &input = Input::get_instance();
+
+	m_input_state.input_x = static_cast<f32>(input.is_key_pressed(GLFW_KEY_D)) - static_cast<f32>(input.is_key_pressed(GLFW_KEY_A));
+	m_input_state.input_z = static_cast<f32>(input.is_key_pressed(GLFW_KEY_W)) - static_cast<f32>(input.is_key_pressed(GLFW_KEY_S));
+	m_input_state.wish_to_jump = input.is_key_pressed(GLFW_KEY_SPACE);
+
+	m_input_state.wish_to_place_block |= input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_RIGHT);
+	m_input_state.wish_to_break_block |= input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_LEFT);
+	m_input_state.wish_to_copy_block |= input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_MIDDLE);
 }
 
 void Player::handle_movement(World &world, f32 dt) {
@@ -42,10 +74,7 @@ void Player::handle_movement(World &world, f32 dt) {
 
 	const Input &input = Input::get_instance();
 
-	const f32 input_x = static_cast<f32>(input.is_key_pressed(GLFW_KEY_D)) - static_cast<f32>(input.is_key_pressed(GLFW_KEY_A));
-	const f32 input_z = static_cast<f32>(input.is_key_pressed(GLFW_KEY_W)) - static_cast<f32>(input.is_key_pressed(GLFW_KEY_S));
-
-	vec3 wish_dir = forward * input_z + right * input_x;
+	vec3 wish_dir = forward * m_input_state.input_z + right * m_input_state.input_x;
 	if(glm::length2(wish_dir) > 0.0001f) {
 		wish_dir = glm::normalize(wish_dir);
 	}
@@ -88,11 +117,18 @@ void Player::handle_movement(World &world, f32 dt) {
 	horizontal_move(2);
 
 	if(!m_fly_enabled) {
-		m_position.y += m_vertical_velocity * dt;
+		const f32 dy = m_vertical_velocity * dt;
+		m_position.y += dy;
 		if(check_collision(world)) {
-			m_position.y -= m_vertical_velocity * dt;
+			m_position.y -= dy;
 
 			if(m_vertical_velocity < 0.0f) {
+				const f32 current_feet_y = m_position.y - PLAYER_HEIGHT;
+				const f32 target_feet_y = glm::floor(current_feet_y);
+
+				const f32 snap_y = target_feet_y + PLAYER_HEIGHT + 0.0001f;
+				m_position.y = snap_y;
+
 				m_is_grounded = true;
 				m_vertical_velocity = 0.0f;
 			} else if(m_vertical_velocity > 0.0f) {
@@ -158,14 +194,14 @@ bool Player::check_collision(World &world) {
 
 	const AABB aabb = calculate_aabb();
 
-	const i32 min_x = static_cast<i32>(std::floor(aabb.m_min.x));
-	const i32 max_x = static_cast<i32>(std::floor(aabb.m_max.x));
+	const i32 min_x = static_cast<i32>(glm::floor(aabb.min.x));
+	const i32 max_x = static_cast<i32>(glm::floor(aabb.max.x));
 
-	const i32 min_y = static_cast<i32>(std::floor(aabb.m_min.y));
-	const i32 max_y = static_cast<i32>(std::floor(aabb.m_max.y));
+	const i32 min_y = static_cast<i32>(glm::floor(aabb.min.y));
+	const i32 max_y = static_cast<i32>(glm::floor(aabb.max.y));
 
-	const i32 min_z = static_cast<i32>(std::floor(aabb.m_min.z));
-	const i32 max_z = static_cast<i32>(std::floor(aabb.m_max.z));
+	const i32 min_z = static_cast<i32>(glm::floor(aabb.min.z));
+	const i32 max_z = static_cast<i32>(glm::floor(aabb.max.z));
 
 	for(i32 x = min_x; x <= max_x; ++x) {
 		for(i32 y = min_y; y <= max_y; ++y) {
@@ -174,7 +210,7 @@ bool Player::check_collision(World &world) {
 				const BlockID block_id = world.get_block(check_position);
 				const BlockType &block_type = BlockRegistry::get(block_id);
 
-				if(block_type.m_is_solid) {
+				if(block_type.is_solid()) {
 					return true;
 				}
 			}
@@ -187,46 +223,40 @@ bool Player::check_collision(World &world) {
 void Player::handle_block_interaction(World &world) {
 	PROFILE_FUNC();
 
-	Input &input = Input::get_instance();
-	
-	const bool mouse_locked = input.get_mouse_mode() == GLFW_CURSOR_DISABLED;
-	const bool wish_to_break = mouse_locked && input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_LEFT);
-	const bool wish_to_place = mouse_locked && input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_RIGHT);
-
 	const vec3 ray_start = m_position;
 	const vec3 ray_dir = m_camera.get_forward_direction();
 
 	const RaycastResult raycast_result = world.raycast(ray_start, ray_dir, REACH_DISTANCE);
 		
-	if(!raycast_result.m_did_hit) {
+	if(!raycast_result.did_hit) {
 		m_last_highlighted_block_position = std::nullopt;
 		return;
 	}
 
-	if(input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
-		m_block_in_hand = world.get_block(raycast_result.m_hit_block_position);
+	if(m_input_state.wish_to_copy_block) {
+		m_block_in_hand = world.get_block(raycast_result.hit_block_position);
 		if(m_block_in_hand == BlockID::Air) {
 			m_block_in_hand = BlockID::Stone;
 		}
 	}
 
-	m_last_highlighted_block_position = raycast_result.m_hit_block_position;
+	m_last_highlighted_block_position = raycast_result.hit_block_position;
 
-	if(wish_to_place) {
+	if(m_input_state.wish_to_place_block) {
 		const AABB player_aabb = calculate_aabb();
 		const AABB block_aabb = {
-			.m_min = vec3(raycast_result.m_previous_grid_position) - 0.5f,
-			.m_max = vec3(raycast_result.m_previous_grid_position) + 1.0f,
+			.min = vec3(raycast_result.previous_grid_position) - 0.5f,
+			.max = vec3(raycast_result.previous_grid_position) + 1.0f,
 		};
 
 		if(!player_aabb.overlap(block_aabb)) {
-			const BlockPosition place_position(vec3(raycast_result.m_previous_grid_position) + 0.5f);
+			const BlockPosition place_position(vec3(raycast_result.previous_grid_position) + 0.5f);
 			
 			// TODO: Send place packet to server
 			world.set_block(place_position, m_block_in_hand);
 		}
-	} else if(wish_to_break) {
+	} else if(m_input_state.wish_to_break_block) {
 		// TODO: Send break packet to server
-		world.set_block(raycast_result.m_hit_block_position, BlockID::Air);
+		world.set_block(raycast_result.hit_block_position, BlockID::Air);
 	}
 }

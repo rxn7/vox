@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vox/common/system/tick_loop.hpp"
 #include "vox/engine/core/i_game.hpp"
 #include "vox/engine/core/window.hpp"
 #include "vox/engine/tools/imgui/profiler_imgui_tool.hpp"
@@ -22,7 +23,7 @@ public:
 	}
 
 	inline f32 get_delta_time() const { 
-		return m_delta_time; 
+		return m_tick_loop.get_elapsed();
 	}
 
 private:
@@ -32,8 +33,9 @@ private:
 	bool init_imgui();
 	bool init_networking();
 
-	void update();
-	void render();
+	void tick();
+	void update(f32 dt);
+	void render(f64 alpha);
 
 	static void error_callback_glfw(i32 error, const char *description);
 	static void window_size_callback_glfw(GLFWwindow *window, i32 w, i32 h);
@@ -43,11 +45,11 @@ private:
 
 private:
 	Window m_window;
+	TickLoop m_tick_loop;
 
 	IGame *mp_game;
 	ProfilerImGuiTool m_profiler_imgui_tool;
 
-	f32 m_delta_time;
 	bool m_is_opengl_initialized = false;
 	
 	static Engine *sp_instance;

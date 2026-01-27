@@ -19,10 +19,10 @@ void Profiler::begin(f32 target_duration_us) {
 }
 
 void Profiler::end() {
-	m_duration_us =  m_elapsed_us;
+	m_duration_us = m_elapsed_us;
 
 	if(!m_buffer.empty()) {
-		m_buffer[0].m_duration_us = m_duration_us;
+		m_buffer[0].duration_us = m_duration_us;
 	}
 
 	m_results.swap(m_buffer);
@@ -40,41 +40,41 @@ void Profiler::update(f32 dt) {
 
 i16 Profiler::start_scope(const char *name) {
 	if(m_buffer.empty()) {
-		m_buffer.push_back({ .m_name = "", .m_duration_us = 1 });
+		m_buffer.push_back({ .name = "", .duration_us = 1 });
 		m_current_node_idx = 0;
 	}
 
-	i16 child_idx = m_buffer[m_current_node_idx].m_first_child;
+	i16 child_idx = m_buffer[m_current_node_idx].first_child;
 
 	while(child_idx != -1) {
-		if(m_buffer[child_idx].m_name == name) {
+		if(m_buffer[child_idx].name == name) {
 			m_current_node_idx = child_idx;
 			return child_idx;
 		}
 
-		child_idx = m_buffer[child_idx].m_next_sibling;
+		child_idx = m_buffer[child_idx].next_sibling;
 	}
 
 	assert(m_buffer.size() < std::numeric_limits<i16>::max());
 
-	const u8 new_depth = m_buffer[m_current_node_idx].m_depth + 1;
+	const u8 new_depth = m_buffer[m_current_node_idx].depth + 1;
 	const i16 new_index = static_cast<i16>(m_buffer.size());
 
 	m_buffer.push_back({
-		.m_name = name,
-		.m_depth = new_depth,
-		.m_parent = m_current_node_idx
+		.name = name,
+		.depth = new_depth,
+		.parent = m_current_node_idx
 	});
 
 	ProfilerNode &parent_node = m_buffer[m_current_node_idx];
 
-	if(parent_node.m_first_child == -1) {
-		parent_node.m_first_child = new_index;
+	if(parent_node.first_child == -1) {
+		parent_node.first_child = new_index;
 	} else {
-		m_buffer[parent_node.m_last_child].m_next_sibling = new_index;
+		m_buffer[parent_node.last_child].next_sibling = new_index;
 	}
 
-	parent_node.m_last_child = new_index;
+	parent_node.last_child = new_index;
 	m_current_node_idx = new_index;
 
 	return new_index;
@@ -82,11 +82,11 @@ i16 Profiler::start_scope(const char *name) {
 
 void Profiler::end_scope(u32 duration_us) {
 	ProfilerNode &node = m_buffer[m_current_node_idx];
-	node.m_duration_us += duration_us;
-	++node.m_calls;
+	node.duration_us += duration_us;
+	++node.calls;
 
-	if(node.m_parent != -1) {
-		m_current_node_idx = node.m_parent;
+	if(node.parent != -1) {
+		m_current_node_idx = node.parent;
 	}
 }
 

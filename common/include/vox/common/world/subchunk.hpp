@@ -4,7 +4,8 @@
 #include "vox/common/world/chunk.hpp"
 #include "vox/common/world/world_constants.hpp"
 
-struct SubChunk {
+class SubChunk {
+public:
 	SubChunk(Chunk &chunk, u32 idx) : m_chunk(chunk), m_idx(idx) {
 		m_blocks.fill(BlockID::Air);
 	}
@@ -35,6 +36,19 @@ struct SubChunk {
 		return SubChunkPosition(m_chunk.get_position().x, m_idx, m_chunk.get_position().y);
 	}
 
+	inline u32 get_idx() const {
+		return m_idx;
+	}
+
+	inline Chunk &get_chunk() const {
+		return m_chunk;
+	}
+
+	inline std::array<BlockID, SUBCHUNK_VOLUME> &get_blocks() {
+		return m_blocks;
+	}
+
+private:
 	Chunk &m_chunk;
 	u32 m_idx;
 	std::array<BlockID, SUBCHUNK_VOLUME> m_blocks;

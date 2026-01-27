@@ -3,7 +3,7 @@
 #include "vox/common/networking/packet_type.hpp"
 
 struct PacketHeader {
-	constexpr PacketHeader(PacketType type) : m_type(type) {}
+	constexpr PacketHeader(PacketType type) : type(type) {}
 
-	PacketType m_type;
+	PacketType type;
 };

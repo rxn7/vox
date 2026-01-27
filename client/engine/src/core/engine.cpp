@@ -38,14 +38,9 @@ void Engine::run_game(IGame *game) {
 		return;
 	}
 
-	f64 last_frame, current_frame; last_frame = current_frame = glfwGetTime();
 	Input &input = Input::get_instance();
 
 	while(!glfwWindowShouldClose(m_window.get_glfw_window())) {
-		current_frame = glfwGetTime();
-		m_delta_time = current_frame - last_frame;
-
-		last_frame = current_frame;
 		FpsCounter::get_instance().tick();
 		input.new_frame();
 
@@ -54,27 +49,41 @@ void Engine::run_game(IGame *game) {
 			glfwPollEvents();
 		}
 
-		update();
-		render();
+		{
+			PROFILE_SCOPE("Tick");
+			m_tick_loop.accumulate();
+			while(m_tick_loop.consume_tick()) {
+				tick();
+			}
+		}
+
+		update(get_delta_time());
+		render(m_tick_loop.get_alpha());
 
 		{
 			PROFILE_SCOPE("Swap Buffers");
 			glfwSwapBuffers(m_window.get_glfw_window());
 		}
 
-		profiler.update(m_delta_time);
+		profiler.update(get_delta_time());
 	}
 	
 	mp_game = nullptr;
 }
 
-void Engine::update() { 
+void Engine::tick() {
 	PROFILE_FUNC();
 
-	mp_game->update(m_delta_time);
+	mp_game->tick();
 }
 
-void Engine::render() {
+void Engine::update(f32 delta_time) { 
+	PROFILE_FUNC();
+
+	mp_game->update(m_tick_loop.get_alpha(), delta_time);
+}
+
+void Engine::render(f64 alpha) {
 	PROFILE_FUNC();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

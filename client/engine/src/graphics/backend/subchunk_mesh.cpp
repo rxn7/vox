@@ -33,10 +33,10 @@ void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &
 		renderer.free_subchunk_mesh(m_alloc);
 	}
 
-	const Chunk &chunk = subchunk.m_chunk;
-	const bool ao_enabled = GraphicsSettings::get_instance().m_state.m_ambient_occlusion_enabled;
+	const Chunk &chunk = subchunk.get_chunk();
+	const bool ao_enabled = GraphicsSettings::get_instance().m_state.ambient_occlusion_enabled;
 
-	const u32 subchunk_y_offset = subchunk.m_idx * SUBCHUNK_SIZE;
+	const u32 subchunk_y_offset = subchunk.get_idx() * SUBCHUNK_SIZE;
 
 	u32 index_offset = 0;
 	for(i8 y = 0; y < SUBCHUNK_SIZE; ++y) {
@@ -123,6 +123,6 @@ void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &
 		renderer.upload_subchunk_mesh(m_alloc, s_vertices, s_indices);
 	}
 
-	subchunk.m_chunk.set_dirty(subchunk.m_idx, false);
+	subchunk.get_chunk().set_dirty(subchunk.get_idx(), false);
 	m_index_count = s_indices.size();
 }
