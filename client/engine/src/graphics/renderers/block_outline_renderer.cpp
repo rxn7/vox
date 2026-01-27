@@ -35,7 +35,6 @@ void BlockOutlineRenderer::init() {
 
 void BlockOutlineRenderer::render(BlockPosition block_position, const mat4 &camera_matrix) {
 	PROFILE_FUNC();
-	PROFILE_FUNC();
 
 	const vec3 global_position = vec3(block_position.local_position) + vec3(block_position.chunk_position.x, 0, block_position.chunk_position.y) * CHUNK_WIDTH;
 

@@ -259,7 +259,7 @@ void Player::handle_block_interaction(World &world) {
 	if(m_input_state.wish_to_place_block) {
 		const AABB player_aabb = calculate_aabb();
 		const AABB block_aabb = {
-			.min = vec3(raycast_result.previous_grid_position) - 0.5f,
+			.min = vec3(raycast_result.previous_grid_position),
 			.max = vec3(raycast_result.previous_grid_position) + 1.0f,
 		};
 
