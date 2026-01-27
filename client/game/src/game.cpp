@@ -90,25 +90,20 @@ void Game::render_3d(f32 aspect_ratio) {
 
 	if(m_render_subchunk_debug) {
 		for(auto &[position, chunk] : m_world.get_chunks()) {
-			u32 idx = 0;
 			for(const auto &subchunk : chunk.get_subchunks()) {
-				const vec3 global_position = vec3(position.x, idx, position.y) * SUBCHUNK_SIZE;
 				if(subchunk == nullptr) {
-					++idx;
 					continue;
 				}
 
-				++idx;
-
 				TextRenderCommand3D cmd;
-				cmd.text = std::format("{} {} {}", global_position.x, global_position.y, global_position.z);
-				cmd.position = global_position;
-				cmd.size = 1.0f;
+				cmd.text = std::format("{} {} {}", position.x, subchunk->get_idx(), position.y);
+				cmd.position = vec3(position.x, subchunk->get_idx(), position.y) * SUBCHUNK_SIZE;
+				cmd.size = 0.5f;
 				cmd.horizontal_align = TextHorizontalAlign::Center;
 				cmd.vertical_align = TextVerticalAlign::Middle;
 				cmd.billboard = true;
 
-				const float t = global_position.y / static_cast<f32>(CHUNK_HEIGHT);
+				const float t = subchunk->get_idx() / static_cast<f32>(SUBCHUNK_COUNT);
 				cmd.color = vec4(
 					1.0f,
 					glm::min(1.0f, (1.0f - t) * 2.0f),
