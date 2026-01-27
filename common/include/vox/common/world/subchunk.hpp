@@ -29,7 +29,7 @@ public:
 	}
 
 	inline bool is_block_transparent(i8 x, i16 y, i8 z) const {
-		return m_chunk.is_block_transparent(x, static_cast<i16>(y) + m_idx * SUBCHUNK_SIZE, z);
+		return m_chunk.is_block_transparent_relative(x, static_cast<i16>(y) + m_idx * SUBCHUNK_SIZE, z);
 	}
 
 	inline SubChunkPosition get_position() const {

@@ -10,7 +10,7 @@
 #include "vox/common/world/subchunk.hpp"
 
 Game::Game() 
-: m_camera(vec3(0.0f, 120.0f, 0.0f), 75.0f), m_player(m_camera) {
+: m_camera(vec3(0.0f, 120.0f, 0.0f)), m_player(m_camera) {
 	m_chunk_removed_callback = m_world.m_chunk_removed_signal.connect([&](Chunk &chunk) {
 		for(const auto &subchunk : chunk.get_subchunks()) {
 			if(subchunk == nullptr) {
@@ -94,6 +94,7 @@ void Game::render_3d(f32 aspect_ratio) {
 				if(subchunk == nullptr) {
 					continue;
 				}
+
 
 				TextRenderCommand3D cmd;
 				cmd.text = std::format("{} {} {}", position.x, subchunk->get_idx(), position.y);

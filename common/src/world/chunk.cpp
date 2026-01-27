@@ -2,37 +2,13 @@
 #include "vox/common/world/block_position.hpp"
 #include "vox/common/world/chunk_position.hpp"
 #include "vox/common/world/world.hpp"
-#include "vox/common/world/block_registry.hpp"
 #include "vox/common/world/subchunk.hpp"
 
-Chunk::Chunk(World &world, ChunkPosition position) 
-: m_world(world), m_position(position) {
-	for(u32 x = 0; x < CHUNK_WIDTH; ++x) {
-		for(u32 z = 0; z < CHUNK_WIDTH; ++z) {
-			const u32 max_y = SUBCHUNK_SIZE * 4 - 1;
-
-			for(u32 y = 0; y < max_y; ++y) {
-				if(y == max_y - 1) {
-					set_block(LocalBlockPosition(x, y, z), BlockID::Grass);
-
-					if(rand() % 20 == 0) {
-						for(u32 i = 0; i < 5; ++i) {
-							set_block(LocalBlockPosition(x, y + i, z), BlockID::Log);
-						}
-					}
-				} else if(y < max_y - 5) {
-					set_block(LocalBlockPosition(x, y, z), BlockID::Stone);
-				} else {
-					set_block(LocalBlockPosition(x, y, z), BlockID::Dirt);
-				}
-			}
-		}
-	}
-
+Chunk::Chunk(World &world, ChunkPosition position) : m_world(world), m_position(position) {
 	m_dirty_subchunks_bitmap.reset();
 }
 
-BlockID Chunk::get_block(LocalBlockPosition pos) const {
+BlockID Chunk::get_block_local(LocalBlockPosition pos) const {
 	PROFILE_FUNC();
 
 	if(pos.y >= CHUNK_HEIGHT) {
@@ -47,7 +23,21 @@ BlockID Chunk::get_block(LocalBlockPosition pos) const {
 	return subchunk->get_block({pos.x, pos.y % SUBCHUNK_SIZE, pos.z});
 }
 
-void Chunk::set_block(LocalBlockPosition pos, BlockID value) {
+BlockID Chunk::get_block_relative(i8 x, i16 y, i8 z) const {
+	PROFILE_FUNC();
+
+	BlockID block;
+	if(x < 0 || x >= CHUNK_WIDTH || z < 0 || z >= CHUNK_WIDTH) {
+		const BlockPosition block_position(get_global_position() + vec3(x, y, z));
+		block = m_world.get_block(block_position);
+	} else {
+		block = get_block_local(LocalBlockPosition(x, y, z));
+	}
+
+	return block;
+}
+
+void Chunk::set_block_local(LocalBlockPosition pos, BlockID value) {
 	PROFILE_FUNC();
 
 	if(pos.y >= CHUNK_HEIGHT) {
@@ -71,30 +61,23 @@ void Chunk::set_block(LocalBlockPosition pos, BlockID value) {
 	m_dirty_subchunks_bitmap[subchunk_idx] = true;
 }
 
-void Chunk::remove_subchunk(u32 idx) {
-	PROFILE_FUNC();
-
-	m_subchunks[idx] = nullptr;
-	m_dirty_subchunks_bitmap[idx] = false;
-}
-
-bool Chunk::is_block_transparent(i8 x, i16 y, i8 z) const {
+void Chunk::set_block_relative(i8 x, i16 y, i8 z, BlockID value) {
 	PROFILE_FUNC();
 
 	BlockID block;
 	if(x < 0 || x >= CHUNK_WIDTH || z < 0 || z >= CHUNK_WIDTH) {
 		const BlockPosition block_position(get_global_position() + vec3(x, y, z));
-		block = m_world.get_block(block_position);
+		m_world.set_block(block_position, value);
 	} else {
-		block = get_block(LocalBlockPosition(x, y, z));
+		set_block_local(LocalBlockPosition(x, y, z), value);
 	}
+}
 
-	if(block == BlockID::Air) {
-		return true;
-	}
+void Chunk::remove_subchunk(u32 idx) {
+	PROFILE_FUNC();
 
-	const BlockType &block_type = BlockRegistry::get(block);
-	return block_type.is_transparent();
+	m_subchunks[idx] = nullptr;
+	m_dirty_subchunks_bitmap[idx] = false;
 }
 
 void Chunk::set_all_non_empty_subchunks_dirty() {
@@ -103,6 +86,65 @@ void Chunk::set_all_non_empty_subchunks_dirty() {
 	for(u32 i = 0; i < SUBCHUNK_COUNT; ++i) {
 		if(m_subchunks[i] != nullptr) {
 			m_dirty_subchunks_bitmap[i] = true;
+		}
+	}
+}
+
+void Chunk::generate() {
+	PROFILE_FUNC();
+
+	// TODO: Temporary
+	for(u32 x = 0; x < CHUNK_WIDTH; ++x) {
+		for(u32 z = 0; z < CHUNK_WIDTH; ++z) {
+			const u32 max_y = SUBCHUNK_SIZE * 4 - 1;
+
+			for(u32 y = 0; y < max_y; ++y) {
+				if(y == max_y - 1) {
+					set_block_local(LocalBlockPosition(x, y, z), BlockID::Grass);
+
+					// Trees (temporary)
+					if(rand() % 20 == 0) {
+						bool has_neighbor = false;
+						for(i8 dx = -1; dx <= 1; ++dx) {
+							for(i8 dz = -1; dz <= 1; ++dz) {
+								if(dx == 0 && dz == 0) {
+									continue;
+								}
+
+								if(get_block_relative(x + dx, y+1, z + dz) != BlockID::Air) {
+									has_neighbor = true;
+									break;
+								}
+							}
+						}
+
+						if(has_neighbor) {
+							continue;
+						}
+
+						const u8 tree_height = 4 + rand() % 2;
+
+						i8 radius = 2;
+						for(u32 dy = tree_height-1; dy <= tree_height + 1; ++dy) {
+							for(i8 dx = -radius; dx <= radius; ++dx) {
+								for(i8 dz = -radius; dz <= radius; ++dz) {
+									set_block_relative(x + dx, y + dy, z + dz, BlockID::Leaves);
+								}
+							}
+
+							radius = glm::max(0, radius - 1);
+						}
+
+						for(u32 i = 0; i < tree_height - 1; ++i) {
+							set_block_local(LocalBlockPosition(x, y + i, z), BlockID::Log);
+						}
+					}
+				} else if(y < max_y - 5) {
+					set_block_local(LocalBlockPosition(x, y, z), BlockID::Stone);
+				} else {
+					set_block_local(LocalBlockPosition(x, y, z), BlockID::Dirt);
+				}
+			}
 		}
 	}
 }

@@ -10,7 +10,6 @@ constexpr f32 HALF_PLAYER_WIDTH = PLAYER_WIDTH / 2.0f;
 constexpr vec3 UP = vec3(0.0f, 1.0f, 0.0f);
 
 Player::Player(Camera &cam) : m_camera(cam), m_position(cam.m_position) {
-	std::println("{}", m_camera.m_position);
 }
 
 Player::~Player() {
@@ -19,33 +18,41 @@ Player::~Player() {
 void Player::tick(World &world) {
 	PROFILE_FUNC();
 
-	if(Input::get_instance().get_mouse_mode() != GLFW_CURSOR_DISABLED) {
-		return;
+	m_prev_position = m_position;
+
+	handle_movement(world, TickLoop::TICK_DURATION_SECONDS);
+
+	if(Input::get_instance().get_mouse_mode() == GLFW_CURSOR_DISABLED) {
+		handle_block_interaction(world);
 	}
 
-	m_prev_position = m_position;
-	handle_movement(world, TickLoop::TICK_DURATION_SECONDS);
-		
-	handle_block_interaction(world);
-
+	// reset input, its handled for this tick
 	m_input_state = PlayerInputState();
 }
 
 void Player::update(f64 alpha) {
 	PROFILE_FUNC();
 
+	const vec3 visual_position = glm::mix(m_prev_position, m_position, alpha);
+
+	m_camera.m_position = visual_position;
+
+	const f32 target_fov = m_fly_enabled ? FLY_CAMERA_FOV : DEFAULT_CAMERA_FOV;
+	m_camera.m_fov = glm::mix(m_camera.m_fov, target_fov, static_cast<f32>(alpha));
+
+	if(Input::get_instance().get_mouse_mode() != GLFW_CURSOR_DISABLED) {
+		return;
+	}
+
 	handle_input();
 	handle_mouse_movement();
-
-	const vec3 visual_position = glm::mix(m_prev_position, m_position, alpha);
-	m_camera.m_position = visual_position;
 }
 
 AABB Player::calculate_aabb() const {
 	return AABB {
 		.min = vec3(m_position.x - HALF_PLAYER_WIDTH, m_position.y - PLAYER_HEIGHT, m_position.z - HALF_PLAYER_WIDTH),
-																/* + 0.2f to prevent camera clipping through the ceiling */
-		.max = vec3(m_position.x + HALF_PLAYER_WIDTH, m_position.y + 0.2f, m_position.z + HALF_PLAYER_WIDTH)
+																/* + 0.1f to prevent camera clipping through the ceiling */
+		.max = vec3(m_position.x + HALF_PLAYER_WIDTH, m_position.y + 0.1f, m_position.z + HALF_PLAYER_WIDTH)
 	};
 }
 
@@ -56,7 +63,8 @@ void Player::handle_input() {
 
 	m_input_state.input_x = static_cast<f32>(input.is_key_pressed(GLFW_KEY_D)) - static_cast<f32>(input.is_key_pressed(GLFW_KEY_A));
 	m_input_state.input_z = static_cast<f32>(input.is_key_pressed(GLFW_KEY_W)) - static_cast<f32>(input.is_key_pressed(GLFW_KEY_S));
-	m_input_state.wish_to_jump = input.is_key_pressed(GLFW_KEY_SPACE);
+	m_input_state.wish_to_jump |= input.is_key_pressed(GLFW_KEY_SPACE);
+	m_input_state.wish_to_sprint |= input.is_key_pressed(GLFW_KEY_LEFT_SHIFT);
 
 	m_input_state.wish_to_place_block |= input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_RIGHT);
 	m_input_state.wish_to_break_block |= input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_LEFT);
@@ -84,6 +92,8 @@ void Player::handle_movement(World &world, f32 dt) {
 	}
 	
 	if(m_fly_enabled) {
+		m_vertical_velocity = 0.0f;
+
 		wish_dir.y = static_cast<f32>(input.is_key_pressed(GLFW_KEY_SPACE)) - static_cast<f32>(input.is_key_pressed(GLFW_KEY_LEFT_SHIFT));
 		if(glm::length2(wish_dir) > 0.0001f) {
 			wish_dir = glm::normalize(wish_dir);

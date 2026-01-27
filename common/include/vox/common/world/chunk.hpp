@@ -4,6 +4,7 @@
 #include "vox/common/world/world_constants.hpp"
 #include "vox/common/world/block_id.hpp"
 #include "vox/common/world/chunk_position.hpp"
+#include "vox/common/world/block_registry.hpp"
 #include <bitset>
 
 class World;
@@ -13,15 +14,23 @@ class Chunk {
 public:
 	Chunk(World &world, ChunkPosition position);
 
-	BlockID get_block(LocalBlockPosition pos) const;
+	BlockID get_block_local(LocalBlockPosition pos) const;
 
-	void set_block(LocalBlockPosition pos, BlockID value);
+	BlockID get_block_relative(i8 x, i16 y, i8 z) const;
 
-	bool is_block_transparent(i8 x, i16 y, i8 z) const;
+	void set_block_local(LocalBlockPosition pos, BlockID value);
+
+	void set_block_relative(i8 x, i16 y, i8 z, BlockID value);
 
 	void set_all_non_empty_subchunks_dirty();
 
 	void remove_subchunk(u32 idx);
+
+	void generate();
+
+	inline bool is_block_transparent_relative(i8 x, i16 y, i8 z) const {
+		return BlockRegistry::get(get_block_relative(x, y, z)).is_transparent();
+	}
 
 	inline bool is_dirty(u32 subchunk_idx) const {
 		return m_dirty_subchunks_bitmap[subchunk_idx];

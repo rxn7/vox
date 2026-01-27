@@ -7,12 +7,11 @@ constexpr auto BLOCK_REGISTRY = []() {
 
 #define SET_BLOCK(id, val) blocks[static_cast<sz>(BlockID::id)] = val
 	SET_BLOCK(Air, BlockType("Air"));
-
 	SET_BLOCK(Dirt, BlockType("Dirt", TextureID::Dirt));
 	SET_BLOCK(Stone, BlockType("Stone", TextureID::Stone));
-
 	SET_BLOCK(Grass, BlockType("Grass", BlockTextures(TextureID::GrassTop, TextureID::GrassSide, TextureID::Dirt)));
 	SET_BLOCK(Log, BlockType("Log", BlockTextures(TextureID::LogTopBot, TextureID::LogSide, TextureID::LogTopBot)));
+	SET_BLOCK(Leaves, BlockType("Leaves", TextureID::Leaves));
 
 	return blocks;
 }();

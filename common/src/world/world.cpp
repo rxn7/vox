@@ -15,6 +15,10 @@ void World::create_initial_chunks() {
 			create_chunk(ChunkPosition(x, z));
 		}
 	}
+
+	for(auto &[position, chunk] : m_chunks) {
+		chunk.generate();
+	}
 }
 
 void World::create_chunk(ChunkPosition position) {
@@ -118,7 +122,7 @@ BlockID World::get_block(BlockPosition position) const {
 		return BlockID::Air;
 	}
 
-	return chunk->get_block(position.local_position);
+	return chunk->get_block_local(position.local_position);
 }
 
 void World::set_block(BlockPosition position, BlockID value) {
@@ -129,7 +133,7 @@ void World::set_block(BlockPosition position, BlockID value) {
 		return;
 	}
 
-	chunk->set_block(position.local_position, value);
+	chunk->set_block_local(position.local_position, value);
 
 	const u32 sub_idx = position.local_position.y / SUBCHUNK_SIZE;
 	const u32 local_y = position.local_position.y % SUBCHUNK_SIZE;

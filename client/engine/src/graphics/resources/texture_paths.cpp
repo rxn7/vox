@@ -18,6 +18,7 @@ inline constexpr auto TEXTURE_PATHS = []() {
 	SET_TEXTURE(Stone, "stone.png");
 	SET_TEXTURE(LogTopBot, "log_top_bot.png");
 	SET_TEXTURE(LogSide, "log_side.png");
+	SET_TEXTURE(Leaves, "leaves.png");
 
 	return paths;
 }();

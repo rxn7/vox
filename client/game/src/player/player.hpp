@@ -5,6 +5,9 @@
 #include "vox/common/world/physics_constants.hpp"
 #include "vox/engine/graphics/backend/camera.hpp"
 
+constexpr f32 FLY_CAMERA_FOV = 85.0f;
+constexpr f32 DEFAULT_CAMERA_FOV = 75.0f;
+
 constexpr f32 TERMINAL_VELOCITY = 20.0f;
 constexpr f32 PLAYER_HEIGHT = 1.6f;
 constexpr f32 PLAYER_WIDTH = 0.3f;
@@ -31,6 +34,8 @@ struct PlayerInputState {
 	f32 input_x = 0.0f;
 	f32 input_z = 0.0f;
 	bool wish_to_jump = false;
+
+	bool wish_to_sprint = false;
 
 	bool wish_to_place_block = false;
 	bool wish_to_break_block = false;

@@ -55,7 +55,7 @@ void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &
 					const auto [normal, tangent1, tangent2] = get_face_data(face_id);
 
 					const auto is_block_solid = [&](i16vec3 offset) -> bool {
-						return !chunk.is_block_transparent(x + offset.x, y + offset.y + subchunk_y_offset, z + offset.z);
+						return !chunk.is_block_transparent_relative(x + offset.x, y + offset.y + subchunk_y_offset, z + offset.z);
 					};
 					
 					const auto calculate_ao = [&](i32 t1, i32 t2) -> u8 {
