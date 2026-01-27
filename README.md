@@ -2,22 +2,22 @@
 C++ Voxel Engine (possibly a game in the future) made with modern OpenGL (core 4.3).
 
 # Building
-#### Only linux is supported (may work on windows, but not tested).
+#### Linux is supported and Windows is sometimes tested (with Visual Studio 17 2022)
 
 ## Requirements
-- libopenssl 
-- libprotobuf
+#### GLAD
+- python3
+- pip install jinja2
 
 ## Commands
-```bash
-mkdir build
-cd build
-cmake ..
-cmake --build .
-./vox
-```
-or you can just use my configuration:
+### Linux
 ```bash
 ./scripts/configure.sh 
 ./scripts/debug.sh
+```
+
+### Windows
+```bash
+./scripts/configure.bat 
+./scripts/debug.bat
 ```
