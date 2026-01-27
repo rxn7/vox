@@ -70,7 +70,6 @@ i16 Profiler::start_scope(const char *name) {
 
 	if(parent_node.m_first_child == -1) {
 		parent_node.m_first_child = new_index;
-		parent_node.m_next_sibling = -1;
 	} else {
 		m_buffer[parent_node.m_last_child].m_next_sibling = new_index;
 	}
