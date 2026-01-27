@@ -25,6 +25,8 @@ class BlockType {
 public:
 	constexpr BlockType() : m_name("INVALID"), m_is_solid(false), m_is_transparent(true) { }
 
+	constexpr BlockType(std::string_view name) : m_name(name), m_is_solid(false), m_is_transparent(true) { }
+
 	constexpr BlockType(std::string_view name, TextureID texture, bool is_solid = true, bool is_transparent = false) 
 	: m_name(name), m_is_solid(is_solid), m_is_transparent(is_transparent) {
 		for(i32 i=0; i<6; ++i) {

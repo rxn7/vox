@@ -41,6 +41,7 @@ private:
 	static void window_size_callback_glfw(GLFWwindow *window, i32 w, i32 h);
 	static void key_event_callback_glfw(GLFWwindow *window, i32 key, i32 scancode, i32 action, i32 mods);
 	static void mouse_button_event_callback_glfw(GLFWwindow *window, i32 button, i32 action, i32 mods);
+	static void scroll_callback_glfw(GLFWwindow *window, f64 x, f64 y);
 	static void mouse_move_callback_glfw(GLFWwindow *window, f64 x, f64 y);
 
 private:

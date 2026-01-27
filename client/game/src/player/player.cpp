@@ -61,6 +61,10 @@ void Player::handle_input() {
 	m_input_state.wish_to_place_block |= input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_RIGHT);
 	m_input_state.wish_to_break_block |= input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_LEFT);
 	m_input_state.wish_to_copy_block |= input.is_mouse_button_just_pressed(GLFW_MOUSE_BUTTON_MIDDLE);
+
+	if(f32 scroll = input.get_scroll().y; scroll != 0.0f) {
+		m_block_in_hand = static_cast<BlockID>(glm::mod(static_cast<i32>(m_block_in_hand) + static_cast<i32>(scroll), static_cast<i32>(BlockID::SIZE)));
+	}
 }
 
 void Player::handle_movement(World &world, f32 dt) {

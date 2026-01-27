@@ -6,6 +6,7 @@ constexpr auto BLOCK_REGISTRY = []() {
 	std::array<BlockType, static_cast<sz>(BlockID::SIZE)> blocks{};
 
 #define SET_BLOCK(id, val) blocks[static_cast<sz>(BlockID::id)] = val
+	SET_BLOCK(Air, BlockType("Air"));
 
 	SET_BLOCK(Dirt, BlockType("Dirt", TextureID::Dirt));
 	SET_BLOCK(Stone, BlockType("Stone", TextureID::Stone));

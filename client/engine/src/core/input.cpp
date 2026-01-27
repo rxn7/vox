@@ -8,6 +8,7 @@ void Input::new_frame() {
 	m_last_mouse_position = m_mouse_position;
 	m_previous_keys = m_keys;
 	m_previous_buttons = m_buttons;
+	m_scroll = vec2(0, 0);
 }
 
 bool Input::is_key_pressed(i32 key) const {
@@ -55,6 +56,10 @@ void Input::set_mouse_mode(i32 mode) {
 
 void Input::update_mouse_position(vec2 position) {
 	m_mouse_position = position;
+}
+
+void Input::update_scroll(vec2 scroll) {
+	m_scroll = scroll;
 }
 
 void Input::update_key(i32 key, bool is_pressed) {

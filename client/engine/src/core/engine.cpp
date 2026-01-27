@@ -169,6 +169,7 @@ bool Engine::init_glfw() {
 	glfwSetCursorPosCallback(p_window, mouse_move_callback_glfw);
 	glfwSetKeyCallback(p_window, key_event_callback_glfw);
 	glfwSetMouseButtonCallback(p_window, mouse_button_event_callback_glfw);
+	glfwSetScrollCallback(p_window, scroll_callback_glfw);
 
 	glfwMakeContextCurrent(p_window);
 	glfwSwapInterval(0);
@@ -274,4 +275,9 @@ void Engine::mouse_button_event_callback_glfw([[maybe_unused]] GLFWwindow *p_win
 void Engine::mouse_move_callback_glfw([[maybe_unused]] GLFWwindow *p_window, [[maybe_unused]] f64 x, [[maybe_unused]] f64 y) {
 	Input &input = Input::get_instance();
 	input.update_mouse_position(vec2(x, y));
+}
+
+void Engine::scroll_callback_glfw([[maybe_unused]] GLFWwindow *p_window, f64 x, f64 y) {
+	Input &input = Input::get_instance();
+	input.update_scroll(vec2(x, y));
 }

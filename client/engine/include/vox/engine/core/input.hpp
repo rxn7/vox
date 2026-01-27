@@ -21,6 +21,11 @@ public:
 	void update_mouse_position(vec2 position);
 	void update_key(i32 key, bool is_pressed);
 	void update_mouse_button(i32 button, bool is_pressed);
+	void update_scroll(vec2 scroll);
+
+	inline vec2 get_scroll() const {
+		return m_scroll;
+	}
 
 	inline vec2 get_mouse_delta() const { 
 		return m_mouse_position - m_last_mouse_position.value_or(m_mouse_position); 
@@ -39,6 +44,8 @@ private:
 
 	std::optional<vec2> m_last_mouse_position = std::nullopt;
 	vec2 m_mouse_position = vec2(0);
+
+	vec2 m_scroll = vec2(0);
 
 	i32 m_mouse_mode = GLFW_CURSOR_NORMAL;
 };
