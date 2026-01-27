@@ -5,19 +5,19 @@
 // TODO: This should be in game code not engine
 // NOTE: its done that way to make explicit assignment to a specific BlockID.
 inline constexpr auto TEXTURE_PATHS = []() {
-    std::array<std::string_view, static_cast<sz>(TextureID::SIZE)> paths{};
+	std::array<std::string_view, static_cast<sz>(TextureID::SIZE)> paths{};
 
-    for(auto &p : paths) 
+	for(auto &p : paths) 
 		p = TEXTURE_PATH("error.png");
 
-    #define SET_TEXTURE(id, name) paths[static_cast<sz>(TextureID::id)] = TEXTURE_PATH(name)
+	#define SET_TEXTURE(id, name) paths[static_cast<sz>(TextureID::id)] = TEXTURE_PATH(name)
 
-    SET_TEXTURE(Dirt, "dirt.png");
-    SET_TEXTURE(GrassTop, "grass_top.png");
-    SET_TEXTURE(GrassSide, "grass_side.png");
-    SET_TEXTURE(Stone, "stone.png");
+	SET_TEXTURE(Dirt, "dirt.png");
+	SET_TEXTURE(GrassTop, "grass_top.png");
+	SET_TEXTURE(GrassSide, "grass_side.png");
+	SET_TEXTURE(Stone, "stone.png");
 
-    return paths;
+	return paths;
 }();
 
 const std::string_view &TexturePaths::get(TextureID id) {
@@ -25,5 +25,5 @@ const std::string_view &TexturePaths::get(TextureID id) {
 }
 
 std::span<const std::string_view> TexturePaths::get_all() {
-    return TEXTURE_PATHS;
+	return TEXTURE_PATHS;
 }

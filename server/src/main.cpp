@@ -1,3 +1,3 @@
 int main(int argc, const char **argv) {
-    std::println("Hello world :)");
+	std::println("Hello world :)");
 }

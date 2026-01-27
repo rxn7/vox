@@ -7,6 +7,7 @@
 
 void WorldRenderer::init() {
 	PROFILE_FUNC();
+	
 
 	m_shader.load(b::embed<"shaders/chunk-vert.glsl">().str(), b::embed<"shaders/chunk-frag.glsl">().str());
 	m_textures.load(TexturePaths::get_all());
@@ -72,7 +73,6 @@ void WorldRenderer::render(const mat4 &camera_matrix) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }
-
 void WorldRenderer::update_subchunk(SubChunk &subchunk) {
 	PROFILE_FUNC();
 
@@ -83,12 +83,11 @@ void WorldRenderer::update_subchunk(SubChunk &subchunk) {
 		m_subchunk_meshes.emplace(position, SubChunkMesh(position));
 	}
 
+	PROFILE_FUNC();
 	m_subchunk_meshes.at(position).generate_and_upload(subchunk, *this);
 }
 
-void WorldRenderer::remove_subchunk(const SubChunk &subchunk) {
-	PROFILE_FUNC();
-
+void WorldRenderer::remove_subchunk(SubChunk &subchunk) {
 	const SubChunkPosition position = subchunk.get_position();
 
 	const auto it = m_subchunk_meshes.find(position);
@@ -99,34 +98,36 @@ void WorldRenderer::remove_subchunk(const SubChunk &subchunk) {
 	SubChunkMesh &mesh = it->second;
 	free_subchunk_mesh(mesh.m_alloc);
 
-    m_subchunk_meshes.erase(it);
+	PROFILE_FUNC();
+	m_subchunk_meshes.erase(it);
 }
 
 void WorldRenderer::upload_subchunk_mesh(const SubChunkMeshAllocation &alloc, std::span<const u32> vertices, std::span<const u32> indices) {
-	PROFILE_FUNC();
-    
-    if(vertices.size() > alloc.m_vertex_alloc.m_size) [[unlikely]] {
-        std::println("WorldRenderer::upload_chunk_mesh allocated {} vertices, trying to upload {}.", alloc.m_vertex_alloc.m_size, vertices.size());
-        return;
-    }
-    
-    if(indices.size() > alloc.m_index_alloc.m_size) [[unlikely]] {
-        std::println("WorldRenderer::upload_chunk_mesh allocated {} indices, trying to upload {}.", alloc.m_index_alloc.m_size, indices.size());
-        return;
-    }
-    
+	
+	
+	if(vertices.size() > alloc.m_vertex_alloc.m_size) [[unlikely]] {
+		std::println("WorldRenderer::upload_chunk_mesh allocated {} vertices, trying to upload {}.", alloc.m_vertex_alloc.m_size, vertices.size());
+		return;
+	}
+	
+	if(indices.size() > alloc.m_index_alloc.m_size) [[unlikely]] {
+		std::println("WorldRenderer::upload_chunk_mesh allocated {} indices, trying to upload {}.", alloc.m_index_alloc.m_size, indices.size());
+		return;
+	}
+	
 	const u64 vert_offset = alloc.m_vertex_alloc.m_offset * sizeof(u32);
 	const u64 index_offset = alloc.m_index_alloc.m_offset * sizeof(u32);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, vert_offset, vertices.size_bytes(), vertices.data());
 
+	PROFILE_FUNC();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, index_offset, indices.size_bytes(), indices.data());
 }
 
 void WorldRenderer::render_subchunk_mesh(const SubChunkMesh &mesh) {
-	PROFILE_FUNC();
+	
 
 	DrawElementsIndirectCommand cmd = {
 		.m_index_count = mesh.m_index_count,
@@ -135,38 +136,39 @@ void WorldRenderer::render_subchunk_mesh(const SubChunkMesh &mesh) {
 		.m_base_vertex = static_cast<i32>(mesh.m_alloc.m_vertex_alloc.m_offset),
 		.m_base_instance = static_cast<u32>(m_draw_commands.size()),
 	};
+	PROFILE_FUNC();
 	
 	m_draw_commands.push_back(cmd);
 	m_packed_subchunk_positions.push_back(Packer::pack_subchunk_position(mesh.get_position()));
 }
 
 std::optional<SubChunkMeshAllocation> WorldRenderer::allocate_subchunk_mesh(u32 vertex_count, u32 index_count) {
-    PROFILE_FUNC();
-    
-    std::optional<OffsetAllocator::Allocation> vertex_alloc = m_vertex_allocator.allocate(vertex_count);
-    if(!vertex_alloc.has_value()) {
-        std::println("WorldRenderer::allocate_chunks_mesh: not enough space for {} vertices", vertex_count);
-        return std::nullopt;
-    }
-    
-    std::optional<OffsetAllocator::Allocation> index_alloc = m_index_allocator.allocate(index_count);
-    if(!index_alloc.has_value()) {
-        std::println("WorldRenderer::allocate_chunks_mesh: not enough space for {} indices", index_count);
-        return std::nullopt;
-    }
-    
-    return SubChunkMeshAllocation{
-        .m_vertex_alloc = *vertex_alloc,
-        .m_index_alloc = *index_alloc
-    };
+	
+	
+	std::optional<OffsetAllocator::Allocation> vertex_alloc = m_vertex_allocator.allocate(vertex_count);
+	if(!vertex_alloc.has_value()) {
+		std::println("WorldRenderer::allocate_chunks_mesh: not enough space for {} vertices", vertex_count);
+		return std::nullopt;
+	}
+	
+	std::optional<OffsetAllocator::Allocation> index_alloc = m_index_allocator.allocate(index_count);
+	if(!index_alloc.has_value()) {
+		std::println("WorldRenderer::allocate_chunks_mesh: not enough space for {} indices", index_count);
+		return std::nullopt;
+	}
+	
+	return SubChunkMeshAllocation{
+		.m_vertex_alloc = *vertex_alloc,
+		.m_index_alloc = *index_alloc
+	};
 }
 
 void WorldRenderer::free_subchunk_mesh(const SubChunkMeshAllocation &alloc) {
-    if(alloc.m_vertex_alloc.m_size > 0) {
-        m_vertex_allocator.free(alloc.m_vertex_alloc);
-    }
-    
-    if(alloc.m_index_alloc.m_size > 0) {
-        m_index_allocator.free(alloc.m_index_alloc);
-    }
+	if(alloc.m_vertex_alloc.m_size > 0) {
+		m_vertex_allocator.free(alloc.m_vertex_alloc);
+	}
+	
+	if(alloc.m_index_alloc.m_size > 0) {
+		m_index_allocator.free(alloc.m_index_alloc);
+	}
 }

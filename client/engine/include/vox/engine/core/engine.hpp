@@ -14,23 +14,23 @@ public:
 	void run_game(IGame *game);
 
 	static Engine &get_instance() { 
-        return *sp_instance; 
-    }
+		return *sp_instance; 
+	}
 
-    inline Window &get_window() { 
-        return m_window; 
-    }
+	inline Window &get_window() { 
+		return m_window; 
+	}
 
 	inline f32 get_delta_time() const { 
-        return m_delta_time; 
-    }
+		return m_delta_time; 
+	}
 
 private:
 	bool init();
 	bool init_glfw();
 	bool init_opengl();
 	bool init_imgui();
-    bool init_networking();
+	bool init_networking();
 
 	void update();
 	void render();
@@ -42,12 +42,13 @@ private:
 	static void mouse_move_callback_glfw(GLFWwindow *window, f64 x, f64 y);
 
 private:
-    Window m_window;
-	f32 m_delta_time;
+	Window m_window;
 
-    IGame *mp_game;
-    
-    ProfilerImGuiTool m_profiler_imgui_tool;
-    
+	IGame *mp_game;
+	ProfilerImGuiTool m_profiler_imgui_tool;
+
+	f32 m_delta_time;
+	bool m_is_opengl_initialized = false;
+	
 	static Engine *sp_instance;
 };

@@ -4,5 +4,5 @@
 
 class GraphicsImGuiTool {
 public:
-    void render(std::optional<std::reference_wrapper<World>> world = std::nullopt);
+	void render(std::optional<std::reference_wrapper<World>> world = std::nullopt);
 };

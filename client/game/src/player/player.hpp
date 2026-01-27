@@ -39,8 +39,8 @@ public:
 private:
 	void handle_movement(World &world, f32 dt);
 	void handle_mouse_movement();
-    void accelerate(vec3 wish_dir, f32 acceleration, f32 max_speed, f32 dt);
-    void apply_friction(f32 friction, f32 dt);
+	void accelerate(vec3 wish_dir, f32 acceleration, f32 max_speed, f32 dt);
+	void apply_friction(f32 friction, f32 dt);
 	bool check_collision(World &world);
 	void handle_block_interaction(World &world); 
 
@@ -52,7 +52,7 @@ private:
 	vec3 &m_position;
 
 	f32 m_vertical_velocity = 0.0f;
-	vec3 m_horizontal_velocity;
+	vec3 m_horizontal_velocity = vec3(0.0f);
 
 	std::optional<BlockPosition> m_last_highlighted_block_position;
 

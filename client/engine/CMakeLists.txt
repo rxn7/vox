@@ -8,3 +8,4 @@ target_precompile_headers(vox_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/
 add_subdirectory(embed)
 
 target_link_libraries(vox_engine PUBLIC vox_common imgui glfw glad_gl_core_43)
+target_link_libraries(vox_engine PRIVATE vox_common_pch)

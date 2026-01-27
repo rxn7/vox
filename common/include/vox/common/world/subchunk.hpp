@@ -18,6 +18,7 @@ struct SubChunk {
 	}
 
 	inline bool is_empty() const {
+		PROFILE_FUNC();
 		for(u32 i = 0; i < SUBCHUNK_VOLUME; ++i) {
 			if(m_blocks[i] != BlockID::Air) {
 				return false;

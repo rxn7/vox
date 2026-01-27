@@ -49,7 +49,7 @@ void Input::set_mouse_mode(i32 mode) {
 
 	m_mouse_mode = mode;
 
-    Window &window = Engine::get_instance().get_window();
+	Window &window = Engine::get_instance().get_window();
 	glfwSetInputMode(window.get_glfw_window(), GLFW_CURSOR, mode);
 }
 

@@ -39,7 +39,7 @@ public:
 		return m_position; 
 	}
 
-	constexpr vec3 get_global_position() const { 
+	vec3 get_global_position() const { 
 		return vec3(m_position.x, 0, m_position.y) * CHUNK_WIDTH; 
 	}
 

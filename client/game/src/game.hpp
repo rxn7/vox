@@ -17,22 +17,20 @@ class Game : public IGame {
 public:
 	Game();
 	~Game();
-    
-    bool init() override;
+	
+	bool init() override;
 
 	void update(f32 delta_time) override;
 	void render_3d(f32 aspect_ratio) override;
 	void render_ui() override;
 	void render_imgui() override;
 
-	void handle_window_resize(ivec2 window_size) override;
-
 	inline const Camera &get_camera() const { 
-        return m_camera; 
-    }
-    
+		return m_camera; 
+	}
+	
 private:
-    void handle_input();
+	void handle_input();
 
 private:
 	World m_world;
@@ -44,11 +42,11 @@ private:
 	Crosshair m_crosshair;
 	Camera m_camera;
 	Player m_player;
-    
-    WorldImGuiTool m_world_imgui_tool;
-    GraphicsImGuiTool m_graphics_imgui_tool;
+	
+	WorldImGuiTool m_world_imgui_tool;
+	GraphicsImGuiTool m_graphics_imgui_tool;
 
 	bool m_render_subchunk_debug = false;
 
-    CallbackID m_chunk_removed_callback;
+	CallbackID m_chunk_removed_callback;
 };

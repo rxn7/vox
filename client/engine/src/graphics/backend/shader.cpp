@@ -74,6 +74,7 @@ u32 Shader::create_shader(ShaderType type, std::string_view source) {
 
 i32 Shader::get_uniform_location(std::string_view name) const {
 	PROFILE_FUNC();
+	
 
 	const auto &uniform_location_it = m_uniform_locations.find(std::string(name));
 	const bool uniform_exists = uniform_location_it != m_uniform_locations.end();

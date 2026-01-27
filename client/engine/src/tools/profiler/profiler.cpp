@@ -13,36 +13,36 @@ void Profiler::end_scope([[maybe_unused]] u32 duration_us) { }
 #else 
 
 void Profiler::begin(f32 target_duration_us) {
-    m_target_duration_us = target_duration_us;
-    m_elapsed_us = 0.0f;
+	m_target_duration_us = target_duration_us;
+	m_elapsed_us = 0.0f;
 	m_current_node_idx = 0;
 }
 
 void Profiler::end() {
-    m_duration_us =  m_elapsed_us;
+	m_duration_us =  m_elapsed_us;
 
-    if(!m_buffer.empty()) {
-        m_buffer[0].m_duration_us = m_duration_us;
-    }
+	if(!m_buffer.empty()) {
+		m_buffer[0].m_duration_us = m_duration_us;
+	}
 
 	m_results.swap(m_buffer);
 	m_buffer.clear();
 }
 
 void Profiler::update(f32 dt) {
-    m_elapsed_us += dt * 1'000'000.0f;
+	m_elapsed_us += dt * 1'000'000.0f;
 
-    if(!m_paused && m_elapsed_us >= m_target_duration_us) {
-        end();
-        begin(m_target_duration_us);
-    }
+	if(!m_paused && m_elapsed_us >= m_target_duration_us) {
+		end();
+		begin(m_target_duration_us);
+	}
 }
 
 i16 Profiler::start_scope(const char *name) {
 	if(m_buffer.empty()) {
-        m_buffer.push_back({ .m_name = "", .m_duration_us = 1 });
-        m_current_node_idx = 0;
-    }
+		m_buffer.push_back({ .m_name = "", .m_duration_us = 1 });
+		m_current_node_idx = 0;
+	}
 
 	i16 child_idx = m_buffer[m_current_node_idx].m_first_child;
 
@@ -70,6 +70,7 @@ i16 Profiler::start_scope(const char *name) {
 
 	if(parent_node.m_first_child == -1) {
 		parent_node.m_first_child = new_index;
+		parent_node.m_next_sibling = -1;
 	} else {
 		m_buffer[parent_node.m_last_child].m_next_sibling = new_index;
 	}

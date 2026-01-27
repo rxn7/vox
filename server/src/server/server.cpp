@@ -1,7 +1,7 @@
 #include "vox/server/server.hpp"
 
 bool Server::start(u16 port) {
-    return true;
+	return true;
 }
 
 void Server::stop() {

@@ -33,10 +33,11 @@ struct BlockType {
 
 	constexpr BlockType(std::string_view name, BlockTextures textures, bool is_solid = true, bool is_transparent = false)
 	: m_name(name), m_is_solid(is_solid), m_is_transparent(is_transparent), m_textures(textures) {
-    }
+	}
 
 	TextureID get_texture_id(BlockFaceID face_id) const { 
 		PROFILE_FUNC();
+		
 		return m_textures.m_textures[(u8)face_id]; 
 	}
 

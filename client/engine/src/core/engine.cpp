@@ -1,43 +1,42 @@
 #include "vox/engine/core/engine.hpp"
-#include "steam/steamnetworkingtypes.h"
 #include "vox/engine/core/i_game.hpp"
 #include "vox/engine/core/input.hpp"
 #include "vox/engine/tools/fps_counter.hpp"
 
 #include <print>
-#include <steam/steamnetworkingsockets.h>
-#include <steam/isteamnetworkingutils.h>
 
 #include <stb_image.h>
 
 Engine *Engine::sp_instance = nullptr;
 
 Engine::Engine() { 
-    assert(sp_instance == nullptr);
-    sp_instance = this;
+	assert(sp_instance == nullptr);
+	sp_instance = this;
 }
 
 Engine::~Engine() { 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
-    
-    m_window.destroy();
+	
+	m_window.destroy();
 	glfwTerminate();
 
-    GameNetworkingSockets_Kill();
+//	 GameNetworkingSockets_Kill();
 }
 
 void Engine::run_game(IGame *game) {
 	Profiler &profiler = Profiler::get_instance();
-    profiler.begin(PROFILING_DURATION_US);
+	profiler.begin(PROFILING_DURATION_US);
 
-	if(!init())
+	if(!init()) {
 		return;
+	}
 
-    mp_game = game;
-    if(!mp_game->init())
-        return;
+	mp_game = game;
+	if(!mp_game->init()) {
+		return;
+	}
 
 	f64 last_frame, current_frame; last_frame = current_frame = glfwGetTime();
 	Input &input = Input::get_instance();
@@ -63,14 +62,15 @@ void Engine::run_game(IGame *game) {
 			glfwSwapBuffers(m_window.get_glfw_window());
 		}
 
-        profiler.update(m_delta_time);
+		profiler.update(m_delta_time);
 	}
-    
-    mp_game = nullptr;
+	
+	mp_game = nullptr;
 }
 
 void Engine::update() { 
 	PROFILE_FUNC();
+
 	mp_game->update(m_delta_time);
 }
 
@@ -100,11 +100,11 @@ void Engine::render() {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-        
-        const bool enable_imgui_input = Input::get_instance().get_mouse_mode() == GLFW_CURSOR_NORMAL;
-        ImGui::GetIO().SetAppAcceptingEvents(enable_imgui_input);
-        
-        m_profiler_imgui_tool.render();
+		
+		const bool enable_imgui_input = Input::get_instance().get_mouse_mode() == GLFW_CURSOR_NORMAL;
+		ImGui::GetIO().SetAppAcceptingEvents(enable_imgui_input);
+		
+		m_profiler_imgui_tool.render();
 		mp_game->render_imgui();
 
 		ImGui::EndFrame();
@@ -121,19 +121,20 @@ bool Engine::init() {
 	if(!init_opengl())	return false;
 	if(!init_imgui())	return false;
 
+	{
+		i32 w, h;
+		glfwGetWindowSize(sp_instance->m_window.get_glfw_window(), &w, &h);
+		Engine::window_size_callback_glfw(sp_instance->m_window.get_glfw_window(), 1280, 720);
+	}
+
 	stbi_set_flip_vertically_on_load(true);
 
 	Input &input = Input::get_instance();
 	input.init();
 	input.set_mouse_mode(GLFW_CURSOR_DISABLED);
 
-	// constexpr f32 VRAM_USAGE_PER_CHUNK = (WorldRenderer::VERTEX_SLOT_SIZE * sizeof(u32) + WorldRenderer::INDEX_SLOT_SIZE * sizeof(u32)) / 1000.0f;
-
-	// std::println("WorldRenderer VRAM usage: {} KB per chunk", VRAM_USAGE_PER_CHUNK);
-	// std::println("WorldRenderer Total VRAM usage: {} KB", VRAM_USAGE_PER_CHUNK * WorldRenderer::MAX_CHUNKS);
-
 	ProfilerTimePoint end = ProfilerClock::now();
-	std::println("App initialization took {} ms", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+	std::println("Engine initialization took {} ms", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
 	return true;
 }
@@ -150,12 +151,11 @@ bool Engine::init_glfw() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	if(!m_window.create({1280, 720}, "vox")) {
-		std::println("failed to create window");
+	if(!m_window.create({1280, 720}, "vox engine", false)) {
 		return false;
 	}
-    
-    GLFWwindow *p_window = m_window.get_glfw_window();
+	
+	GLFWwindow *p_window = m_window.get_glfw_window();
 	glfwSetWindowSizeCallback(p_window, window_size_callback_glfw);
 	glfwSetCursorPosCallback(p_window, mouse_move_callback_glfw);
 	glfwSetKeyCallback(p_window, key_event_callback_glfw);
@@ -180,12 +180,16 @@ bool Engine::init_opengl() {
 	glDepthFunc(GL_LESS);
 
 	glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+	std::println("OpenGL inititialized");
+
+	m_is_opengl_initialized = true;
 
 	return true;
 }
@@ -208,13 +212,13 @@ bool Engine::init_imgui() {
 }
 
 bool Engine::init_networking() {
-    SteamDatagramErrMsg err_msg;
-    if(!GameNetworkingSockets_Init(nullptr, err_msg)) {
-        std::println("Failed to initialize Game Networking Sockets: {}", err_msg);
-        return false;
-    }
-    
-    return true;
+//	 SteamDatagramErrMsg err_msg;
+//	 if(!GameNetworkingSockets_Init(nullptr, err_msg)) {
+//		 std::println("Failed to initialize Game Networking Sockets: {}", err_msg);
+//		 return false;
+//	 }
+	
+	return true;
 }
 
 void Engine::error_callback_glfw(i32 error, const char *description) {
@@ -222,15 +226,18 @@ void Engine::error_callback_glfw(i32 error, const char *description) {
 }
 
 void Engine::window_size_callback_glfw([[maybe_unused]] GLFWwindow *p_window, i32 w, i32 h) {
-    Window &window = sp_instance->get_window();
-	window.update_size({w, h});
+	if(!sp_instance->m_is_opengl_initialized) [[unlikely]] {
+		return;
+	}
+
+	sp_instance->m_window.update_size({w, h});
 
 	glViewport(0, 0, w, h);
-	sp_instance->mp_game->handle_window_resize(vec2(w, h));
 }
 
 void Engine::key_event_callback_glfw([[maybe_unused]] GLFWwindow *p_window, [[maybe_unused]] i32 key, [[maybe_unused]] i32 scancode, [[maybe_unused]] i32 action, [[maybe_unused]] i32 mods) {
 	Input &input = Input::get_instance();
+
 	switch(action) {
 		case GLFW_PRESS:
 			input.update_key(key, true);
