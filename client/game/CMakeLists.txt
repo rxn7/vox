@@ -7,8 +7,8 @@ target_link_libraries(vox_game PUBLIC vox_engine vox_server_lib vox_common)
 add_subdirectory(embed)
 
 add_custom_target(vox_copy_assets ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/assets ${PROJECT_BINARY_DIR}/client/game/assets
-    COMMENT "Copying assets into binary directory"
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+	${CMAKE_CURRENT_SOURCE_DIR}/assets ${PROJECT_BINARY_DIR}/client/game/assets
+	COMMENT "Copying assets into binary directory"
 )
 add_dependencies(vox_game vox_copy_assets)

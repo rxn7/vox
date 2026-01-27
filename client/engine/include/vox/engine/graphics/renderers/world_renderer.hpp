@@ -20,27 +20,27 @@ public:
 	void render(const mat4 &camera_matrix);
 
 	void update_subchunk(SubChunk &subchunk);
-	void remove_subchunk(const SubChunk &subchunk);
+	void remove_subchunk(SubChunk &subchunk);
 
 	void upload_subchunk_mesh(const SubChunkMeshAllocation &alloc, std::span<const u32> vertices, std::span<const u32> indices);
-    [[nodiscard]] std::optional<SubChunkMeshAllocation> allocate_subchunk_mesh(u32 vertex_count, u32 index_count);
-    void free_subchunk_mesh(const SubChunkMeshAllocation &alloc);
-    
-    inline const OffsetAllocator &get_vertex_allocator() const {
-        return m_vertex_allocator; 
-    }
+	[[nodiscard]] std::optional<SubChunkMeshAllocation> allocate_subchunk_mesh(u32 vertex_count, u32 index_count);
+	void free_subchunk_mesh(const SubChunkMeshAllocation &alloc);
+	
+	inline const OffsetAllocator &get_vertex_allocator() const {
+		return m_vertex_allocator; 
+	}
 
-    inline const OffsetAllocator &get_index_allocator() const {
-        return m_index_allocator; 
-    }
-    
+	inline const OffsetAllocator &get_index_allocator() const {
+		return m_index_allocator; 
+	}
+	
 private:
 	void render_subchunk_mesh(const SubChunkMesh &mesh);
 	
 public:
 	static constexpr u32 MAX_VERTICES = 20'000'000;
 	static constexpr u32 MAX_INDICES = 30'000'000;
-    static constexpr u32 MAX_VISIBLE_SUBCHUNKS = 10'000;
+	static constexpr u32 MAX_VISIBLE_SUBCHUNKS = 10'000;
 
 	bool m_use_wireframe = false;
 
@@ -57,8 +57,8 @@ private:
 
 	std::vector<DrawElementsIndirectCommand> m_draw_commands;
 	std::vector<u32> m_packed_subchunk_positions;
-    std::unordered_map<SubChunkPosition, SubChunkMesh> m_subchunk_meshes;
-    
-    OffsetAllocator m_vertex_allocator{MAX_VERTICES};
-    OffsetAllocator m_index_allocator{MAX_INDICES};
+	std::unordered_map<SubChunkPosition, SubChunkMesh> m_subchunk_meshes;
+	
+	OffsetAllocator m_vertex_allocator{MAX_VERTICES};
+	OffsetAllocator m_index_allocator{MAX_INDICES};
 };

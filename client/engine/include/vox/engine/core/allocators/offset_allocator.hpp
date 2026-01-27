@@ -14,12 +14,12 @@ public:
 	void free(Allocation alloc);
 
 	inline u32 get_total_memory() const { 
-        return m_total_size; 
-    }
+		return m_total_size; 
+	}
 
 	inline u32 get_used_memory() const {
-        return m_total_size - m_current_free_space; 
-    }
+		return m_total_size - m_current_free_space; 
+	}
 
 private:
 	u32 m_total_size = 0;

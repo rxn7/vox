@@ -9,6 +9,7 @@ Camera::Camera(vec3 position, f32 fov)
 
 mat4 Camera::get_view_matrix() const {
 	PROFILE_FUNC();
+	
 
 	constexpr vec3 UP = vec3(0.0f, 1.0f, 0.0f);
 	const vec3 forward = get_forward_direction();
@@ -21,7 +22,6 @@ mat4 Camera::get_projection_matrix(f32 aspect_ratio) const {
 	PROFILE_FUNC();
 
 	const mat4 projection_matrix = glm::perspective(glm::radians(m_fov), aspect_ratio, NEAR_PLANE, FAR_PLANE);
-
 	return projection_matrix;
 }
 

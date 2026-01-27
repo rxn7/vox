@@ -7,15 +7,16 @@
 #include "vox/engine/graphics/graphics_settings.hpp"
 
 inline u8 calculate_vertex_ao(bool side1_occluded, bool side2_occluded, bool corner_occluded) {
-    if(side1_occluded && side2_occluded) {
-        return 3;
-    }
-    return side1_occluded + side2_occluded + corner_occluded;
+	if(side1_occluded && side2_occluded) {
+		return 3;
+	}
+	return side1_occluded + side2_occluded + corner_occluded;
 }
 
 void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &renderer) {
 	PROFILE_FUNC();
-    
+	
+	
 	static std::vector<u32> s_vertices{};
 	s_vertices.reserve(4096);
 	s_vertices.clear();
@@ -33,7 +34,7 @@ void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &
 	}
 
 	const Chunk &chunk = subchunk.m_chunk;
-    const bool ao_enabled = GraphicsSettings::get_instance().m_state.m_ambient_occlusion_enabled;
+	const bool ao_enabled = GraphicsSettings::get_instance().m_state.m_ambient_occlusion_enabled;
 
 	const u32 subchunk_y_offset = subchunk.m_idx * SUBCHUNK_SIZE;
 
@@ -56,13 +57,13 @@ void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &
 					const auto is_block_solid = [&](i16vec3 offset) -> bool {
 						return !chunk.is_block_transparent(x + offset.x, y + offset.y + subchunk_y_offset, z + offset.z);
 					};
-                    
+					
 					const auto calculate_ao = [&](i32 t1, i32 t2) -> u8 {
 						PROFILE_SCOPE("Ambient Occlusion");
 
-                        if(!ao_enabled) {
-                            return 0; 
-                        }
+						if(!ao_enabled) {
+							return 0; 
+						}
 
 						const i16vec3 side1 = normal + tangent1 * t1;
 						const i16vec3 side2 = normal + tangent2 * t2;
@@ -116,12 +117,12 @@ void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &
 		}
 	}
 
-    const auto result = renderer.allocate_subchunk_mesh(s_vertices.size(), s_indices.size());
-    if(result) {
-        m_alloc = *result;
-        renderer.upload_subchunk_mesh(m_alloc, s_vertices, s_indices);
-    }
+	const auto result = renderer.allocate_subchunk_mesh(s_vertices.size(), s_indices.size());
+	if(result) {
+		m_alloc = *result;
+		renderer.upload_subchunk_mesh(m_alloc, s_vertices, s_indices);
+	}
 
 	subchunk.m_chunk.set_dirty(subchunk.m_idx, false);
-    m_index_count = s_indices.size();
+	m_index_count = s_indices.size();
 }

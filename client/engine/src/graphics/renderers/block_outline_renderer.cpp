@@ -2,28 +2,28 @@
 
 constexpr std::array<BlockOutlineVertex, 8> VERTICES = {
 	BlockOutlineVertex({0.0f, 0.0f, 0.0f}),
-    BlockOutlineVertex({1.0f, 0.0f, 0.0f}),
-    BlockOutlineVertex({1.0f, 1.0f, 0.0f}),
-    BlockOutlineVertex({0.0f, 1.0f, 0.0f}),
-    BlockOutlineVertex({0.0f, 0.0f, 1.0f}),
-    BlockOutlineVertex({1.0f, 0.0f, 1.0f}),
-    BlockOutlineVertex({1.0f, 1.0f, 1.0f}),
-    BlockOutlineVertex({0.0f, 1.0f, 1.0f})
+	BlockOutlineVertex({1.0f, 0.0f, 0.0f}),
+	BlockOutlineVertex({1.0f, 1.0f, 0.0f}),
+	BlockOutlineVertex({0.0f, 1.0f, 0.0f}),
+	BlockOutlineVertex({0.0f, 0.0f, 1.0f}),
+	BlockOutlineVertex({1.0f, 0.0f, 1.0f}),
+	BlockOutlineVertex({1.0f, 1.0f, 1.0f}),
+	BlockOutlineVertex({0.0f, 1.0f, 1.0f})
 };
 
 constexpr std::array<u16, 36> INDICES = { 
 	// Front Face (Z=0)
-    0, 2, 1, 0, 3, 2,
-    // Back Face (Z=1)
-    5, 7, 4, 5, 6, 7,
-    // Left Face (X=0)
-    4, 3, 0, 4, 7, 3,
-    // Right Face (X=1)
-    1, 6, 5, 1, 2, 6,
-    // Bottom Face (Y=0)
-    4, 1, 5, 4, 0, 1,
-    // Top Face (Y=1)
-    3, 6, 2, 3, 7, 6
+	0, 2, 1, 0, 3, 2,
+	// Back Face (Z=1)
+	5, 7, 4, 5, 6, 7,
+	// Left Face (X=0)
+	4, 3, 0, 4, 7, 3,
+	// Right Face (X=1)
+	1, 6, 5, 1, 2, 6,
+	// Bottom Face (Y=0)
+	4, 1, 5, 4, 0, 1,
+	// Top Face (Y=1)
+	3, 6, 2, 3, 7, 6
 };
 
 void BlockOutlineRenderer::init() {
@@ -34,7 +34,8 @@ void BlockOutlineRenderer::init() {
 }
 
 void BlockOutlineRenderer::render(BlockPosition block_position, const mat4 &camera_matrix) {
-    PROFILE_FUNC();
+	PROFILE_FUNC();
+	PROFILE_FUNC();
 
 	const vec3 global_position = vec3(block_position.m_local_position) + vec3(block_position.m_chunk_position.x, 0, block_position.m_chunk_position.y) * CHUNK_WIDTH;
 

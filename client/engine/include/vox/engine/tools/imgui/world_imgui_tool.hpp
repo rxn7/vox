@@ -5,5 +5,5 @@
 
 class WorldImGuiTool {
 public:
-    void render(World &world, std::optional<std::reference_wrapper<WorldRenderer>> world_renderer = std::nullopt);
+	void render(World &world, std::optional<std::reference_wrapper<WorldRenderer>> world_renderer = std::nullopt);
 };

@@ -23,12 +23,12 @@ public:
 	void update_mouse_button(i32 button, bool is_pressed);
 
 	inline vec2 get_mouse_delta() const { 
-        return m_mouse_position - m_last_mouse_position.value_or(m_mouse_position); 
-    }
+		return m_mouse_position - m_last_mouse_position.value_or(m_mouse_position); 
+	}
 
 	inline i32 get_mouse_mode() const { 
-        return m_mouse_mode; 
-    }
+		return m_mouse_mode; 
+	}
 
 private:
 	std::array<bool, GLFW_KEY_LAST+1> m_keys;

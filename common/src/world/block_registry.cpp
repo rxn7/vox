@@ -3,17 +3,17 @@
 
 // NOTE: its done that way to make explicit assignment to a specific BlockID.
 constexpr auto BLOCK_REGISTRY = []() {
-    std::array<BlockType, static_cast<sz>(BlockID::SIZE)> blocks{};
+	std::array<BlockType, static_cast<sz>(BlockID::SIZE)> blocks{};
 
 #define SET_BLOCK(id, val) blocks[static_cast<sz>(BlockID::id)] = val
 
-    SET_BLOCK(Dirt, BlockType("Dirt", TextureID::Dirt));
-    SET_BLOCK(Stone, BlockType("Stone", TextureID::Stone));
+	SET_BLOCK(Dirt, BlockType("Dirt", TextureID::Dirt));
+	SET_BLOCK(Stone, BlockType("Stone", TextureID::Stone));
 
     SET_BLOCK(Grass, BlockType("Grass", BlockTextures(TextureID::GrassTop, TextureID::GrassSide, TextureID::Dirt)));
     SET_BLOCK(Log, BlockType("Log", BlockTextures(TextureID::LogTopBot, TextureID::LogSide, TextureID::LogTopBot)));
 
-    return blocks;
+	return blocks;
 }();
 
 const BlockType &BlockRegistry::get(BlockID id) {

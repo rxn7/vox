@@ -25,6 +25,7 @@ public:
 
 	void init(std::span<const Vertex> vertices, std::span<const u16> elements) {
 		PROFILE_FUNC();
+		
 		assert(vertices.size() >= 3 && elements.size() >= 3);
 
 		m_element_count = elements.size();

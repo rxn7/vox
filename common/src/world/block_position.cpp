@@ -19,5 +19,5 @@ BlockPosition::BlockPosition(vec3 global_position) {
 	m_chunk_position = ChunkPosition(
 		static_cast<i16>(std::floor(static_cast<f32>(x) / CHUNK_WIDTH)),
 		static_cast<i16>(std::floor(static_cast<f32>(z) / CHUNK_WIDTH))
-    );
+	);
 }

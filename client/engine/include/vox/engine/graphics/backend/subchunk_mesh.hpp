@@ -6,28 +6,28 @@
 class WorldRenderer;
 
 struct SubChunkMeshAllocation {
-    OffsetAllocator::Allocation m_vertex_alloc;
-    OffsetAllocator::Allocation m_index_alloc;
-    
-    inline bool is_valid() const {
-        return m_vertex_alloc.m_size > 0 && m_index_alloc.m_size > 0;
-    };
+	OffsetAllocator::Allocation m_vertex_alloc;
+	OffsetAllocator::Allocation m_index_alloc;
+	
+	inline bool is_valid() const {
+		return m_vertex_alloc.m_size > 0 && m_index_alloc.m_size > 0;
+	};
 };
 
 class SubChunkMesh {
 public:
-    SubChunkMesh(SubChunkPosition position) : m_position(position) {}
+	SubChunkMesh(SubChunkPosition position) : m_position(position) {}
 
-    void generate_and_upload(const SubChunk &chunk, WorldRenderer &renderer);
+	void generate_and_upload(const SubChunk &chunk, WorldRenderer &renderer);
 
-    inline SubChunkPosition get_position() const {
-        return m_position;
-    }
+	inline SubChunkPosition get_position() const {
+		return m_position;
+	}
 
 public:
 	u32 m_index_count = 0;
-    SubChunkMeshAllocation m_alloc;
-    
+	SubChunkMeshAllocation m_alloc;
+	
 private:
-    SubChunkPosition m_position;
+	SubChunkPosition m_position;
 };

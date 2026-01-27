@@ -8,8 +8,8 @@ public:
 	void tick();
 
 	inline u32 get_frame_rate() const { 
-        return m_frame_rate; 
-    }
+		return m_frame_rate; 
+	}
 
 private:
 	u32 m_frame_rate = 0;

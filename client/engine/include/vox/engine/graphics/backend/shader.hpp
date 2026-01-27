@@ -39,8 +39,9 @@ public:
 
 	inline void bind() const { 
 		PROFILE_FUNC();
-		if(m_program_id == s_bound_program) 
+		if(m_program_id == s_bound_program) {
 			return;
+		}
 
 		s_bound_program = m_program_id;
 		glUseProgram(m_program_id); 

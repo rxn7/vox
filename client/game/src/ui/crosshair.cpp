@@ -25,7 +25,7 @@ void Crosshair::init() {
 void Crosshair::render(vec2 window_size) {
 	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 
-    const vec2 scale = vec2(
+	const vec2 scale = vec2(
 		(m_size / window_size.x) * 2.0f,
 		(m_size / window_size.y) * 2.0f
 	);

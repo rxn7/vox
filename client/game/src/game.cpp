@@ -9,8 +9,8 @@
 #include "vox/common/world/world.hpp"
 
 Game::Game() 
-: m_camera(vec3(0, 120.0f, 0), 75.0f), m_player(m_camera) {
-    m_chunk_removed_callback = m_world.m_chunk_removed_signal.connect([&](Chunk &chunk) {
+: m_camera(vec3(0.0f, 120.0f, 0.0f), 75.0f), m_player(m_camera) {
+	m_chunk_removed_callback = m_world.m_chunk_removed_signal.connect([&](Chunk &chunk) {
 		for(const auto &subchunk : chunk.get_subchunks()) {
 			if(subchunk == nullptr) {
 				continue;	
@@ -19,11 +19,11 @@ Game::Game()
 			m_world_renderer.remove_subchunk(*subchunk);
 			chunk.remove_subchunk(subchunk->m_idx);
 		}
-    });
+	});
 }
 
 Game::~Game() {
-    m_world.m_chunk_removed_signal.disconnect(m_chunk_removed_callback);
+	m_world.m_chunk_removed_signal.disconnect(m_chunk_removed_callback);
 }
 
 bool Game::init() {
@@ -34,19 +34,19 @@ bool Game::init() {
 	m_block_outline_renderer.init();
 	m_crosshair.init();
 
-    m_world.create_initial_chunks();
+	m_world.create_initial_chunks();
 
-    return true;
+	return true;
 }
 
 void Game::update(f32 delta_time) {
 	PROFILE_FUNC();
-    
-    handle_input();
+	
+	handle_input();
 	m_player.update(m_world, delta_time);
-    
-    for(auto &[position, chunk] : m_world.get_chunks()) {
-        if(chunk.has_dirty_subchunks()) {
+	
+	for(auto &[position, chunk] : m_world.get_chunks()) {
+		if(chunk.has_dirty_subchunks()) {
 			for(const auto &subchunk : chunk.get_subchunks()) {
 				if(subchunk == nullptr) {
 					continue;
@@ -62,8 +62,8 @@ void Game::update(f32 delta_time) {
 					m_world_renderer.update_subchunk(*subchunk);
 				}
 			}
-        }
-    }
+		}
+	}
 }
 
 void Game::render_3d(f32 aspect_ratio) {
@@ -117,6 +117,9 @@ void Game::render_3d(f32 aspect_ratio) {
 
 void Game::render_ui() {
 	PROFILE_FUNC();
+
+	const ivec2 window_size = Engine::get_instance().get_window().get_size();
+
 	m_text_renderer.update_2d(Engine::get_instance().get_window().get_size());
 
 	{
@@ -137,8 +140,14 @@ void Game::render_ui() {
 		m_text_renderer.render_text_2d(cmd);
 	}
 
-	const ivec2 window_size = Engine::get_instance().get_window().get_size();
-	m_crosshair.render(window_size);
+	{
+		TextRenderCommand2D cmd;
+		cmd.text = std::format("pos: {:2f} {:2f} {:2f}", m_camera.m_position.x, m_camera.m_position.y, m_camera.m_position.z);
+		cmd.position = vec2(0, 32);
+		cmd.size = 16.0f;
+
+		m_text_renderer.render_text_2d(cmd);
+	}
 
 	if(m_world_renderer.m_use_wireframe) {
 		TextRenderCommand2D cmd;
@@ -157,18 +166,20 @@ void Game::render_ui() {
 
 		m_text_renderer.render_text_2d(cmd);
 	}
+
+	m_crosshair.render(window_size);
 }
 
 void Game::render_imgui() {
 	PROFILE_FUNC();
-    m_world_imgui_tool.render(m_world, m_world_renderer);
-    m_graphics_imgui_tool.render(m_world);
+	m_world_imgui_tool.render(m_world, m_world_renderer);
+	m_graphics_imgui_tool.render(m_world);
 }
 
 void Game::handle_input() {
 	PROFILE_FUNC();
 
-    Input &input = Input::get_instance();
+	Input &input = Input::get_instance();
 	if(input.is_key_just_pressed(GLFW_KEY_F1)) {
 		m_world_renderer.m_use_wireframe ^= 1;
 	}
@@ -184,12 +195,8 @@ void Game::handle_input() {
 	if(input.is_key_just_pressed(GLFW_KEY_ESCAPE)) {
 		if(input.get_mouse_mode() == GLFW_CURSOR_DISABLED) {
 			input.set_mouse_mode(GLFW_CURSOR_NORMAL);
-        } else {
+		} else {
 			input.set_mouse_mode(GLFW_CURSOR_DISABLED);
-        }
+		}
 	}
-}
-
-void Game::handle_window_resize(ivec2 window_size) {
-	PROFILE_FUNC();
 }
