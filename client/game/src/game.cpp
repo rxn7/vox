@@ -155,8 +155,9 @@ void Game::render_ui() {
 	if(m_world_renderer.m_use_wireframe) {
 		TextRenderCommand2D cmd;
 		cmd.text = "[wireframe]";
-		cmd.position = vec2(0, window_size.y - 16.0f);
+		cmd.position = vec2(0, window_size.y);
 		cmd.size = 16.0f;
+		cmd.vertical_align = TextVerticalAlign::Top;
 
 		m_text_renderer.render_text_2d(cmd);
 	}
@@ -164,8 +165,9 @@ void Game::render_ui() {
 	if(m_player.m_fly_enabled) {
 		TextRenderCommand2D cmd;
 		cmd.text = "[fly]";
-		cmd.position = vec2(0, window_size.y - 32.0f);
+		cmd.position = vec2(0, window_size.y - 16.0f);
 		cmd.size = 16.0f;
+		cmd.vertical_align = TextVerticalAlign::Top;
 
 		m_text_renderer.render_text_2d(cmd);
 	}
@@ -174,8 +176,10 @@ void Game::render_ui() {
 		TextRenderCommand2D cmd;
 		cmd.text = std::format("block: {}", BlockRegistry::get(m_player.get_block_in_hand()).get_name());
 		cmd.position = vec2(window_size.x * 0.5f, 16.0f);
-		cmd.size = 16.0f;
+		cmd.size = 24.0f;
 		cmd.horizontal_align = TextHorizontalAlign::Center;
+		cmd.vertical_align = TextVerticalAlign::Middle;
+		cmd.color = vec4(1.0f, 1.0f, 1.0f, 0.7f);
 
 		m_text_renderer.render_text_2d(cmd);
 	}

@@ -51,11 +51,10 @@ void TextRenderer::update_3d(const mat4 &proj_matrix, const mat4 &view_matrix) {
 	PROFILE_FUNC();
 	m_proj_matrix_3d = proj_matrix;
 	m_view_matrix_3d = view_matrix;
-	PROFILE_FUNC();
 }
 
 void TextRenderer::render_text(std::string_view text, mat4 mvp, f32 size, TextHorizontalAlign horizontal_align, TextVerticalAlign vertical_align, vec4 color) {
-	
+	PROFILE_FUNC();
 
 	if(text.empty()) [[unlikely]] {
 		return;
@@ -80,6 +79,7 @@ void TextRenderer::render_text(std::string_view text, mat4 mvp, f32 size, TextHo
 	m_shader.set_uniform_f32("u_font_size", size);
 	m_shader.set_uniform_i32("u_text_length", text.size());
 	m_shader.set_uniform_i32("u_horizontal_align", static_cast<i32>(horizontal_align));
+	m_shader.set_uniform_i32("u_vertical_align", static_cast<i32>(vertical_align));
 	m_shader.set_uniform_vec4("u_color", color);
 
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, text.size() );
@@ -89,15 +89,14 @@ void TextRenderer::render_text(std::string_view text, mat4 mvp, f32 size, TextHo
 }
 
 void TextRenderer::render_text_2d(const TextRenderCommand2D &cmd) {
-	
-
 	PROFILE_FUNC();
+
 	const mat4 model = glm::translate(mat4(1.0f), vec3(cmd.position, 0));
 	render_text(cmd.text, m_projection_view_matrix_2d * model, cmd.size, cmd.horizontal_align, cmd.vertical_align, cmd.color);
 }
 
 void TextRenderer::render_text_3d(const TextRenderCommand3D &cmd) {
-	
+	PROFILE_FUNC();
 
 	mat4 model = glm::translate(mat4(1.0f), cmd.position);
 

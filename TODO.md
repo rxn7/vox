@@ -3,7 +3,6 @@
 ## Features
 - Internal server for singleplayer -- working on rn
 - Remote server for multiplayer
-- Text renderer alignment
 - Infinite world
 - Procedural world generation
 
