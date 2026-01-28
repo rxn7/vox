@@ -1,7 +1,7 @@
 #include "vox/engine/tools/imgui/graphics_imgui_tool.hpp"
 #include "vox/engine/graphics/graphics_settings.hpp"
 
-void GraphicsImGuiTool::render(std::optional<std::reference_wrapper<World>> world) {
+void GraphicsImGuiTool::render(std::optional<std::reference_wrapper<ClientWorld>> world) {
 	PROFILE_FUNC();
 	PROFILE_FUNC();
 

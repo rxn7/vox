@@ -5,14 +5,14 @@
 #include "vox/engine/tools/fps_counter.hpp"
 #include "vox/engine/core/engine.hpp"
 #include "vox/engine/core/input.hpp"
-#include "vox/common/world/world.hpp"
 #include "vox/common/world/block_registry.hpp"
 #include "vox/common/world/subchunk.hpp"
 
 Game::Game() 
-: mp_host_driver(std::make_shared<HostNetworkDriver>()),
-m_server(mp_host_driver), 
+: mp_network(std::make_shared<HostNetworkDriver>()),
+m_server(mp_network), 
 m_camera(vec3(0.0f, 120.0f, 0.0f)), 
+m_world(m_world_renderer),
 m_player(m_camera) {
 	m_chunk_removed_callback = m_world.m_chunk_removed_signal.connect([&](Chunk &chunk) {
 		for(const auto &subchunk : chunk.get_subchunks()) {
@@ -38,8 +38,9 @@ bool Game::init() {
 	m_block_outline_renderer.init();
 	m_crosshair.init();
 
-	m_world.create_initial_chunks();
-
+	// m_world.create_initial_chunks();
+	
+	mp_network->init();
 	m_server_thread = std::jthread([this](std::stop_token stop_token) {
 		m_server.run(stop_token);
 	});
@@ -54,27 +55,32 @@ void Game::tick() {
 	// 	.message = "Hello world!"
 	// };
 	// mp_host_driver->SendPacketToServer(std::move(chat_packet));
+	
+	S2C_Packet packet;
+	while(mp_network->poll_packet(packet)) {
+		handle_packet(packet);
+	}
 
 	m_player.tick(m_world);
 }
 
 void Game::update(f64 alpha, f32 delta_time) {
 	PROFILE_FUNC();
-	
+
 	handle_input();
 	m_player.update(alpha);
 	
 	for(auto &[position, chunk] : m_world.get_chunks()) {
-		if(chunk.has_dirty_subchunks()) {
-			for(const auto &subchunk : chunk.get_subchunks()) {
+		if(chunk->has_dirty_subchunks()) {
+			for(const auto &subchunk : chunk->get_subchunks()) {
 				if(subchunk == nullptr) {
 					continue;
 				}
 
-				if(chunk.is_dirty(subchunk->get_idx())) {
+				if(chunk->is_dirty(subchunk->get_idx())) {
 					if(subchunk->is_empty()) {
 						m_world_renderer.remove_subchunk(*subchunk);
-						chunk.remove_subchunk(subchunk->get_idx());
+						chunk->remove_subchunk(subchunk->get_idx());
 						continue;
 					}
 
@@ -102,11 +108,10 @@ void Game::render_3d(f32 aspect_ratio) {
 
 	if(m_render_subchunk_debug) {
 		for(auto &[position, chunk] : m_world.get_chunks()) {
-			for(const auto &subchunk : chunk.get_subchunks()) {
+			for(const auto &subchunk : chunk->get_subchunks()) {
 				if(subchunk == nullptr) {
 					continue;
 				}
-
 
 				TextRenderCommand3D cmd;
 				cmd.text = std::format("{} {} {}", position.x, subchunk->get_idx(), position.y);
@@ -228,4 +233,19 @@ void Game::handle_input() {
 			input.set_mouse_mode(GLFW_CURSOR_DISABLED);
 		}
 	}
+}
+
+void Game::handle_packet(const S2C_Packet &packet) {
+	std::visit(Overloaded {
+		[&](const S2C_ChatMessagePacket &p)  {
+			std::println("[CHAT] {}: {}", p.sender_id, p.message);
+		},
+
+		[&](const S2C_ChunkUpdatePacket &p)  {
+			m_world.handle_chunk_udate_packet(p);
+		},
+
+		[&](const S2C_PlayerUpdatePacket &p)  {
+		}
+	}, packet);
 }

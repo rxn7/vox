@@ -2,9 +2,8 @@
 
 using CallbackID = u32;
 
-template<typename Owner, typename ...Args>
+template<typename ...Args>
 class Signal {
-friend Owner;
 public:
 	using Callback = std::function<void(Args...)>;
 
@@ -18,7 +17,6 @@ public:
 		m_slots.erase(id);
 	}
 	
-private:
 	void emit(Args ...args) {
 		for(const auto &[id, callback] : m_slots) {
 			callback(args...);

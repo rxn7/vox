@@ -1,8 +1,8 @@
 #pragma once
 
-#include "vox/common/world/world.hpp"
+#include "vox/engine/world/client_world.hpp"
 
 class GraphicsImGuiTool {
 public:
-	void render(std::optional<std::reference_wrapper<World>> world = std::nullopt);
+	void render(std::optional<std::reference_wrapper<ClientWorld>> world = std::nullopt);
 };

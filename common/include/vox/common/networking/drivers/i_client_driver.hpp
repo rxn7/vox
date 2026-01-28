@@ -7,6 +7,6 @@ class IClientDriver {
 public:
 	virtual ~IClientDriver() = default;
 
-	virtual void SendPacketToServer(C2S_Packet packet) = 0;
-	virtual bool PollPacket(S2C_Packet &out_packet) = 0;
+	virtual void send_packet_to_server(C2S_Packet packet) = 0;
+	virtual bool poll_packet(S2C_Packet &out_packet) = 0;
 };

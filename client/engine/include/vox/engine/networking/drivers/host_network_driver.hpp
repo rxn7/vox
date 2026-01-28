@@ -6,13 +6,16 @@
 
 class HostNetworkDriver : public IClientDriver, public IServerDriver {
 public:
+	void init();
+
 	// CLIENT
-	void SendPacketToServer(C2S_Packet packet) override;
-	bool PollPacket(S2C_Packet &out_packet) override;
+	void send_packet_to_server(C2S_Packet packet) override;
+	bool poll_packet(S2C_Packet &out_packet) override;
 
 	// SERVER
-	void SendPacketToClient(i32 client_id, S2C_Packet packet) override;
-	bool PollPacket(C2S_Packet &out_packet, i32 &sender_id) override;
+	void send_packet_to_client(i32 client_id, S2C_Packet packet) override;
+	void broadcast_packet(S2C_Packet packet, i32 except_id = -1) override;
+	bool poll_packet(C2S_Packet &out_packet, i32 &sender_id) override;
 
 private:
 	ThreadSafeQueue<C2S_Packet> m_packets_for_server_queue;

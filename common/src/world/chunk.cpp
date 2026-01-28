@@ -1,10 +1,10 @@
 #include "vox/common/world/chunk.hpp"
 #include "vox/common/world/block_position.hpp"
 #include "vox/common/world/chunk_position.hpp"
-#include "vox/common/world/world.hpp"
+#include "vox/common/world/i_world.hpp"
 #include "vox/common/world/subchunk.hpp"
 
-Chunk::Chunk(World &world, ChunkPosition position) : m_world(world), m_position(position) {
+Chunk::Chunk(IWorld &world, ChunkPosition position) : m_world(world), m_position(position) {
 	m_dirty_subchunks_bitmap.reset();
 }
 
@@ -86,65 +86,6 @@ void Chunk::set_all_non_empty_subchunks_dirty() {
 	for(u32 i = 0; i < SUBCHUNK_COUNT; ++i) {
 		if(m_subchunks[i] != nullptr) {
 			m_dirty_subchunks_bitmap[i] = true;
-		}
-	}
-}
-
-void Chunk::generate() {
-	PROFILE_FUNC();
-
-	// TODO: Temporary
-	for(u32 x = 0; x < CHUNK_WIDTH; ++x) {
-		for(u32 z = 0; z < CHUNK_WIDTH; ++z) {
-			const u32 max_y = SUBCHUNK_SIZE * 4 - 1;
-
-			for(u32 y = 0; y < max_y; ++y) {
-				if(y == max_y - 1) {
-					set_block_local(LocalBlockPosition(x, y, z), BlockID::Grass);
-
-					// Trees (temporary)
-					if(rand() % 20 == 0) {
-						bool has_neighbor = false;
-						for(i8 dx = -1; dx <= 1; ++dx) {
-							for(i8 dz = -1; dz <= 1; ++dz) {
-								if(dx == 0 && dz == 0) {
-									continue;
-								}
-
-								if(get_block_relative(x + dx, y+1, z + dz) != BlockID::Air) {
-									has_neighbor = true;
-									break;
-								}
-							}
-						}
-
-						if(has_neighbor) {
-							continue;
-						}
-
-						const u8 tree_height = 4 + rand() % 2;
-
-						i8 radius = 2;
-						for(u32 dy = tree_height-1; dy <= tree_height + 1; ++dy) {
-							for(i8 dx = -radius; dx <= radius; ++dx) {
-								for(i8 dz = -radius; dz <= radius; ++dz) {
-									set_block_relative(x + dx, y + dy, z + dz, BlockID::Leaves);
-								}
-							}
-
-							radius = glm::max(0, radius - 1);
-						}
-
-						for(u32 i = 0; i < tree_height - 1; ++i) {
-							set_block_local(LocalBlockPosition(x, y + i, z), BlockID::Log);
-						}
-					}
-				} else if(y < max_y - 5) {
-					set_block_local(LocalBlockPosition(x, y, z), BlockID::Stone);
-				} else {
-					set_block_local(LocalBlockPosition(x, y, z), BlockID::Dirt);
-				}
-			}
 		}
 	}
 }

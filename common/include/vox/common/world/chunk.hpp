@@ -5,14 +5,13 @@
 #include "vox/common/world/block_id.hpp"
 #include "vox/common/world/chunk_position.hpp"
 #include "vox/common/world/block_registry.hpp"
-#include <bitset>
+#include "vox/common/world/subchunk.hpp"
 
-class World;
-class SubChunk;
+class IWorld;
 
 class Chunk {
 public:
-	Chunk(World &world, ChunkPosition position);
+	Chunk(IWorld &world, ChunkPosition position);
 
 	BlockID get_block_local(LocalBlockPosition pos) const;
 
@@ -25,8 +24,6 @@ public:
 	void set_all_non_empty_subchunks_dirty();
 
 	void remove_subchunk(u32 idx);
-
-	void generate();
 
 	inline bool is_block_transparent_relative(i8 x, i16 y, i8 z) const {
 		return BlockRegistry::get(get_block_relative(x, y, z)).is_transparent();
@@ -42,6 +39,10 @@ public:
 
 	inline bool has_dirty_subchunks() const {
 		return m_dirty_subchunks_bitmap.any();
+	}
+
+	inline bool subchunk_exists(u32 idx) const {
+		return m_subchunks[idx] != nullptr;
 	}
 
 	inline ChunkPosition get_position() const { 
@@ -63,10 +64,28 @@ public:
 		return m_subchunks[idx].get();
 	}
 
+	inline SubChunk *create_subchunk(u32 idx) {
+		 m_subchunks[idx] = std::make_unique<SubChunk>(*this, idx);
+		 return m_subchunks[idx].get();
+	}
+
+	inline SubChunk *get_or_create(u32 idx) {
+		if(idx >= SUBCHUNK_COUNT) [[unlikely]] {
+			std::println("Tried to get subchunk at invalid idx: {}", idx);
+			return nullptr;
+		}
+
+		if(SubChunk *subchunk = get_subchunk(idx)) {
+			return subchunk;
+		}
+
+		return create_subchunk(idx);
+	}
+
 private:
 	ChunkPosition m_position;
-	World &m_world;
+	IWorld &m_world;
 
-	std::array<std::unique_ptr<SubChunk>, SUBCHUNK_COUNT> m_subchunks;
 	std::bitset<SUBCHUNK_COUNT> m_dirty_subchunks_bitmap;
+	std::array<std::unique_ptr<SubChunk>, SUBCHUNK_COUNT> m_subchunks;
 };

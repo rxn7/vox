@@ -3,8 +3,7 @@
 #include "vox/common/system/tick_loop.hpp"
 #include "vox/engine/core/input.hpp"
 #include "vox/common/world/block_registry.hpp"
-#include "vox/common/world/physics_constants.hpp"
-#include "vox/common/world/world.hpp"
+#include "vox/common/world/physics.hpp"
 
 constexpr f32 HALF_PLAYER_WIDTH = PLAYER_WIDTH / 2.0f;
 constexpr vec3 UP = vec3(0.0f, 1.0f, 0.0f);
@@ -15,7 +14,7 @@ Player::Player(Camera &cam) : m_camera(cam), m_position(cam.m_position) {
 Player::~Player() {
 }
 
-void Player::tick(World &world) {
+void Player::tick(IWorld &world) {
 	PROFILE_FUNC();
 
 	m_prev_position = m_position;
@@ -75,7 +74,7 @@ void Player::handle_input() {
 	}
 }
 
-void Player::handle_movement(World &world, f32 dt) {
+void Player::handle_movement(IWorld &world, f32 dt) {
 	PROFILE_FUNC();
 
 	vec3 forward = m_camera.get_forward_direction();
@@ -203,7 +202,7 @@ void Player::apply_friction(f32 friction, f32 dt) {
 	m_horizontal_velocity *= (new_speed / speed);
 }
 
-bool Player::check_collision(World &world) {
+bool Player::check_collision(IWorld &world) {
 	PROFILE_FUNC();
 
 	const AABB aabb = calculate_aabb();
@@ -234,43 +233,43 @@ bool Player::check_collision(World &world) {
 	return false;
 }
 
-void Player::handle_block_interaction(World &world) {
+void Player::handle_block_interaction(IWorld &world) {
 	PROFILE_FUNC();
 
 	const vec3 ray_start = m_position;
 	const vec3 ray_dir = m_camera.get_forward_direction();
 
-	const RaycastResult raycast_result = world.raycast(ray_start, ray_dir, REACH_DISTANCE);
+	const std::optional<Physics::RaycastResult> raycast_result = Physics::raycast(world, ray_start, ray_dir, REACH_DISTANCE);
 		
-	if(!raycast_result.did_hit) {
+	if(!raycast_result.has_value()) {
 		m_last_highlighted_block_position = std::nullopt;
 		return;
 	}
 
 	if(m_input_state.wish_to_copy_block) {
-		m_block_in_hand = world.get_block(raycast_result.hit_block_position);
+		m_block_in_hand = world.get_block(raycast_result->hit_block_position);
 		if(m_block_in_hand == BlockID::Air) {
 			m_block_in_hand = BlockID::Stone;
 		}
 	}
 
-	m_last_highlighted_block_position = raycast_result.hit_block_position;
+	m_last_highlighted_block_position = raycast_result->hit_block_position;
 
 	if(m_input_state.wish_to_place_block) {
 		const AABB player_aabb = calculate_aabb();
 		const AABB block_aabb = {
-			.min = vec3(raycast_result.previous_grid_position),
-			.max = vec3(raycast_result.previous_grid_position) + 1.0f,
+			.min = vec3(raycast_result->previous_grid_position),
+			.max = vec3(raycast_result->previous_grid_position) + 1.0f,
 		};
 
 		if(!player_aabb.overlap(block_aabb)) {
-			const BlockPosition place_position(vec3(raycast_result.previous_grid_position) + 0.5f);
+			const BlockPosition place_position(vec3(raycast_result->previous_grid_position) + 0.5f);
 			
 			// TODO: Send place packet to server
 			world.set_block(place_position, m_block_in_hand);
 		}
 	} else if(m_input_state.wish_to_break_block) {
 		// TODO: Send break packet to server
-		world.set_block(raycast_result.hit_block_position, BlockID::Air);
+		world.set_block(raycast_result->hit_block_position, BlockID::Air);
 	}
 }

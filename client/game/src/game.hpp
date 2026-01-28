@@ -3,8 +3,8 @@
 #include "player/player.hpp"
 #include "ui/crosshair.hpp"
 
+#include "vox/engine/world/client_world.hpp"
 #include "vox/common/helper/signal.hpp"
-#include "vox/common/world/world.hpp"
 #include "vox/common/server/server_logic.hpp"
 #include "vox/engine/networking/drivers/host_network_driver.hpp"
 #include "vox/engine/core/i_game.hpp"
@@ -35,14 +35,15 @@ public:
 private:
 	void start_server();
 	void handle_input();
+	void handle_packet(const S2C_Packet &packet);
 
 private:
 	// TODO: this should be only inside host
-	std::shared_ptr<HostNetworkDriver> mp_host_driver;
+	std::shared_ptr<HostNetworkDriver> mp_network;
 	ServerLogic m_server;
 	std::jthread m_server_thread;
 
-	World m_world;
+	ClientWorld m_world;
 
 	WorldRenderer m_world_renderer;
 	TextRenderer m_text_renderer;

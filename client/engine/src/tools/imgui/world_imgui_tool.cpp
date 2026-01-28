@@ -2,7 +2,7 @@
 #include "vox/common/helper/format_helper.hpp"
 #include "vox/common/world/subchunk.hpp"
 
-void WorldImGuiTool::render(World &world, std::optional<std::reference_wrapper<WorldRenderer>> world_renderer_wrapper) {
+void WorldImGuiTool::render(ClientWorld &world, std::optional<std::reference_wrapper<WorldRenderer>> world_renderer_wrapper) {
 	PROFILE_FUNC();
 	PROFILE_FUNC();
 

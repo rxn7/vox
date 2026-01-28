@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vox/common/world/world.hpp"
+#include "vox/common/world/i_world.hpp"
 #include "vox/common/world/aabb.hpp"
 #include "vox/common/world/physics_constants.hpp"
 #include "vox/engine/graphics/backend/camera.hpp"
@@ -47,7 +47,7 @@ public:
 	Player(Camera &cam);
 	~Player();
 
-	void tick(World &world);
+	void tick(IWorld &world);
 	void update(f64 alpha);
 	AABB calculate_aabb() const;
 
@@ -66,12 +66,12 @@ public:
 
 private:
 	void handle_input();
-	void handle_movement(World &world, f32 dt);
+	void handle_movement(IWorld &world, f32 dt);
 	void handle_mouse_movement();
 	void accelerate(vec3 wish_dir, f32 acceleration, f32 max_speed, f32 dt);
 	void apply_friction(f32 friction, f32 dt);
-	bool check_collision(World &world);
-	void handle_block_interaction(World &world); 
+	bool check_collision(IWorld &world);
+	void handle_block_interaction(IWorld &world); 
 
 public:
 	bool m_fly_enabled = false;

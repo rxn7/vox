@@ -14,10 +14,12 @@
 #include <queue>
 #include <mutex>
 #include <thread>
+#include <bitset>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <glm/gtx/hash.hpp>
 
 using vec2 = glm::vec2;
 using vec3 = glm::vec3;
@@ -49,5 +51,11 @@ using i64 = int64_t;
 using u64 = uint64_t;
 
 using sz = size_t;
+
+template<class... Ts> 
+struct Overloaded : Ts... { using Ts::operator()...; };
+
+template<class... Ts> 
+Overloaded(Ts...) -> Overloaded<Ts...>;
 
 #include "vox/common/profiler/profiler_scope_timer.hpp"

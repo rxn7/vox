@@ -1,7 +1,6 @@
 #pragma once
 
 #include <functional>
-#include <glm/gtx/hash.hpp>
 
 typedef i16vec2 ChunkPosition;
 
