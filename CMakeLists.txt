@@ -37,7 +37,7 @@ include(cmake/embed.cmake)
 include(cmake/game_networking_sockets.cmake)
 
 add_subdirectory(common)
-add_subdirectory(server)
+add_subdirectory(dedicated_server)
 add_subdirectory(client)
 
 if(EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")

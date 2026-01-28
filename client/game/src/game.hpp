@@ -5,6 +5,8 @@
 
 #include "vox/common/helper/signal.hpp"
 #include "vox/common/world/world.hpp"
+#include "vox/common/server/server_logic.hpp"
+#include "vox/engine/networking/drivers/host_network_driver.hpp"
 #include "vox/engine/core/i_game.hpp"
 #include "vox/engine/tools/imgui/graphics_imgui_tool.hpp"
 #include "vox/engine/tools/imgui/world_imgui_tool.hpp"
@@ -31,9 +33,15 @@ public:
 	}
 	
 private:
+	void start_server();
 	void handle_input();
 
 private:
+	// TODO: this should be only inside host
+	std::shared_ptr<HostNetworkDriver> mp_host_driver;
+	ServerLogic m_server;
+	std::jthread m_server_thread;
+
 	World m_world;
 
 	WorldRenderer m_world_renderer;

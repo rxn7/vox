@@ -2,7 +2,7 @@
 
 class IGame {
 public:
-	virtual ~IGame() {}
+	virtual ~IGame() = default;
 
 	virtual bool init() = 0;
 

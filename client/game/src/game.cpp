@@ -10,7 +10,10 @@
 #include "vox/common/world/subchunk.hpp"
 
 Game::Game() 
-: m_camera(vec3(0.0f, 120.0f, 0.0f)), m_player(m_camera) {
+: mp_host_driver(std::make_shared<HostNetworkDriver>()),
+m_server(mp_host_driver), 
+m_camera(vec3(0.0f, 120.0f, 0.0f)), 
+m_player(m_camera) {
 	m_chunk_removed_callback = m_world.m_chunk_removed_signal.connect([&](Chunk &chunk) {
 		for(const auto &subchunk : chunk.get_subchunks()) {
 			if(subchunk == nullptr) {
@@ -37,11 +40,20 @@ bool Game::init() {
 
 	m_world.create_initial_chunks();
 
+	m_server_thread = std::jthread([this](std::stop_token stop_token) {
+		m_server.run(stop_token);
+	});
+
 	return true;
 }
 
 void Game::tick() {
 	PROFILE_FUNC();
+
+	// C2S_ChatMessagePacket chat_packet = {
+	// 	.message = "Hello world!"
+	// };
+	// mp_host_driver->SendPacketToServer(std::move(chat_packet));
 
 	m_player.tick(m_world);
 }

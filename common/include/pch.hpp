@@ -11,40 +11,43 @@
 #include <span>
 #include <memory>
 #include <atomic>
+#include <queue>
+#include <mutex>
+#include <thread>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-typedef glm::vec2 vec2;
-typedef glm::vec3 vec3;
-typedef glm::vec4 vec4;
-typedef glm::ivec2 ivec2;
-typedef glm::ivec3 ivec3;
-typedef glm::ivec4 ivec4;
-typedef glm::mat4 mat4;
-typedef glm::mat3 mat3;
+using vec2 = glm::vec2;
+using vec3 = glm::vec3;
+using vec4 = glm::vec4;
+using ivec2 = glm::ivec2;
+using ivec3 = glm::ivec3;
+using ivec4 = glm::ivec4;
+using mat4 = glm::mat4;
+using mat3 = glm::mat3;
 
-typedef glm::i8vec3 i8vec3;
-typedef glm::u8vec3 u8vec3;
-typedef glm::i16vec3 i16vec3;
-typedef glm::i16vec2 i16vec2;
+using i8vec3 = glm::i8vec3;
+using u8vec3 = glm::u8vec3;
+using i16vec3 = glm::i16vec3;
+using i16vec2 = glm::i16vec2;
 
-typedef float f32;
-typedef double f64;
+using f32 = float;
+using f64 = double;
 
-typedef int8_t i8;
-typedef uint8_t u8;
+using i8 = int8_t;
+using u8 = uint8_t;
 
-typedef int16_t i16;
-typedef uint16_t u16;
+using i16 = int16_t;
+using u16 = uint16_t;
 
-typedef int32_t i32;
-typedef uint32_t u32;
+using i32 = int32_t;
+using u32 = uint32_t;
 
-typedef int64_t i64;
-typedef uint64_t u64;
+using i64 = int64_t;
+using u64 = uint64_t;
 
-typedef size_t sz;
+using sz = size_t;
 
 #include "vox/common/profiler/profiler_scope_timer.hpp"

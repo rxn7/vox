@@ -4,6 +4,8 @@
 #include "vox/common/world/chunk.hpp"
 #include "vox/common/world/world_constants.hpp"
 
+using SubChunkData = std::array<BlockID, SUBCHUNK_VOLUME>;
+
 class SubChunk {
 public:
 	SubChunk(Chunk &chunk, u32 idx) : m_chunk(chunk), m_idx(idx) {
@@ -44,12 +46,12 @@ public:
 		return m_chunk;
 	}
 
-	inline std::array<BlockID, SUBCHUNK_VOLUME> &get_blocks() {
+	inline SubChunkData &get_blocks() {
 		return m_blocks;
 	}
 
 private:
 	Chunk &m_chunk;
 	u32 m_idx;
-	std::array<BlockID, SUBCHUNK_VOLUME> m_blocks;
+	SubChunkData m_blocks;
 };

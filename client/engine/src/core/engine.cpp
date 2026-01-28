@@ -38,6 +38,8 @@ void Engine::run_game(IGame *game) {
 		return;
 	}
 
+	m_tick_loop.start();
+
 	Input &input = Input::get_instance();
 
 	while(!glfwWindowShouldClose(m_window.get_glfw_window())) {

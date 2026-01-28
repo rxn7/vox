@@ -40,7 +40,6 @@ void TextRenderer::init() {
 	m_initialized = true;
 }
 
-
 void TextRenderer::update_2d(vec2 screen_size) {
 	PROFILE_FUNC();
 
