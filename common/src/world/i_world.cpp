@@ -40,8 +40,8 @@ void IWorld::set_block(BlockPosition position, BlockID value) {
 	const u32 sub_idx = position.local_position.y / SUBCHUNK_SIZE;
 	const u32 local_y = position.local_position.y % SUBCHUNK_SIZE;
 
-	m_dirty_chunk_positions.insert(position.chunk_position);
-	chunk->set_dirty(sub_idx, true);
+	// m_dirty_chunk_positions.insert(position.chunk_position);
+	// chunk->set_dirty(sub_idx, true);
 
 	const u32 lx = position.local_position.x;
 	const u32 ly = position.local_position.y;

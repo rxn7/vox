@@ -21,7 +21,7 @@ m_player(m_camera) {
 			}
 
 			m_world_renderer.remove_subchunk(*subchunk);
-			chunk.remove_subchunk(subchunk->get_idx());
+			// chunk.remove_subchunk(subchunk->get_idx());
 		}
 	});
 }
@@ -54,12 +54,26 @@ void Game::tick() {
 	// };
 	// mp_host_driver->SendPacketToServer(std::move(chat_packet));
 	
-	S2C_Packet packet;
-	while(mp_network->poll_packet(packet)) {
-		handle_packet(std::move(packet));
+	{
+		PROFILE_SCOPE("Client packet polling");
+
+		S2C_Packet packet;
+		while(mp_network->poll_packet(packet)) {
+			handle_packet(std::move(packet));
+		}
 	}
 
 	m_player.tick(m_world);
+
+	{
+		C2S_PlayerUpdatePacket packet = {
+			.position = m_player.get_position(),
+			.pitch = m_camera.m_pitch,
+			.yaw = m_camera.m_yaw,
+		};
+
+		mp_network->send_packet_to_server(std::move(packet));
+	}
 }
 
 void Game::update(f64 alpha, f32 delta_time) {

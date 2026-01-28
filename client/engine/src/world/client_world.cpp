@@ -32,6 +32,21 @@ void ClientWorld::handle_chunk_udate_packet(const S2C_ChunkUpdatePacket &packet)
 		subchunk->set_blocks(*blocks);
 		chunk->set_dirty(i, true);
 	}
+
+	// flag neighbours dirty
+	for(i8 dx = -1; dx <= 1; ++dx) {
+		for(i8 dz = -1; dz <= 1; ++dz) {
+			const ChunkPosition position = packet.position + ChunkPosition(dx, dz);
+			Chunk *chunk = get_chunk(position);
+
+			if(chunk == nullptr) {
+				continue;
+			}
+
+			chunk->set_all_non_empty_subchunks_dirty();
+			m_dirty_chunk_positions.insert(position);
+		}
+	}
 }
 
 void ClientWorld::update_dirty_chunk(Chunk *chunk) {

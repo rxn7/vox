@@ -10,11 +10,17 @@ ServerLogic::ServerLogic(std::shared_ptr<IServerDriver> p_network) : mp_network(
 	m_world.create_initial_chunks();
 
 	p_network->m_player_connected.connect([&](i32 client_id) {
+		m_players.insert({client_id, PlayerServerEntity{}});
+
 		for(i32 x = -4; x < 4; ++x) {
 			for(i32 z = -4; z < 4; ++z) {
 				send_chunk_to_client(client_id, {x, z});
 			}
 		}
+	});
+
+	p_network->m_player_disconnected.connect([&](i32 client_id) {
+		m_players.erase(client_id);
 	});
 }
 
@@ -44,10 +50,13 @@ void ServerLogic::run(std::stop_token stop_token) {
 }
 
 void ServerLogic::tick() {
+	for(const auto &[player_id, player_entity] : m_players) {
+		// TODO: this should be on the client
+	}
 }
 
 void ServerLogic::send_chunk_to_client(i32 client_id, ChunkPosition position) {
-	PROFILE_FUNC();
+	// PROFILE_FUNC();
 
 	Chunk *chunk = m_world.get_chunk(position);
 	if(chunk == nullptr) {
@@ -71,11 +80,14 @@ void ServerLogic::send_chunk_to_client(i32 client_id, ChunkPosition position) {
 
 		std::shared_ptr<SubChunkData> ferry_data = std::make_shared<SubChunkData>();
 
-		std::memcpy(
-			ferry_data->data(),
-			subchunk->get_blocks().data(),
-			SUBCHUNK_VOLUME
-		);
+		const SubChunkData &blocks = subchunk->get_blocks();
+		std::copy(blocks.begin(), blocks.end(), ferry_data->begin());
+
+		// std::memcpy(
+		// 	ferry_data->data(),
+		// 	subchunk->get_blocks().data(),
+		// 	SUBCHUNK_VOLUME
+		// );
 
 		packet.data[i] = ferry_data;
 	}
@@ -84,7 +96,7 @@ void ServerLogic::send_chunk_to_client(i32 client_id, ChunkPosition position) {
 }
 
 void ServerLogic::handle_packet(C2S_Packet packet, i32 sender_id) {
-	PROFILE_FUNC();
+	// PROFILE_FUNC();
 
 	std::visit(Overloaded {
 		[&](const C2S_ChatMessagePacket &p)  {
@@ -100,6 +112,24 @@ void ServerLogic::handle_packet(C2S_Packet packet, i32 sender_id) {
 		},
 
 		[&](const C2S_PlayerUpdatePacket &p)  {
+			if(!m_players.contains(sender_id)) {
+				server_log("Invalid sender id: {}", sender_id);
+				return;
+			}
+
+			PlayerServerEntity &player_entity = m_players.at(sender_id);
+			player_entity.update(p.position, p.pitch, p.yaw);
+
+			const BlockPosition position = player_entity.get_block_position();
+
+			// TODO: Temporary
+			Chunk *chunk = m_world.get_chunk(position.chunk_position); 
+			if(chunk == nullptr) {
+				chunk = m_world.create_chunk(position.chunk_position);
+				m_world.generate_chunk(*chunk);
+
+				send_chunk_to_client(sender_id, position.chunk_position);
+			}
 		},
 	}, packet);
 }

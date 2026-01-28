@@ -38,7 +38,7 @@ BlockID Chunk::get_block_relative(i8 x, i16 y, i8 z) const {
 }
 
 void Chunk::set_block_local(LocalBlockPosition pos, BlockID value) {
-	PROFILE_FUNC();
+	// PROFILE_FUNC();
 
 	if(pos.y >= CHUNK_HEIGHT) {
 		return;
@@ -62,7 +62,7 @@ void Chunk::set_block_local(LocalBlockPosition pos, BlockID value) {
 }
 
 void Chunk::set_block_relative(i8 x, i16 y, i8 z, BlockID value) {
-	PROFILE_FUNC();
+	// PROFILE_FUNC();
 
 	BlockID block;
 	if(x < 0 || x >= CHUNK_WIDTH || z < 0 || z >= CHUNK_WIDTH) {

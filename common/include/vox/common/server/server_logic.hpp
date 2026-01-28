@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vox/common/server/player_server_entity.hpp"
 #include "vox/common/server/server_world.hpp"
 #include "vox/common/system/tick_loop.hpp"
 #include "vox/common/networking/drivers/i_server_driver.hpp"
@@ -17,5 +18,6 @@ private:
 private:
 	std::shared_ptr<IServerDriver> mp_network;
 	ServerWorld m_world;
+	std::unordered_map<i32, PlayerServerEntity> m_players;
 	TickLoop m_tick_loop;
 };
