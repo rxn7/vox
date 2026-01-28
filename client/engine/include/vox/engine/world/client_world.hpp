@@ -10,6 +10,8 @@ public:
 	virtual ~ClientWorld();
 
 	void handle_chunk_udate_packet(const S2C_ChunkUpdatePacket &packet);
+	void update_dirty_chunk(Chunk *chunk);
+	Chunk *try_pop_dirty_chunk();
 		
 private:
 	WorldRenderer &m_renderer;

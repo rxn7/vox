@@ -12,7 +12,7 @@ public:
 private:
 	void tick();
 	void send_chunk_to_client(i32 client_id, ChunkPosition position);
-	void handle_packet(const C2S_Packet &packet, i32 sender_id);
+	void handle_packet(C2S_Packet packet, i32 sender_id);
 
 private:
 	std::shared_ptr<IServerDriver> mp_network;

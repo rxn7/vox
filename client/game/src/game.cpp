@@ -38,8 +38,6 @@ bool Game::init() {
 	m_block_outline_renderer.init();
 	m_crosshair.init();
 
-	// m_world.create_initial_chunks();
-	
 	mp_network->init();
 	m_server_thread = std::jthread([this](std::stop_token stop_token) {
 		m_server.run(stop_token);
@@ -58,7 +56,7 @@ void Game::tick() {
 	
 	S2C_Packet packet;
 	while(mp_network->poll_packet(packet)) {
-		handle_packet(packet);
+		handle_packet(std::move(packet));
 	}
 
 	m_player.tick(m_world);
@@ -70,24 +68,8 @@ void Game::update(f64 alpha, f32 delta_time) {
 	handle_input();
 	m_player.update(alpha);
 	
-	for(auto &[position, chunk] : m_world.get_chunks()) {
-		if(chunk->has_dirty_subchunks()) {
-			for(const auto &subchunk : chunk->get_subchunks()) {
-				if(subchunk == nullptr) {
-					continue;
-				}
-
-				if(chunk->is_dirty(subchunk->get_idx())) {
-					if(subchunk->is_empty()) {
-						m_world_renderer.remove_subchunk(*subchunk);
-						chunk->remove_subchunk(subchunk->get_idx());
-						continue;
-					}
-
-					m_world_renderer.update_subchunk(*subchunk);
-				}
-			}
-		}
+	while(Chunk *chunk = m_world.try_pop_dirty_chunk()) {
+		m_world.update_dirty_chunk(chunk);
 	}
 }
 
@@ -235,7 +217,7 @@ void Game::handle_input() {
 	}
 }
 
-void Game::handle_packet(const S2C_Packet &packet) {
+void Game::handle_packet(S2C_Packet packet) {
 	std::visit(Overloaded {
 		[&](const S2C_ChatMessagePacket &p)  {
 			std::println("[CHAT] {}: {}", p.sender_id, p.message);

@@ -40,6 +40,7 @@ void IWorld::set_block(BlockPosition position, BlockID value) {
 	const u32 sub_idx = position.local_position.y / SUBCHUNK_SIZE;
 	const u32 local_y = position.local_position.y % SUBCHUNK_SIZE;
 
+	m_dirty_chunk_positions.insert(position.chunk_position);
 	chunk->set_dirty(sub_idx, true);
 
 	const u32 lx = position.local_position.x;
@@ -74,6 +75,7 @@ void IWorld::set_block(BlockPosition position, BlockID value) {
 					}
 
 					target_chunk->set_dirty((u32)target_idx, true);
+					m_dirty_chunk_positions.insert(target_chunk->get_position());
 				}
 			}
 		}
@@ -111,5 +113,6 @@ void IWorld::mark_all_chunks_dirty() {
 
 	for(auto &[position, chunk] : m_chunks) {
 		chunk->set_all_non_empty_subchunks_dirty();
+		m_dirty_chunk_positions.insert(position);
 	}
 }

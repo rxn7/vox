@@ -9,12 +9,12 @@ class IWorld {
 public:
 	virtual ~IWorld();
 
-	Chunk *create_chunk(ChunkPosition position);
-	void remove_chunk(ChunkPosition position);
-	void set_block(BlockPosition position, BlockID value);
-	BlockID get_block(BlockPosition position) const;
-	Chunk *get_chunk(ChunkPosition position) const;
-	void mark_all_chunks_dirty();
+	virtual Chunk *create_chunk(ChunkPosition position);
+	virtual void remove_chunk(ChunkPosition position);
+	virtual void set_block(BlockPosition position, BlockID value); // returns chunk that is containing this block
+	virtual BlockID get_block(BlockPosition position) const;
+	virtual Chunk *get_chunk(ChunkPosition position) const;
+	virtual void mark_all_chunks_dirty();
 	
 	std::unordered_map<ChunkPosition, std::unique_ptr<Chunk>> &get_chunks() const { 
 		return m_chunks; 
@@ -25,5 +25,6 @@ public:
 	Signal<Chunk&> m_chunk_removed_signal;
 
 protected:
+	std::unordered_set<ChunkPosition> m_dirty_chunk_positions;
 	mutable std::unordered_map<ChunkPosition, std::unique_ptr<Chunk>> m_chunks; 
 };

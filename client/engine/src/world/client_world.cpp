@@ -6,6 +6,8 @@ ClientWorld::ClientWorld(WorldRenderer &renderer) : m_renderer(renderer) {
 ClientWorld::~ClientWorld() { }
 
 void ClientWorld::handle_chunk_udate_packet(const S2C_ChunkUpdatePacket &packet) {
+	PROFILE_FUNC();
+
 	Chunk *chunk = get_chunk(packet.position);
 	if(chunk == nullptr) {
 		chunk = create_chunk(packet.position);
@@ -30,7 +32,41 @@ void ClientWorld::handle_chunk_udate_packet(const S2C_ChunkUpdatePacket &packet)
 		subchunk->set_blocks(*blocks);
 		chunk->set_dirty(i, true);
 	}
+}
 
-	// TODO: Copy blocks
-	// chunk->generate();
+void ClientWorld::update_dirty_chunk(Chunk *chunk) {
+	PROFILE_FUNC();
+
+	for(const auto &subchunk : chunk->get_subchunks()) {
+		if(subchunk == nullptr) {
+			continue;
+		}
+
+		if(!chunk->is_dirty(subchunk->get_idx())) {
+			continue;
+		}
+
+		if(subchunk->is_empty()) {
+			m_renderer.remove_subchunk(*subchunk);
+			chunk->remove_subchunk(subchunk->get_idx());
+			continue;
+		}
+
+		m_renderer.update_subchunk(*subchunk);
+	}
+}
+
+Chunk *ClientWorld::try_pop_dirty_chunk() {
+	PROFILE_FUNC();
+
+	if(m_dirty_chunk_positions.empty()) {
+		return nullptr;
+	}
+
+	const auto begin = m_dirty_chunk_positions.begin();
+
+	const ChunkPosition position = *begin;
+	m_dirty_chunk_positions.erase(begin);
+
+	return get_chunk(position);
 }

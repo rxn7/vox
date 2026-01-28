@@ -28,10 +28,15 @@ void ServerLogic::run(std::stop_token stop_token) {
 			tick();
 		}
 
-		C2S_Packet packet;
-		i32 sender_id;
-		while(mp_network->poll_packet(packet, sender_id)) {
-			handle_packet(packet, sender_id);
+		{
+			// PROFILE_SCOPE("Server packet polling")
+			// TODO: Thread safe profiler
+
+			C2S_Packet packet;
+			i32 sender_id;
+			while(mp_network->poll_packet(packet, sender_id)) {
+				handle_packet(std::move(packet), sender_id);
+			}
 		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -42,6 +47,8 @@ void ServerLogic::tick() {
 }
 
 void ServerLogic::send_chunk_to_client(i32 client_id, ChunkPosition position) {
+	PROFILE_FUNC();
+
 	Chunk *chunk = m_world.get_chunk(position);
 	if(chunk == nullptr) {
 		server_log("Chunk doesn't exist");
@@ -76,7 +83,9 @@ void ServerLogic::send_chunk_to_client(i32 client_id, ChunkPosition position) {
 	mp_network->send_packet_to_client(client_id, std::move(packet));
 }
 
-void ServerLogic::handle_packet(const C2S_Packet &packet, i32 sender_id) {
+void ServerLogic::handle_packet(C2S_Packet packet, i32 sender_id) {
+	PROFILE_FUNC();
+
 	std::visit(Overloaded {
 		[&](const C2S_ChatMessagePacket &p)  {
 			// TODO: Handle commands

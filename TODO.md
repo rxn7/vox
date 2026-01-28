@@ -1,10 +1,12 @@
 # TODO
 
+## Bugs
+- Thread-Safe profiler
+
 ## Debug
 - Chunk outline renderer
 
 ## Features
-- Internal server for singleplayer -- working on rn
 - Remote server for multiplayer
 - Infinite world
 - Procedural world generation

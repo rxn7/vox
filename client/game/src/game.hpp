@@ -35,7 +35,7 @@ public:
 private:
 	void start_server();
 	void handle_input();
-	void handle_packet(const S2C_Packet &packet);
+	void handle_packet(S2C_Packet packet);
 
 private:
 	// TODO: this should be only inside host
