@@ -16,7 +16,6 @@ inline u8 calculate_vertex_ao(bool side1_occluded, bool side2_occluded, bool cor
 void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &renderer) {
 	PROFILE_FUNC();
 	
-	
 	static std::vector<u32> s_vertices{};
 	s_vertices.reserve(4096);
 	s_vertices.clear();
@@ -97,7 +96,7 @@ void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &
 				};
 
 				if(subchunk.is_block_transparent(x + 1, y, z))
-					add_quad(BlockFaceID::Right,		{1, 0, 1}, {1, 0, 0}, {1, 1, 0}, {1, 1, 1});
+					add_quad(BlockFaceID::Right,	{1, 0, 1}, {1, 0, 0}, {1, 1, 0}, {1, 1, 1});
 
 				if(subchunk.is_block_transparent(x - 1, y, z))
 					add_quad(BlockFaceID::Left,		{0, 0, 0}, {0, 0, 1}, {0, 1, 1}, {0, 1, 0});

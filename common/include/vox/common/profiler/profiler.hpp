@@ -1,5 +1,7 @@
 #pragma once
 
+// TODO: VOX_USE_PROFILER define
+
 #ifndef NDEBUG
 #include "vox/common/helper/singleton.hpp"
 

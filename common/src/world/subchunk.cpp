@@ -10,6 +10,11 @@ void SubChunk::set_blocks(const SubChunkData &blocks) {
 }
 
 bool SubChunk::is_block_transparent(i8 x, i16 y, i8 z) const {
+	// dont render bottom faces of lowest blocks
+	if(y < 0) {
+		return false;
+	}
+
 	return m_chunk.is_block_transparent_relative(x, static_cast<i16>(y) + m_idx * SUBCHUNK_SIZE, z);
 }
 

@@ -9,7 +9,9 @@ TextRenderer::TextRenderer() {
 }
 
 TextRenderer::~TextRenderer() {
-	if(!m_initialized) return;
+	if(!m_initialized) {
+		return;
+	}
 
 	glDeleteBuffers(1, &m_font_ssbo);
 	glDeleteBuffers(1, &m_text_ssbo);
