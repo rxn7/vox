@@ -1,5 +1,5 @@
 #!/bin/sh
 
-pushd build/client/game >/dev/null
-gdb ./Debug/vox_game -q
+pushd build/client >/dev/null
+gdb ./Debug/vox -q
 popd >/dev/null

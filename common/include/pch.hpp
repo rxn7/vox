@@ -16,6 +16,7 @@
 #include <mutex>
 #include <thread>
 #include <bitset>
+#include <cfloat>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -36,8 +37,8 @@ using u8vec3 = glm::u8vec3;
 using i16vec3 = glm::i16vec3;
 using i16vec2 = glm::i16vec2;
 
-using f32 = float;
-using f64 = double;
+using f32 = glm::float32;;
+using f64 = glm::float64;
 
 using i8 = int8_t;
 using u8 = uint8_t;
@@ -52,6 +53,15 @@ using i64 = int64_t;
 using u64 = uint64_t;
 
 using sz = size_t;
+
+using HighResClock = std::chrono::high_resolution_clock;
+using HighResTimePoint = std::chrono::high_resolution_clock::time_point;
+using SecondsF32 = std::chrono::duration<f32, std::ratio<1>>;
+using MillisecondsU64 = std::chrono::duration<u64, std::milli>;
+using MillisecondsU32 = std::chrono::duration<u32, std::milli>;
+using MillisecondsF32 = std::chrono::duration<f32, std::milli>;
+using NanosecondsU32 = std::chrono::duration<u32, std::nano>;
+using NanosecondsU64 = std::chrono::duration<u64, std::nano>;
 
 template<class... Ts> 
 struct Overloaded : Ts... { using Ts::operator()...; };

@@ -1,7 +1,8 @@
 #pragma once
 
-#ifndef NDEBUG
 #include "vox/common/profiler/profiler.hpp"
+
+#ifndef NDEBUG
 
 class ProfilerScopeTimer {
 public:
@@ -12,17 +13,15 @@ public:
 
 	inline ~ProfilerScopeTimer() {
 		const ProfilerTimePoint end = ProfilerClock::now();
-		const u32 duration = std::chrono::duration_cast<std::chrono::microseconds>(end - m_start).count();
 
+		const NanosecondsU64 duration = std::chrono::duration_cast<NanosecondsU64>(end - m_start);
 		Profiler::get_instance().end_scope(duration);
 	}
 
 private:
 	ProfilerTimePoint m_start;
 };
-#endif
 
-#ifndef NDEBUG
 template <size_t N>
 constexpr auto clean_func_name(const char(&s)[N]) {
 	std::string_view v(s, N - 1);
@@ -64,7 +63,9 @@ constexpr auto clean_func_name(const char(&s)[N]) {
 	static constexpr auto COMBINE(__func_name_, __LINE__) = clean_func_name(RAW_FUNC_SIG); \
 	ProfilerScopeTimer COMBINE(__scope_timer__, __COUNTER__)(COMBINE(__func_name_, __LINE__).data())
 
-#else
+#else // Release
+
 #define PROFILE_SCOPE(name)
 #define PROFILE_FUNC()
+
 #endif

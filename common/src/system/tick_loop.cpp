@@ -1,12 +1,12 @@
 #include "vox/common/system/tick_loop.hpp"
 
 void TickLoop::start() {
-	m_accumulator = Nanoseconds(0);
-	m_previous_time = Clock::now();
+	m_accumulator = NanosecondsU64(0);
+	m_previous_time = HighResClock::now();
 }
 
 void TickLoop::accumulate() {
-	const TimePoint now = Clock::now();
+	const HighResTimePoint now = HighResClock::now();
 	m_elapsed = now - m_previous_time;
 	m_previous_time = now;
 

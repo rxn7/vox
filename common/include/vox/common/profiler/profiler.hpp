@@ -1,5 +1,6 @@
 #pragma once
 
+#ifndef NDEBUG
 #include "vox/common/helper/singleton.hpp"
 
 typedef std::chrono::high_resolution_clock ProfilerClock;
@@ -7,46 +8,57 @@ typedef ProfilerClock::time_point ProfilerTimePoint;
 
 struct ProfilerNode {
 	const char *name;
-	u32 duration_us = 0;
+	MillisecondsF32 duration_ms = MillisecondsF32(0);
 	u16 calls = 0;
 	u8 depth = 0;
 
-	i16 parent = -1;
-	i16 first_child = -1;
-	i16 last_child = -1;
-	i16 next_sibling = -1;
+	i32 parent = -1;
+	i32 first_child = -1;
+	i32 last_child = -1;
+	i32 next_sibling = -1;
+};
+
+struct ProfilerThreadContext {
+	ProfilerThreadContext(const char *name = nullptr) {
+		thread_id = std::this_thread::get_id();
+
+		if(name != nullptr) {
+			thread_name = name;
+		} else {
+			thread_name = "Thread " + std::to_string(std::hash<std::thread::id>{}(thread_id));
+		}
+
+		buffer.reserve(4096);
+		results.reserve(4096);
+	}
+
+	std::string thread_name;
+	std::thread::id thread_id;
+
+	std::vector<ProfilerNode> buffer;
+
+	std::vector<ProfilerNode> results;
+	std::mutex results_mutex;
+
+	i32 current_node_idx = -1;
 };
 
 class Profiler {
 SINGLETON_CLASS(Profiler);
 public:
-	void begin(f32 target_duration_us);
-	void end();
-	void update(f32 dt);
+	void start_scope(const char *name);
+	void end_scope(MillisecondsF32 duration_ms);
 
-	i16 start_scope(const char *name);
-	void end_scope(u32 duration_us);
+	void register_this_thread(const char *name = nullptr);
 
-#ifndef NDEBUG
-	inline std::span<const ProfilerNode> get_results() const { 
-		return m_results; 
-	}
-
-	inline f32 get_duration_us() const {
-		return m_duration_us;
-	}
-	
-public:
-	bool m_paused = false;
+	// NOTE: its called "consume" because it invalides the results after using it.
+	void consume_each_thread_results(std::function<void(std::vector<ProfilerNode> &results, const std::string &thread_name)> callback);
 
 private:
-	f32 m_elapsed_us;
-	f32 m_duration_us;
-	f32 m_target_duration_us;
+	ProfilerThreadContext &get_local_thread_context();
 
-	std::vector<ProfilerNode> m_buffer;
-	std::vector<ProfilerNode> m_results;
-
-	i16 m_current_node_idx = 0;
-#endif
+private:
+	std::mutex m_thread_ctx_registry_mutex;
+	std::vector<ProfilerThreadContext*> m_thread_ctx_registry;
 };
+#endif

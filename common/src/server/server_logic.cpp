@@ -25,18 +25,23 @@ ServerLogic::ServerLogic(std::shared_ptr<IServerDriver> p_network) : mp_network(
 }
 
 void ServerLogic::run(std::stop_token stop_token) {
+#ifndef NDEBUG
+	Profiler::get_instance().register_this_thread("Server Logic");
+#endif
+
 	server_log("Started");
 
 	m_tick_loop.start();
 	while(!stop_token.stop_requested()) {
+		PROFILE_SCOPE("Root Loop");
+
 		m_tick_loop.accumulate();
 		while(m_tick_loop.consume_tick()) {
 			tick();
 		}
 
 		{
-			// PROFILE_SCOPE("Server packet polling")
-			// TODO: Thread safe profiler
+			PROFILE_SCOPE("Server packet polling")
 
 			C2S_Packet packet;
 			i32 sender_id;
@@ -50,13 +55,15 @@ void ServerLogic::run(std::stop_token stop_token) {
 }
 
 void ServerLogic::tick() {
+	PROFILE_FUNC();
+
 	for(const auto &[player_id, player_entity] : m_players) {
 		// TODO: this should be on the client
 	}
 }
 
 void ServerLogic::send_chunk_to_client(i32 client_id, ChunkPosition position) {
-	// PROFILE_FUNC();
+	PROFILE_FUNC();
 
 	Chunk *chunk = m_world.get_chunk(position);
 	if(chunk == nullptr) {
@@ -83,12 +90,6 @@ void ServerLogic::send_chunk_to_client(i32 client_id, ChunkPosition position) {
 		const SubChunkData &blocks = subchunk->get_blocks();
 		std::copy(blocks.begin(), blocks.end(), ferry_data->begin());
 
-		// std::memcpy(
-		// 	ferry_data->data(),
-		// 	subchunk->get_blocks().data(),
-		// 	SUBCHUNK_VOLUME
-		// );
-
 		packet.data[i] = ferry_data;
 	}
 
@@ -96,7 +97,7 @@ void ServerLogic::send_chunk_to_client(i32 client_id, ChunkPosition position) {
 }
 
 void ServerLogic::handle_packet(C2S_Packet packet, i32 sender_id) {
-	// PROFILE_FUNC();
+	PROFILE_FUNC();
 
 	std::visit(Overloaded {
 		[&](const C2S_ChatMessagePacket &p)  {

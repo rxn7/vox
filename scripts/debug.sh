@@ -9,6 +9,6 @@ if [ $? -ne 0 ]; then
 exit
 fi
 
-pushd build/client/game >/dev/null
-./Debug/vox_game
+pushd build/client >/dev/null
+./Debug/vox
 popd >/dev/null

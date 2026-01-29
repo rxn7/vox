@@ -2,9 +2,6 @@
 
 class TickLoop {
 public:
-	using Clock = std::chrono::high_resolution_clock;
-	using TimePoint = std::chrono::high_resolution_clock::time_point;
-	using Nanoseconds = std::chrono::duration<u64, std::nano>;
 
 public:
 	void start();
@@ -21,12 +18,12 @@ public:
 
 public:
 	static constexpr u32 TICKS_PER_SECOND = 20;
-	static constexpr Nanoseconds TICK_DURATION_NS = Nanoseconds(1'000'000'000) / TICKS_PER_SECOND;
-	static constexpr Nanoseconds MAX_FRAME_TIME = Nanoseconds(250'000'000);
+	static constexpr NanosecondsU64 TICK_DURATION_NS = NanosecondsU64(1'000'000'000) / TICKS_PER_SECOND;
+	static constexpr NanosecondsU64 MAX_FRAME_TIME = NanosecondsU64(250'000'000);
 	static constexpr f32 TICK_DURATION_SECONDS = std::chrono::duration_cast<std::chrono::duration<f32>>(TICK_DURATION_NS).count();
 
 private:
-	Nanoseconds m_accumulator = Nanoseconds(0);
-	Nanoseconds m_elapsed = Nanoseconds(0);
-	TimePoint m_previous_time;
+	NanosecondsU64 m_accumulator = NanosecondsU64(0);
+	NanosecondsU64 m_elapsed = NanosecondsU64(0);
+	HighResTimePoint m_previous_time;
 };
