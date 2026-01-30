@@ -2,7 +2,9 @@
 
 ## Debug
 - Chunk outline renderer
-- Single-vao immediate mode debug renderer (renders AABBs, vectors, etc)
+
+## Improvements
+- Abstract player movement into entity physics
 
 ## Features
 - Remote server for multiplayer
