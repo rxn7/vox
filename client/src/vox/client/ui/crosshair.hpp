@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vox/client/graphics/backend/mesh.hpp"
+#include "vox/client/graphics/backend/static_mesh.hpp"
 #include "vox/client/graphics/backend/shader.hpp"
 
 struct CrosshairVertex {
@@ -18,7 +18,6 @@ public:
 	Crosshair();
 	~Crosshair();
 
-	void init();
 	void render(vec2 window_size);
 
 public:
@@ -26,6 +25,6 @@ public:
 	float m_thickness = 0.1f;
 
 private:
-	Mesh<CrosshairVertex> m_mesh;
+	StaticMesh<CrosshairVertex> m_mesh;
 	Shader m_shader;
 };

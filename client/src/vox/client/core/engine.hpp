@@ -10,6 +10,7 @@ public:
 	Engine();
 	~Engine();
 
+	bool init();
 	void run_game(IGame *game);
 
 	static Engine &get_instance() { 
@@ -25,7 +26,6 @@ public:
 	}
 
 private:
-	bool init();
 	bool init_glfw();
 	bool init_opengl();
 	bool init_imgui();

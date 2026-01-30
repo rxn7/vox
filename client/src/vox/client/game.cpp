@@ -38,8 +38,6 @@ bool Game::init() {
 
 	m_world_renderer.init();
 	m_text_renderer.init();
-	m_block_outline_renderer.init();
-	m_crosshair.init();
 
 	mp_network->init();
 	m_server_thread = std::jthread([this](std::stop_token stop_token) {
@@ -106,32 +104,12 @@ void Game::render_3d(f32 aspect_ratio) {
 	}
 
 	if(m_render_subchunk_debug) {
-		for(auto &[position, chunk] : m_world.get_chunks()) {
-			for(const auto &subchunk : chunk->get_subchunks()) {
-				if(subchunk == nullptr) {
-					continue;
-				}
-
-				TextRenderCommand3D cmd;
-				cmd.text = std::format("{} {} {}", position.x, subchunk->get_idx(), position.y);
-				cmd.position = vec3(position.x, subchunk->get_idx(), position.y) * SUBCHUNK_SIZE;
-				cmd.size = 0.5f;
-				cmd.horizontal_align = TextHorizontalAlign::Center;
-				cmd.vertical_align = TextVerticalAlign::Middle;
-				cmd.billboard = true;
-
-				const float t = subchunk->get_idx() / static_cast<f32>(SUBCHUNK_COUNT);
-				cmd.color = vec4(
-					1.0f,
-					glm::min(1.0f, (1.0f - t) * 2.0f),
-					glm::max(0.0f, 1.0f - t * 2.0f),
-					1.0f
-				);
-
-				m_text_renderer.render_text_3d(cmd);
-			}
-		}
+		render_chunks_debug();
 	}
+
+	m_debug_renderer.draw_aabb(m_player.calculate_aabb(), vec3(1.0f, 1.0f, 1.0f));
+
+	m_debug_renderer.render(camera_matrix);
 }
 
 void Game::render_ui() {
@@ -247,4 +225,35 @@ void Game::handle_packet(S2C_Packet packet) {
 		[&](const S2C_PlayerUpdatePacket &p)  {
 		}
 	}, packet);
+}
+
+void Game::render_chunks_debug() {
+	for(auto &[position, chunk] : m_world.get_chunks()) {
+		const vec3 global_pos = chunk->get_global_position();
+		m_debug_renderer.draw_line(vec3(global_pos.x, 0.0f, global_pos.z), vec3(global_pos.x, 500.0f, global_pos.z), vec3(1.0f, 0.0f, 0.0f));
+
+		for(const auto &subchunk : chunk->get_subchunks()) {
+			if(subchunk == nullptr) {
+				continue;
+			}
+
+			TextRenderCommand3D cmd;
+			cmd.text = std::format("{} {} {}", position.x, subchunk->get_idx(), position.y);
+			cmd.position = vec3(position.x, subchunk->get_idx(), position.y) * SUBCHUNK_SIZE;
+			cmd.size = 0.5f;
+			cmd.horizontal_align = TextHorizontalAlign::Center;
+			cmd.vertical_align = TextVerticalAlign::Middle;
+			cmd.billboard = true;
+
+			const f32 t = subchunk->get_idx() / static_cast<f32>(SUBCHUNK_COUNT);
+			cmd.color = vec4(
+				1.0f,
+				glm::min(1.0f, (1.0f - t) * 2.0f),
+				glm::max(0.0f, 1.0f - t * 2.0f),
+				1.0f
+			);
+
+			m_text_renderer.render_text_3d(cmd);
+		}
+	}
 }

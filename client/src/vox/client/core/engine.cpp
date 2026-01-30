@@ -26,10 +26,6 @@ Engine::~Engine() {
 }
 
 void Engine::run_game(IGame *game) {
-	if(!init()) {
-		return;
-	}
-
 	mp_game = game;
 	if(!mp_game->init()) {
 		return;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "vox/common/world/chunk.hpp"
 #include "vox/client/core/allocators/offset_allocator.hpp"
 #include "vox/client/graphics/backend/subchunk_mesh.hpp"
 #include "vox/client/graphics/backend/shader.hpp"

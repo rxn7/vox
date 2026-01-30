@@ -17,7 +17,7 @@ void ServerWorld::create_initial_chunks() {
 }
 
 void ServerWorld::generate_chunk(Chunk &chunk) {
-	// PROFILE_FUNC();
+	PROFILE_FUNC();
 
 	// TODO: Temporary
 	for(u32 x = 0; x < CHUNK_WIDTH; ++x) {

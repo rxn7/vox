@@ -26,11 +26,7 @@ constexpr std::array<u16, 36> INDICES = {
 	3, 6, 2, 3, 7, 6
 };
 
-void BlockOutlineRenderer::init() {
-	PROFILE_FUNC();
-
-	m_shader.load(b::embed<"shaders/block-outline-vert.glsl">().str(), b::embed<"shaders/block-outline-frag.glsl">().str());
-	m_mesh.init(VERTICES, INDICES);
+BlockOutlineRenderer::BlockOutlineRenderer() : m_mesh(VERTICES, INDICES), m_shader(b::embed<"shaders/block-outline-vert.glsl">().data(), b::embed<"shaders/block-outline-frag.glsl">().data()) {
 }
 
 void BlockOutlineRenderer::render(BlockPosition block_position, const mat4 &camera_matrix) {

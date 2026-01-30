@@ -4,6 +4,10 @@ u32 Shader::s_bound_program = 0;
 
 Shader::Shader() {}
 
+Shader::Shader(std::string_view vert_source, std::string_view frag_source) {
+	load(vert_source, frag_source);
+}
+
 Shader::~Shader() {
 	if(!m_created) return;
 
@@ -12,7 +16,6 @@ Shader::~Shader() {
 
 bool Shader::load(std::string_view vert_source, std::string_view frag_source) {
 	m_program_id = glCreateProgram();
-
 	m_created = true;
 
 	m_frag_id = create_shader(SHADER_FRAGMENT, frag_source);
@@ -82,7 +85,7 @@ i32 Shader::get_uniform_location(std::string_view name) const {
 	if(!uniform_exists) [[unlikely]] {
 		const i32 location = glGetUniformLocation(m_program_id, name.data());
 		if(location == -1) [[unlikely]] {
-			std::println("Failed to get uniform location: {}", name);
+			std::println("failed to get uniform location: {}", name);
 		}
 
 		m_uniform_locations.emplace(name, location);

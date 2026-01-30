@@ -14,6 +14,7 @@
 #include "vox/client/graphics/renderers/block_outline_renderer.hpp"
 #include "vox/client/graphics/renderers/world_renderer.hpp"
 #include "vox/client/graphics/renderers/text_renderer.hpp"
+#include "vox/client/graphics/renderers/debug_renderer.hpp"
 
 class Game : public IGame {
 public:
@@ -33,6 +34,7 @@ public:
 	}
 	
 private:
+	void render_chunks_debug();
 	void start_server();
 	void handle_input();
 	void handle_packet(S2C_Packet packet);
@@ -48,6 +50,7 @@ private:
 	WorldRenderer m_world_renderer;
 	TextRenderer m_text_renderer;
 	BlockOutlineRenderer m_block_outline_renderer;
+	DebugRenderer m_debug_renderer;
 
 	Crosshair m_crosshair;
 	Camera m_camera;

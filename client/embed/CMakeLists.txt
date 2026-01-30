@@ -9,5 +9,8 @@ b_embed(vox_embed shaders/default-vert.glsl)
 b_embed(vox_embed shaders/text-frag.glsl)
 b_embed(vox_embed shaders/text-vert.glsl)
 
+b_embed(vox_embed shaders/debug-frag.glsl)
+b_embed(vox_embed shaders/debug-vert.glsl)
+
 b_embed(vox_embed shaders/ui/crosshair-frag.glsl)
 b_embed(vox_embed shaders/ui/crosshair-vert.glsl)

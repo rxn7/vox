@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vox/common/world/block_position.hpp"
-#include "vox/client/graphics/backend/mesh.hpp"
+#include "vox/client/graphics/backend/static_mesh.hpp"
 #include "vox/client/graphics/backend/shader.hpp"
 
 struct BlockOutlineVertex {
@@ -15,11 +15,11 @@ struct BlockOutlineVertex {
 
 class BlockOutlineRenderer {
 public:
-	void init();
+	BlockOutlineRenderer();
 	void render(BlockPosition block_position, const mat4 &camera_matrix);
 
 private:
-	Mesh<BlockOutlineVertex> m_mesh;
+	StaticMesh<BlockOutlineVertex> m_mesh;
 	Shader m_shader;
 
 	vec4 m_color = vec4(1.0f, 1.0f, 1.0f, 0.5f);

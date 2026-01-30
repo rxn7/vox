@@ -1,7 +1,7 @@
 #include "vox/common/world/physics.hpp"
 
 std::optional<Physics::RaycastResult> Physics::raycast(const IWorld &world, vec3 start, vec3 dir, f32 max_distance) {
-	PROFILE_FUNC(); // TODO: this is not thread safe
+	PROFILE_FUNC();
 
 	ivec3 grid_position = ivec3(glm::floor(start));
 	const ivec3 step_dir = ivec3(glm::sign(dir));

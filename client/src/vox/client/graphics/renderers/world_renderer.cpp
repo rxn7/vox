@@ -64,12 +64,14 @@ void WorldRenderer::render(const mat4 &camera_matrix) {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_packed_chunk_positions_ssbo);
 
 	if(m_use_wireframe) {
+		glLineWidth(2.0f);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	} 
 
 	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (void*)0, m_draw_commands.size(), 0);
 
 	if(m_use_wireframe) {
+		glLineWidth(1.0f);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }

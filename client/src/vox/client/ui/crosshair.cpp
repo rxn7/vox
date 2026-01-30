@@ -2,10 +2,6 @@
 
 #include <battery/embed.hpp>
 
-Crosshair::Crosshair() {}
-
-Crosshair::~Crosshair() {}
-
 constexpr std::array<CrosshairVertex, 4> VERTICES = {
 	CrosshairVertex(vec2(-0.5f, -0.5f)),
 	CrosshairVertex(vec2(0.5f, -0.5f)),
@@ -15,12 +11,10 @@ constexpr std::array<CrosshairVertex, 4> VERTICES = {
 
 constexpr std::array<u16, 6> INDICES = { 0, 1, 2, 2, 3, 0 };
 
-void Crosshair::init() {
-	PROFILE_FUNC();
-
-	m_shader.load(b::embed<"shaders/ui/crosshair-vert.glsl">().str(), b::embed<"shaders/ui/crosshair-frag.glsl">().str());
-	m_mesh.init(VERTICES, INDICES);
+Crosshair::Crosshair() : m_mesh(VERTICES, INDICES), m_shader(b::embed<"shaders/ui/crosshair-vert.glsl">().data(), b::embed<"shaders/ui/crosshair-frag.glsl">().data()) {
 }
+
+Crosshair::~Crosshair() {}
 
 void Crosshair::render(vec2 window_size) {
 	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);

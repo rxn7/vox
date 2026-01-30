@@ -3,7 +3,6 @@
 
 void GraphicsImGuiTool::render(std::optional<std::reference_wrapper<ClientWorld>> world) {
 	PROFILE_FUNC();
-	PROFILE_FUNC();
 
 	if(!ImGui::Begin("Graphics")) {
 		ImGui::End();

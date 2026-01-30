@@ -8,6 +8,7 @@ enum ShaderType {
 class Shader {
 public:
 	Shader();
+	Shader(std::string_view vert_source, std::string_view frag_source);
 	~Shader();
 
 	bool load(std::string_view vert_source, std::string_view frag_source);
