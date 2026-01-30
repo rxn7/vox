@@ -1,10 +1,8 @@
 # TODO
 
-## Bugs
-- Thread-Safe profiler
-
 ## Debug
 - Chunk outline renderer
+- Single-vao immediate mode debug renderer (renders AABBs, vectors, etc)
 
 ## Features
 - Remote server for multiplayer
