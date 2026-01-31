@@ -9,12 +9,22 @@ constexpr f32 FLY_CAMERA_FOV = 85.0f;
 constexpr f32 DEFAULT_CAMERA_FOV = 75.0f;
 
 constexpr f32 TERMINAL_VELOCITY = 20.0f;
-constexpr f32 PLAYER_HEIGHT = 1.6f;
+
+constexpr f32 PLAYER_FEET_OFFSET = 1.6f;
+constexpr f32 PLAYER_HEAD_OFFSET = 0.1f;
+
+constexpr f32 PLAYER_HEIGHT = PLAYER_FEET_OFFSET + PLAYER_HEAD_OFFSET;
+constexpr f32 PLAYER_HALF_HEIGHT = PLAYER_HEIGHT * 0.5f;
+
+constexpr f32 PLAYER_EYE_OFFSET = PLAYER_HALF_HEIGHT - PLAYER_HEAD_OFFSET;
+
 constexpr f32 PLAYER_WIDTH = 0.3f;
+constexpr f32 PLAYER_HALF_WIDTH = PLAYER_WIDTH * 0.5f;
+
 constexpr f32 REACH_DISTANCE = 5.0f;
 
 constexpr f32 JUMP_HEIGHT = 1.25f;
-const f32 JUMP_FORCE = std::sqrt(2.0f * JUMP_HEIGHT * GRAVITY);
+const f32 JUMP_FORCE = glm::sqrt(2.0f * JUMP_HEIGHT * GRAVITY);
 
 constexpr f32 CAMERA_SENSITIVITY = 0.002f;
 
@@ -50,7 +60,7 @@ public:
 	void tick(IWorld &world);
 	void update(f64 alpha);
 	AABB calculate_aabb() const;
-
+	
 	// physics position
 	vec3 get_position() const { 
 		return m_position; 
@@ -70,7 +80,6 @@ private:
 	void handle_mouse_movement();
 	void accelerate(vec3 wish_dir, f32 acceleration, f32 max_speed, f32 dt);
 	void apply_friction(f32 friction, f32 dt);
-	bool check_collision(IWorld &world);
 	void handle_block_interaction(IWorld &world); 
 
 public:

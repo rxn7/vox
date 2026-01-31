@@ -24,7 +24,7 @@ struct LocalBlockPosition {
 struct BlockPosition {
 	constexpr BlockPosition() {}
 	constexpr BlockPosition(ChunkPosition chunk_position, LocalBlockPosition local_position) : chunk_position(chunk_position), local_position(local_position) {}
-	BlockPosition(vec3 global_position);
+	explicit BlockPosition(vec3 global_position);
 
 	inline bool is_valid() const {
 		return local_position.y < CHUNK_HEIGHT && local_position.x < CHUNK_WIDTH && local_position.z < CHUNK_WIDTH;

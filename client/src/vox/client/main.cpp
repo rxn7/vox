@@ -11,7 +11,7 @@ i32 main(i32 argc, char **argv) {
 	// we could use heap allocation but i prefer to keep it on stack
 	{
 		Game game;
-		std::println("running the game");
+		std::println("Running the game");
 		engine.run_game(&game);
 	}
 

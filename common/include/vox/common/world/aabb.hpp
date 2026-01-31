@@ -11,4 +11,16 @@ struct AABB {
 			min.z < other.max.z && max.z > other.min.z
 		);
 	}
+
+	constexpr vec3 size() const {
+		return (max - min);
+	}
+
+	constexpr vec3 half_size() const {
+		return size() * 0.5f;
+	}
+
+	constexpr vec3 center() const {
+		return min + half_size();
+	}
 };

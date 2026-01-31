@@ -52,3 +52,59 @@ std::optional<Physics::RaycastResult> Physics::raycast(const IWorld &world, vec3
 
 	return std::nullopt;
 }
+
+std::optional<Physics::CollisionResult> Physics::check_collision(IWorld &world, const AABB &aabb) {
+	PROFILE_FUNC();
+
+	const i32 min_x = static_cast<i32>(glm::floor(aabb.min.x));
+	const i32 max_x = static_cast<i32>(glm::floor(aabb.max.x));
+
+	const i32 min_y = static_cast<i32>(glm::floor(aabb.min.y));
+	const i32 max_y = static_cast<i32>(glm::floor(aabb.max.y));
+
+	const i32 min_z = static_cast<i32>(glm::floor(aabb.min.z));
+	const i32 max_z = static_cast<i32>(glm::floor(aabb.max.z));
+
+	for(i32 x = min_x; x <= max_x; ++x) {
+		for(i32 y = min_y; y <= max_y; ++y) {
+			for(i32 z = min_z; z <= max_z; ++z) {
+				const vec3 block_center = vec3(x, y, z) + 0.5f;
+				const BlockPosition check_position = BlockPosition(block_center);
+				const BlockID block_id = world.get_block(check_position);
+				const BlockType &block_type = BlockRegistry::get(block_id);
+
+				if(!block_type.is_solid()) {
+					continue;
+				}
+
+				const vec3 block_half_size = vec3(0.5f);
+				const vec3 aabb_center = aabb.center();
+
+				const vec3 delta = aabb_center - block_center;
+				const vec3 overlap = (aabb.half_size() + block_half_size) - glm::abs(delta);
+
+				const vec3 normal = Physics::calculate_normal(overlap, delta);
+
+				return CollisionResult {
+					.block_type = block_type,
+					.block_center = block_center,
+					.normal = normal,
+				};
+			}
+		}
+	}
+
+	return std::nullopt;
+}
+
+vec3 Physics::calculate_normal(vec3 overlap, vec3 delta) {
+	if(overlap.x < overlap.y && overlap.x < overlap.z) {
+		return vec3(glm::sign(delta.x), 0.0f, 0.0f);
+	}
+
+	if(overlap.y < overlap.x && overlap.y < overlap.z) {
+		return vec3(0.0f, glm::sign(delta.y), 0.0f);
+	}
+
+	return vec3(0.0f, 0.0f, glm::sign(delta.z));
+}
