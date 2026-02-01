@@ -2,49 +2,26 @@
 
 #include "vox/common/world/i_world.hpp"
 #include "vox/common/world/aabb.hpp"
-#include "vox/common/world/physics_constants.hpp"
 #include "vox/client/graphics/backend/camera.hpp"
 
-constexpr f32 FLY_CAMERA_FOV = 85.0f;
-constexpr f32 DEFAULT_CAMERA_FOV = 75.0f;
-
-constexpr f32 TERMINAL_VELOCITY = 20.0f;
-
-constexpr f32 PLAYER_FEET_OFFSET = 1.6f;
-constexpr f32 PLAYER_HEAD_OFFSET = 0.1f;
-
-constexpr f32 PLAYER_HEIGHT = PLAYER_FEET_OFFSET + PLAYER_HEAD_OFFSET;
-constexpr f32 PLAYER_HALF_HEIGHT = PLAYER_HEIGHT * 0.5f;
-
-constexpr f32 PLAYER_EYE_OFFSET = PLAYER_HALF_HEIGHT - PLAYER_HEAD_OFFSET;
+constexpr f32 PLAYER_HEIGHT = 1.8f;
+constexpr f32 PLAYER_CROUCH_HEIGHT = 1.3f;
 
 constexpr f32 PLAYER_WIDTH = 0.3f;
 constexpr f32 PLAYER_HALF_WIDTH = PLAYER_WIDTH * 0.5f;
 
-constexpr f32 REACH_DISTANCE = 5.0f;
-
-constexpr f32 JUMP_HEIGHT = 1.25f;
-const f32 JUMP_FORCE = glm::sqrt(2.0f * JUMP_HEIGHT * GRAVITY);
-
-constexpr f32 CAMERA_SENSITIVITY = 0.002f;
-
-constexpr f32 GROUND_ACCELERATION = 80.0f;
-constexpr f32 GROUND_FRICTION = 8.0f;
-
-constexpr f32 MOVE_SPEED = 4.0f;
-
-constexpr f32 AIR_ACCELERATION = 30.0f;
-constexpr f32 AIR_FRICTION = 2.0f;
-
-constexpr f32 FLY_ACCELERATION = 100.0f;
-constexpr f32 FLY_MAX_SPEED = 8.0f;
-constexpr f32 FLY_FRICTION = 5.0f;
+enum class CameraMode {
+	FirstPerson,
+	ThirdPerson
+};
 
 struct PlayerInputState {
 	f32 input_x = 0.0f;
 	f32 input_z = 0.0f;
-	bool wish_to_jump = false;
 
+	bool wish_to_crouch = false;
+
+	bool wish_to_jump = false;
 	bool wish_to_sprint = false;
 
 	bool wish_to_place_block = false;
@@ -58,39 +35,54 @@ public:
 	~Player();
 
 	void tick(IWorld &world);
-	void update(f64 alpha);
+	void update(const IWorld &world, f64 alpha);
 	AABB calculate_aabb() const;
+	AABB calculate_visual_aabb() const;
 	
 	// physics position
-	vec3 get_position() const { 
+	inline vec3 get_position() const { 
 		return m_position; 
 	}
 
-	BlockID get_block_in_hand() const {
+	inline BlockID get_block_in_hand() const {
 		return m_block_in_hand;
 	}
 
-	const std::optional<BlockPosition> &get_last_highlighted_block_position() const { 
+	inline bool is_grounded() const {
+		return m_is_grounded;
+	}
+
+	inline const std::optional<BlockPosition> &get_last_highlighted_block_position() const { 
 		return m_last_highlighted_block_position; 
 	}
 
 private:
+	void handle_camera_position(const IWorld &world, f32 alpha);
 	void handle_input();
-	void handle_movement(IWorld &world, f32 dt);
+	void handle_movement(const IWorld &world, f32 dt);
+	void handle_crouch(const IWorld &world);
 	void handle_mouse_movement();
 	void accelerate(vec3 wish_dir, f32 acceleration, f32 max_speed, f32 dt);
 	void apply_friction(f32 friction, f32 dt);
 	void handle_block_interaction(IWorld &world); 
+	void toggle_camera_mode();
 
 public:
 	bool m_fly_enabled = false;
 
 private:
 	Camera &m_camera;
+	CameraMode m_camera_mode = CameraMode::FirstPerson;
+
 	PlayerInputState m_input_state;
 
 	vec3 m_prev_position;
 	vec3 m_position;
+
+	vec3 m_visual_position;
+
+	f32 m_target_height;
+	f32 m_height;
 
 	f32 m_vertical_velocity = 0.0f;
 	vec3 m_horizontal_velocity = vec3(0.0f);
@@ -99,4 +91,5 @@ private:
 	std::optional<BlockPosition> m_last_highlighted_block_position;
 
 	bool m_is_grounded = false;
+	bool m_is_crouching = false;
 };

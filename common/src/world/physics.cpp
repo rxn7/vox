@@ -53,7 +53,7 @@ std::optional<Physics::RaycastResult> Physics::raycast(const IWorld &world, vec3
 	return std::nullopt;
 }
 
-std::optional<Physics::CollisionResult> Physics::check_collision(IWorld &world, const AABB &aabb) {
+std::optional<Physics::CollisionResult> Physics::check_collision(const IWorld &world, const AABB &aabb) {
 	PROFILE_FUNC();
 
 	const i32 min_x = static_cast<i32>(glm::floor(aabb.min.x));
@@ -95,6 +95,35 @@ std::optional<Physics::CollisionResult> Physics::check_collision(IWorld &world, 
 	}
 
 	return std::nullopt;
+}
+
+bool Physics::move_axis(const IWorld &world, Axis axis, f32 &position, f32 &velocity, AABB &aabb, f32 extent, f32 dt) {
+	if(glm::abs(velocity) < 0.0001f) {
+		return false;
+	}
+
+	const f32 delta = velocity * dt;
+	position += delta;
+	aabb.min[axis] += delta;
+	aabb.max[axis] += delta;
+
+	constexpr f32 COLLISION_EPSILON = 0.001f;
+
+	if(auto collision = Physics::check_collision(world, aabb)) {
+		const f32 resolved_position = collision->block_center[axis] - glm::sign(velocity) * (0.5f + extent + COLLISION_EPSILON);
+		const f32 correction = resolved_position - position;
+
+		position = resolved_position;
+
+		aabb.min[axis] += correction;
+		aabb.max[axis] += correction;
+
+		velocity = 0.0f;
+
+		return true;
+	}
+
+	return false;
 }
 
 vec3 Physics::calculate_normal(vec3 overlap, vec3 delta) {

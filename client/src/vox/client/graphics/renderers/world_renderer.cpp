@@ -1,15 +1,10 @@
-#include "vox/common/world/chunk.hpp"
 #include "vox/common/world/subchunk.hpp"
 #include "vox/client/core/allocators/offset_allocator.hpp"
 #include "vox/client/graphics/backend/packer.hpp"
 #include "vox/client/graphics/renderers/world_renderer.hpp"
 #include "vox/client/graphics/resources/texture_paths.hpp"
 
-void WorldRenderer::init() {
-	PROFILE_FUNC();
-	
-
-	m_shader.load(b::embed<"shaders/chunk-vert.glsl">().str(), b::embed<"shaders/chunk-frag.glsl">().str());
+WorldRenderer::WorldRenderer() : m_shader(b::embed<"shaders/chunk-vert.glsl">().str(), b::embed<"shaders/chunk-frag.glsl">().str()) {
 	m_textures.load(TexturePaths::get_all());
 
 	glCreateVertexArrays(1, &m_vao);

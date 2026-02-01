@@ -9,8 +9,6 @@ Chunk::Chunk(IWorld &world, ChunkPosition position) : m_world(world), m_position
 }
 
 BlockID Chunk::get_block_local(LocalBlockPosition pos) const {
-	PROFILE_FUNC();
-
 	if(pos.y >= CHUNK_HEIGHT) {
 		return BlockID::Air;
 	}
@@ -24,8 +22,6 @@ BlockID Chunk::get_block_local(LocalBlockPosition pos) const {
 }
 
 BlockID Chunk::get_block_relative(i8 x, i16 y, i8 z) const {
-	PROFILE_FUNC();
-
 	BlockID block;
 	if(x < 0 || x >= CHUNK_WIDTH || z < 0 || z >= CHUNK_WIDTH) {
 		const BlockPosition block_position(get_global_position() + vec3(x, y, z));
@@ -38,8 +34,6 @@ BlockID Chunk::get_block_relative(i8 x, i16 y, i8 z) const {
 }
 
 void Chunk::set_block_local(LocalBlockPosition pos, BlockID value) {
-	// PROFILE_FUNC();
-
 	if(pos.y >= CHUNK_HEIGHT) {
 		return;
 	}
@@ -62,8 +56,6 @@ void Chunk::set_block_local(LocalBlockPosition pos, BlockID value) {
 }
 
 void Chunk::set_block_relative(i8 x, i16 y, i8 z, BlockID value) {
-	// PROFILE_FUNC();
-
 	BlockID block;
 	if(x < 0 || x >= CHUNK_WIDTH || z < 0 || z >= CHUNK_WIDTH) {
 		const BlockPosition block_position(get_global_position() + vec3(x, y, z));

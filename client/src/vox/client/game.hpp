@@ -32,6 +32,14 @@ public:
 	inline const Camera &get_camera() const { 
 		return m_camera; 
 	}
+
+	inline DebugRenderer &get_debug_renderer() {
+		return m_debug_renderer;
+	}
+
+	inline static Game *get_instance() {
+		return sp_game;
+	}
 	
 private:
 	void render_chunks_debug();
@@ -62,4 +70,6 @@ private:
 	bool m_render_subchunk_debug = false;
 
 	CallbackID m_chunk_removed_callback;
+
+	static Game *sp_game;
 };

@@ -3,6 +3,7 @@
 #include "vox/client/graphics/backend/dynamic_mesh.hpp"
 #include "vox/client/graphics/backend/shader.hpp"
 #include "vox/common/world/aabb.hpp"
+#include "vox/common/helper/singleton.hpp"
 
 struct DebugVertex {
 	constexpr DebugVertex(vec3 position, vec3 color) : position(position), color(color) {}
@@ -22,7 +23,6 @@ struct DebugVertex {
 class DebugRenderer {
 public:
 	DebugRenderer();
-
 	void render(const mat4 &camera_matrix);
 
 	void draw_aabb(const AABB &aabb, vec3 color);

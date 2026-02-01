@@ -15,7 +15,8 @@ struct DrawElementsIndirectCommand {
 
 class WorldRenderer {
 public:
-	void init();
+	WorldRenderer();
+
 	void render(const mat4 &camera_matrix);
 
 	void update_subchunk(SubChunk &subchunk);

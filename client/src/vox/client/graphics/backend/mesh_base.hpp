@@ -24,6 +24,10 @@ public:
 		glBindVertexArray(0);
 	}
 
+	inline void set_draw_mode(GLenum draw_mode) {
+		m_draw_mode = draw_mode;
+	}
+
 protected:
 	MeshBase(GLenum draw_mode = GL_TRIANGLES) : m_draw_mode(draw_mode) {
 		glCreateVertexArrays(1, &m_vao);

@@ -8,12 +8,17 @@
 #include "vox/common/world/block_registry.hpp"
 #include "vox/common/world/subchunk.hpp"
 
+Game *Game::sp_game;
+
 Game::Game() 
 : mp_network(std::make_shared<HostNetworkDriver>()),
 m_server(mp_network), 
 m_camera(vec3(0.0f, 120.0f, 0.0f)), 
 m_world(m_world_renderer),
 m_player(m_camera) {
+	assert(sp_game == nullptr);
+	sp_game = this;
+
 	m_chunk_removed_callback = m_world.m_chunk_removed_signal.connect([&](Chunk &chunk) {
 		for(const auto &subchunk : chunk.get_subchunks()) {
 			if(subchunk == nullptr) {
@@ -35,9 +40,6 @@ bool Game::init() {
 	Profiler::get_instance().register_this_thread("Main");
 #endif
 	PROFILE_FUNC();
-
-	m_world_renderer.init();
-	m_text_renderer.init();
 
 	mp_network->init();
 	m_server_thread = std::jthread([this](std::stop_token stop_token) {
@@ -81,7 +83,7 @@ void Game::update(f64 alpha, f32 delta_time) {
 	PROFILE_FUNC();
 
 	handle_input();
-	m_player.update(alpha);
+	m_player.update(m_world, alpha);
 	
 	while(Chunk *chunk = m_world.try_pop_dirty_chunk()) {
 		m_world.update_dirty_chunk(chunk);
@@ -106,9 +108,7 @@ void Game::render_3d(f32 aspect_ratio) {
 	if(m_render_subchunk_debug) {
 		render_chunks_debug();
 	}
-
-	m_debug_renderer.draw_aabb(m_player.calculate_aabb(), vec3(1.0f, 1.0f, 1.0f));
-
+	
 	m_debug_renderer.render(camera_matrix);
 }
 

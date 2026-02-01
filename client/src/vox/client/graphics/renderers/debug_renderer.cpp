@@ -37,7 +37,7 @@ void DebugRenderer::render(const mat4 &camera_matrix) {
 void DebugRenderer::draw_aabb(const AABB &aabb, vec3 color) {
 	PROFILE_FUNC();
 
-	const u16 base_index = static_cast<u16>(m_vertices.size());
+	u16 base_index = static_cast<u16>(m_vertices.size());
 
     const vec3 &min = aabb.min;
     const vec3 &max = aabb.max;

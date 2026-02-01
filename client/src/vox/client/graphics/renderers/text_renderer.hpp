@@ -36,8 +36,6 @@ public:
 	TextRenderer();
 	~TextRenderer();
 
-	void init();
-
 	void update_2d(vec2 screen_size);
 	void update_3d(const mat4 &proj_matrix, const mat4 &view_matrix);
 
@@ -56,7 +54,6 @@ private:
 	void render_text(std::string_view text, mat4 mvp, f32 size, TextHorizontalAlign horizontal_align, TextVerticalAlign vertical_align, vec4 color);
 
 private:
-	bool m_initialized = false;
 	Shader m_shader;
 	u32 m_vao;
 	u32 m_font_ssbo;

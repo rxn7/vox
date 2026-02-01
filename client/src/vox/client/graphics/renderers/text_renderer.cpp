@@ -5,24 +5,7 @@
 
 constexpr u32 STAGING_BUFFER_SIZE = 2048;
 
-TextRenderer::TextRenderer() {
-}
-
-TextRenderer::~TextRenderer() {
-	if(!m_initialized) {
-		return;
-	}
-
-	glDeleteBuffers(1, &m_font_ssbo);
-	glDeleteBuffers(1, &m_text_ssbo);
-	glDeleteVertexArrays(1, &m_vao);
-}
-
-void TextRenderer::init() {
-	PROFILE_FUNC();
-
-	m_shader.load(b::embed<"shaders/text-vert.glsl">().str(), b::embed<"shaders/text-frag.glsl">().str());
-
+TextRenderer::TextRenderer() : m_shader(b::embed<"shaders/text-vert.glsl">().data(), b::embed<"shaders/text-frag.glsl">().data()) {
 	m_staging_buffer.reserve(STAGING_BUFFER_SIZE);
 
 	glGenVertexArrays(1, &m_vao);
@@ -38,8 +21,12 @@ void TextRenderer::init() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_text_ssbo);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, STAGING_BUFFER_SIZE, nullptr, GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_text_ssbo);
+}
 
-	m_initialized = true;
+TextRenderer::~TextRenderer() {
+	glDeleteBuffers(1, &m_font_ssbo);
+	glDeleteBuffers(1, &m_text_ssbo);
+	glDeleteVertexArrays(1, &m_vao);
 }
 
 void TextRenderer::update_2d(vec2 screen_size) {
