@@ -37,22 +37,29 @@ using u8vec3 = glm::u8vec3;
 using i16vec3 = glm::i16vec3;
 using i16vec2 = glm::i16vec2;
 
+constexpr vec3 FRONT	= vec3( 0,  0,  1);
+constexpr vec3 BACK		= vec3( 0,  0, -1);
+constexpr vec3 RIGHT	= vec3( 1,  0,  0);
+constexpr vec3 LEFT		= vec3(-1,  0,  0);
+constexpr vec3 UP		= vec3( 0,  1,  0);
+constexpr vec3 DOWN		= vec3( 0, -1,  0);
+
 using f32 = glm::float32;;
 using f64 = glm::float64;
 
-using i8 = int8_t;
-using u8 = uint8_t;
+using i8 = std::int8_t;
+using u8 = std::uint8_t;
 
-using i16 = int16_t;
-using u16 = uint16_t;
+using i16 = std::int16_t;
+using u16 = std::uint16_t;
 
-using i32 = int32_t;
-using u32 = uint32_t;
+using i32 = std::int32_t;
+using u32 = std::uint32_t;
 
-using i64 = int64_t;
-using u64 = uint64_t;
+using i64 = std::int64_t;
+using u64 = std::uint64_t;
 
-using sz = size_t;
+using sz = std::size_t;
 
 using HighResClock = std::chrono::high_resolution_clock;
 using HighResTimePoint = std::chrono::high_resolution_clock::time_point;

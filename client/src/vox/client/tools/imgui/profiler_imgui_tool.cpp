@@ -163,10 +163,8 @@ void ProfilerImGuiTool::render_node_recursive(std::span<const ProfilerNode> node
 		ImGui::SetTooltip("Duration: %s \nCalls: %u", FormatHelper::duration(node.duration_ms).c_str(), node.calls);
 	}
 
-	// --- Columns (Stats) ---
-	// Using simple SameLine for layout. (Use ImGui::Table in future for pixel-perfect alignment)
 	ImGui::SameLine();
-	float avail_w = ImGui::GetContentRegionAvail().x;
+	f32 avail_w = ImGui::GetContentRegionAvail().x;
 	ImGui::SetCursorPosX(ImGui::GetCursorPosX() + avail_w - 320.0f); // Right align
 
 	const std::string time_str = FormatHelper::duration(node.duration_ms);

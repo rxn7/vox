@@ -3,9 +3,11 @@
 #include "vox/common/world/i_world.hpp"
 #include "vox/common/world/aabb.hpp"
 #include "vox/client/graphics/backend/camera.hpp"
+#include "vox/client/player/player_model.hpp"
 
 constexpr f32 PLAYER_HEIGHT = 1.8f;
 constexpr f32 PLAYER_CROUCH_HEIGHT = 1.3f;
+constexpr f32 PLAYER_WALK_SPEED = 4.0f;
 
 constexpr f32 PLAYER_WIDTH = 0.3f;
 constexpr f32 PLAYER_HALF_WIDTH = PLAYER_WIDTH * 0.5f;
@@ -36,6 +38,7 @@ public:
 
 	void tick(IWorld &world);
 	void update(const IWorld &world, f64 alpha);
+	void render();
 	AABB calculate_aabb() const;
 	AABB calculate_visual_aabb() const;
 	
@@ -73,6 +76,8 @@ public:
 private:
 	Camera &m_camera;
 	CameraMode m_camera_mode = CameraMode::FirstPerson;
+
+	PlayerModel m_model;
 
 	PlayerInputState m_input_state;
 

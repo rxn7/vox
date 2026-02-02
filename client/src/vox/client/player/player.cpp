@@ -6,8 +6,8 @@
 #include "vox/common/world/physics_constants.hpp"
 #include "vox/client/core/input.hpp"
 
-constexpr f32 FLY_CAMERA_FOV = 85.0f;
 constexpr f32 DEFAULT_CAMERA_FOV = 75.0f;
+constexpr f32 THIRD_PERSON_CAMERA_FOV = 90.0f;
 
 constexpr f32 THIRD_PERSON_CAMERA_DISTANCE = 2.0f;
 
@@ -25,18 +25,15 @@ constexpr f32 CAMERA_SENSITIVITY = 0.002f;
 constexpr f32 GROUND_ACCELERATION = 80.0f;
 constexpr f32 GROUND_FRICTION = 8.0f;
 
-constexpr f32 MOVE_SPEED = 4.0f;
-
 constexpr f32 AIR_ACCELERATION = 30.0f;
-constexpr f32 AIR_FRICTION = 2.0f;
+constexpr f32 AIR_FRICTION = 6.0f;
 
 constexpr f32 FLY_ACCELERATION = 100.0f;
 constexpr f32 FLY_MAX_SPEED = 8.0f;
 constexpr f32 FLY_FRICTION = 5.0f;
 
-constexpr vec3 UP = vec3(0.0f, 1.0f, 0.0f);
-
 Player::Player(Camera &cam) : m_camera(cam), m_position(cam.m_position), m_height(PLAYER_HEIGHT) {
+	m_model.build_geometry();
 }
 
 Player::~Player() {
@@ -70,14 +67,23 @@ void Player::update(const IWorld &world, f64 alpha) {
 	}
 
 	m_visual_position = glm::mix(m_prev_position, m_position, alpha);
-
-	DebugRenderer &debug_renderer = Game::get_instance()->get_debug_renderer();
-	debug_renderer.draw_aabb(calculate_aabb(), m_is_grounded ? vec3(1.0f, 0.0f, 0.0f) : vec3(1.0f, 0.0f, 1.0f));
-	debug_renderer.draw_aabb(calculate_visual_aabb(), vec3(1.0f, 1.0f, 1.0f));
-
 	m_height = glm::lerp(m_height, m_target_height, (f32)alpha);
 
 	handle_camera_position(world, alpha);
+
+	m_model.update(m_visual_position, m_horizontal_velocity, m_camera.m_pitch, m_camera.m_yaw);
+}
+
+void Player::render() {
+	if(m_camera_mode != CameraMode::FirstPerson) {
+		m_model.render(m_visual_position);
+	}
+
+	if(Game::get_instance()->is_debug_enabled()) {
+		DebugRenderer &debug_renderer = Game::get_instance()->get_debug_renderer();
+		debug_renderer.draw_aabb(calculate_aabb(), m_is_grounded ? vec3(1.0f, 0.0f, 0.0f) : vec3(1.0f, 0.0f, 1.0f));
+		debug_renderer.draw_aabb(calculate_visual_aabb(), vec3(1.0f, 1.0f, 1.0f));
+	}
 }
 
 AABB Player::calculate_aabb() const {
@@ -125,6 +131,7 @@ void Player::handle_camera_position(const IWorld &world, f32 alpha) {
 	switch(m_camera_mode) {
 		case CameraMode::FirstPerson:
 			m_camera.m_position = interpolated_position;
+			m_camera.m_fov = DEFAULT_CAMERA_FOV;
 			break;
 
 		case CameraMode::ThirdPerson:
@@ -136,12 +143,10 @@ void Player::handle_camera_position(const IWorld &world, f32 alpha) {
 			}
 
 			m_camera.m_position = interpolated_position + direction * distance;
+			m_camera.m_fov = THIRD_PERSON_CAMERA_FOV;
 
 			break;
 	}
-
-	const f32 target_fov = m_fly_enabled ? FLY_CAMERA_FOV : DEFAULT_CAMERA_FOV;
-	m_camera.m_fov = glm::mix(m_camera.m_fov, target_fov, alpha);
 }
 
 void Player::handle_movement(const IWorld &world, f32 dt) {
@@ -172,10 +177,10 @@ void Player::handle_movement(const IWorld &world, f32 dt) {
 		apply_friction(FLY_FRICTION, dt);
 	} else {
 		if(m_is_grounded) {
-			accelerate(wish_dir, GROUND_ACCELERATION, MOVE_SPEED, dt);
+			accelerate(wish_dir, GROUND_ACCELERATION, PLAYER_WALK_SPEED, dt);
 			apply_friction(GROUND_FRICTION, dt);
 		} else {
-			accelerate(wish_dir, AIR_ACCELERATION, MOVE_SPEED, dt);
+			accelerate(wish_dir, AIR_ACCELERATION, PLAYER_WALK_SPEED, dt);
 			apply_friction(AIR_FRICTION, dt);
 		}
 		
@@ -188,39 +193,6 @@ void Player::handle_movement(const IWorld &world, f32 dt) {
 		}
 	}
 
-	// const auto move_axis = [&](u8 axis, f32 &velocity, f32 extent) -> bool {
-	// 	if(glm::abs(velocity) < 0.0001f) {
-	// 		return false;
-	// 	}
-	//
-	// 	m_position[axis] += velocity * dt;
-	//
-	// 	constexpr f32 COLLISION_EPSILON = 0.001f;
-	//
-	// 	if(auto collision = Physics::check_collision(world, calculate_aabb())) {
-	// 		m_position[axis] = collision->block_center[axis] - glm::sign(velocity) * (0.5f + extent + COLLISION_EPSILON);
-	//
-	// 		velocity = 0.0f;
-	// 		return true;
-	// 	}
-	//
-	// 	return false;
-	// };
-	//
-	// move_axis(0, m_horizontal_velocity.x, PLAYER_HALF_WIDTH);
-	// move_axis(2, m_horizontal_velocity.z, PLAYER_HALF_WIDTH);
-	//
-	// const bool is_falling = m_vertical_velocity < 0.0f;
-	// if(!m_fly_enabled) {
-	// 	if(move_axis(1, m_vertical_velocity, is_falling ? 0.0f : m_height)) {
-	// 		m_is_grounded = is_falling;
-	// 	} else {
-	// 		m_is_grounded = false;
-	// 	}
-	// } else {
-	// 	move_axis(1, m_horizontal_velocity.y, is_falling ? 0.0f : m_height);
-	// }
-	//
 	AABB current_aabb = calculate_aabb();
 
 	Physics::move_axis(world, X_AXIS, m_position.x, m_horizontal_velocity.x, current_aabb, PLAYER_HALF_WIDTH, dt);
@@ -250,8 +222,10 @@ void Player::handle_crouch(const IWorld &world) {
 		return;
 	}
 
-	DebugRenderer &debug_renderer = Game::get_instance()->get_debug_renderer();
-	debug_renderer.draw_line(m_position, m_position + vec3(0.0f, PLAYER_HEIGHT, 0.0f), vec3(0.0f, 0.0f, 1.0f));
+	if(Game::get_instance()->is_debug_enabled()) {
+		DebugRenderer &debug_renderer = Game::get_instance()->get_debug_renderer();
+		debug_renderer.draw_line(m_position, m_position + vec3(0.0f, PLAYER_HEIGHT, 0.0f), vec3(0.0f, 0.0f, 1.0f));
+	}
 
 	const AABB standing_aabb {
         .min = m_position - vec3(PLAYER_HALF_WIDTH, 0, PLAYER_HALF_WIDTH),

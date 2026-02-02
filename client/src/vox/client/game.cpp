@@ -41,6 +41,8 @@ bool Game::init() {
 #endif
 	PROFILE_FUNC();
 
+	m_default_3d_shader.load(b::embed<"shaders/default-vert.glsl">().data(), b::embed<"shaders/default-frag.glsl">().data());
+
 	mp_network->init();
 	m_server_thread = std::jthread([this](std::stop_token stop_token) {
 		m_server.run(stop_token);
@@ -95,17 +97,22 @@ void Game::render_3d(f32 aspect_ratio) {
 
 	const mat4 view_matrix = m_camera.get_view_matrix();
 	const mat4 proj_matrix = m_camera.get_projection_matrix(aspect_ratio);
+
 	m_text_renderer.update_3d(proj_matrix, view_matrix);
 
 	const mat4 camera_matrix = proj_matrix * view_matrix;
+
+	m_default_3d_shader.set_uniform_mat4("u_camera_matrix", camera_matrix);
+
 	m_world_renderer.render(camera_matrix);
+	m_player.render();
 
 	const std::optional<BlockPosition> &last_highlighted_block_position = m_player.get_last_highlighted_block_position();
 	if(last_highlighted_block_position.has_value()) {
 		m_block_outline_renderer.render(last_highlighted_block_position.value(), camera_matrix);
 	}
 
-	if(m_render_subchunk_debug) {
+	if(m_debug_enabled) {
 		render_chunks_debug();
 	}
 	
@@ -200,7 +207,7 @@ void Game::handle_input() {
 	}
 
 	if(input.is_key_just_pressed(GLFW_KEY_F3)) {
-		m_render_subchunk_debug ^= 1;
+		m_debug_enabled ^= 1;
 	}
 
 	if(input.is_key_just_pressed(GLFW_KEY_ESCAPE)) {

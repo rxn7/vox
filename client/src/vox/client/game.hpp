@@ -37,6 +37,14 @@ public:
 		return m_debug_renderer;
 	}
 
+	inline Shader &get_default_3d_shader() {
+		return m_default_3d_shader;
+	}
+
+	inline bool is_debug_enabled() const {
+		return m_debug_enabled;
+	}
+
 	inline static Game *get_instance() {
 		return sp_game;
 	}
@@ -63,11 +71,13 @@ private:
 	Crosshair m_crosshair;
 	Camera m_camera;
 	Player m_player;
+
+	Shader m_default_3d_shader;
 	
 	WorldImGuiTool m_world_imgui_tool;
 	GraphicsImGuiTool m_graphics_imgui_tool;
 
-	bool m_render_subchunk_debug = false;
+	bool m_debug_enabled = false;
 
 	CallbackID m_chunk_removed_callback;
 
