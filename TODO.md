@@ -4,6 +4,8 @@
 - Chunk outline renderer
 
 ## Improvements
+- Clean up PlayerModel code
+- Player crouching animation
 - Abstract player movement into entity physics
 
 ## Features
