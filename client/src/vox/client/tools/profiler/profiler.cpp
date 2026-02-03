@@ -60,7 +60,21 @@ void Profiler::end_scope(MillisecondsF32 duration_ms) {
 	if(ctx.current_node_idx == -1) {
 		{
 			std::lock_guard<std::mutex> lock(ctx.results_mutex);
-			std::swap(ctx.results, ctx.buffer);
+			bool should_swap = false;
+			if(ctx.results.empty()) {
+				should_swap = true;
+			} else {
+				const f32 new_duration = ctx.buffer[0].duration_ms.count();
+				const f32 old_duration = ctx.results[0].duration_ms.count();
+
+				if(new_duration > old_duration) {
+					should_swap = true;
+				}
+			}
+
+			if(should_swap) {
+				std::swap(ctx.results, ctx.buffer);
+			}
 		}
 
 		ctx.buffer.clear();

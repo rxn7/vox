@@ -1,4 +1,5 @@
 #pragma once
+#undef NDEBUG
 
 // TODO: VOX_USE_PROFILER define
 
