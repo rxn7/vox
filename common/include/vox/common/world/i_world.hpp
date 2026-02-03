@@ -11,7 +11,7 @@ public:
 
 	virtual Chunk *create_chunk(ChunkPosition position);
 	virtual void remove_chunk(ChunkPosition position);
-	virtual void set_block(BlockPosition position, BlockID value); // returns chunk that is containing this block
+	virtual void set_block(BlockPosition position, BlockID value);
 	virtual BlockID get_block(BlockPosition position) const;
 	virtual Chunk *get_chunk(ChunkPosition position) const;
 	virtual void mark_all_chunks_dirty();

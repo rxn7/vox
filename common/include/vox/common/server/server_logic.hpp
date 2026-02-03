@@ -12,8 +12,14 @@ public:
 
 private:
 	void tick();
-	void send_chunk_to_client(i32 client_id, ChunkPosition position);
+
 	void handle_packet(C2S_Packet packet, i32 sender_id);
+	void handle_chat_message_packet(C2S_ChatMessagePacket p, i32 sender_id);
+	void handle_player_update_packet(C2S_PlayerUpdatePacket p, i32 sender_id);
+
+	void update_client_chunks(i32 client_id, PlayerServerEntity &player);
+	void send_chunk_update_to_client(i32 client_id, ChunkPosition position);
+	void send_chunk_unload_to_client(i32 client_id, ChunkPosition position);
 
 private:
 	std::shared_ptr<IServerDriver> mp_network;

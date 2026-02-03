@@ -85,6 +85,8 @@ void WorldRenderer::update_subchunk(SubChunk &subchunk) {
 }
 
 void WorldRenderer::remove_subchunk(SubChunk &subchunk) {
+	PROFILE_FUNC();
+
 	const SubChunkPosition position = subchunk.get_position();
 
 	const auto it = m_subchunk_meshes.find(position);
@@ -95,13 +97,12 @@ void WorldRenderer::remove_subchunk(SubChunk &subchunk) {
 	SubChunkMesh &mesh = it->second;
 	free_subchunk_mesh(mesh.m_alloc);
 
-	PROFILE_FUNC();
 	m_subchunk_meshes.erase(it);
 }
 
 void WorldRenderer::upload_subchunk_mesh(const SubChunkMeshAllocation &alloc, std::span<const u32> vertices, std::span<const u32> indices) {
-	
-	
+	PROFILE_FUNC();
+
 	if(vertices.size() > alloc.vertex_alloc.m_size) [[unlikely]] {
 		std::println("WorldRenderer::upload_chunk_mesh allocated {} vertices, trying to upload {}.", alloc.vertex_alloc.m_size, vertices.size());
 		return;
@@ -124,7 +125,7 @@ void WorldRenderer::upload_subchunk_mesh(const SubChunkMeshAllocation &alloc, st
 }
 
 void WorldRenderer::render_subchunk_mesh(const SubChunkMesh &mesh) {
-	
+	PROFILE_FUNC();
 
 	DrawElementsIndirectCommand cmd = {
 		.index_count = mesh.m_index_count,
@@ -133,14 +134,13 @@ void WorldRenderer::render_subchunk_mesh(const SubChunkMesh &mesh) {
 		.base_vertex = static_cast<i32>(mesh.m_alloc.vertex_alloc.m_offset),
 		.base_instance = static_cast<u32>(m_draw_commands.size()),
 	};
-	PROFILE_FUNC();
 	
 	m_draw_commands.push_back(cmd);
 	m_packed_subchunk_positions.push_back(Packer::pack_subchunk_position(mesh.get_position()));
 }
 
 std::optional<SubChunkMeshAllocation> WorldRenderer::allocate_subchunk_mesh(u32 vertex_count, u32 index_count) {
-	
+	PROFILE_FUNC();
 	
 	std::optional<OffsetAllocator::Allocation> vertex_alloc = m_vertex_allocator.allocate(vertex_count);
 	if(!vertex_alloc.has_value()) {

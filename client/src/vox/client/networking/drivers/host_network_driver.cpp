@@ -16,9 +16,9 @@ bool HostNetworkDriver::poll_packet(S2C_Packet &out_packet) {
 }
 
 // SERVER
-void HostNetworkDriver::send_packet_to_client(i32 sender_id, S2C_Packet packet) {
+void HostNetworkDriver::send_packet_to_client(i32 client_id, S2C_Packet packet) {
 	// handle it locally if host sent the packet to itself
-	if(sender_id == HOST_CLIENT_ID) {
+	if(client_id == HOST_CLIENT_ID) {
 		m_packets_for_client_queue.push(std::move(packet));
 		return;
 	}

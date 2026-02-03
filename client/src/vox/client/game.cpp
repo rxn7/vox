@@ -13,7 +13,7 @@ Game *Game::sp_game;
 Game::Game() 
 : mp_network(std::make_shared<HostNetworkDriver>()),
 m_server(mp_network), 
-m_camera(vec3(0.0f, 120.0f, 0.0f)), 
+m_camera(vec3(8.0f, 100.0f, 8.0f)), 
 m_world(m_world_renderer),
 m_player(m_camera) {
 	assert(sp_game == nullptr);
@@ -221,17 +221,21 @@ void Game::handle_input() {
 
 void Game::handle_packet(S2C_Packet packet) {
 	std::visit(Overloaded {
-		[&](const S2C_ChatMessagePacket &p)  {
+		[&](S2C_ChatMessagePacket p)  {
 			std::println("[CHAT] {}: {}", p.sender_id, p.message);
 		},
 
-		[&](const S2C_ChunkUpdatePacket &p)  {
-			m_world.handle_chunk_udate_packet(p);
+		[&](S2C_ChunkUpdatePacket p)  {
+			m_world.handle_chunk_udate_packet(std::move(p));
 		},
 
-		[&](const S2C_PlayerUpdatePacket &p)  {
+		[&](S2C_ChunkUnloadPacket p)  {
+			m_world.handle_chunk_unload_packet(std::move(p));
+		},
+
+		[&](S2C_PlayerUpdatePacket p)  {
 		}
-	}, packet);
+	}, std::move(packet));
 }
 
 void Game::render_chunks_debug() {

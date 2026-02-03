@@ -5,7 +5,7 @@ ClientWorld::ClientWorld(WorldRenderer &renderer) : m_renderer(renderer) {
 
 ClientWorld::~ClientWorld() { }
 
-void ClientWorld::handle_chunk_udate_packet(const S2C_ChunkUpdatePacket &packet) {
+void ClientWorld::handle_chunk_udate_packet(S2C_ChunkUpdatePacket packet) {
 	PROFILE_FUNC();
 
 	Chunk *chunk = get_chunk(packet.position);
@@ -47,6 +47,17 @@ void ClientWorld::handle_chunk_udate_packet(const S2C_ChunkUpdatePacket &packet)
 			m_dirty_chunk_positions.insert(position);
 		}
 	}
+}
+
+void ClientWorld::handle_chunk_unload_packet(S2C_ChunkUnloadPacket packet) {
+	PROFILE_FUNC();
+
+	Chunk *chunk = get_chunk(packet.position);
+	if(chunk == nullptr) {
+		return;
+	}
+
+	remove_chunk(packet.position);
 }
 
 void ClientWorld::update_dirty_chunk(Chunk *chunk) {

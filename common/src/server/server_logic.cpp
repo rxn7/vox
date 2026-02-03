@@ -1,4 +1,5 @@
 #include "vox/common/server/server_logic.hpp"
+#include "vox/common/world/chunk_offsets.hpp"
 
 template<typename ...T>
 void server_log(std::format_string<T...> fmt, T &&...values) {
@@ -11,12 +12,6 @@ ServerLogic::ServerLogic(std::shared_ptr<IServerDriver> p_network) : mp_network(
 
 	p_network->m_player_connected.connect([&](i32 client_id) {
 		m_players.insert({client_id, PlayerServerEntity{}});
-
-		for(i32 x = -4; x < 4; ++x) {
-			for(i32 z = -4; z < 4; ++z) {
-				send_chunk_to_client(client_id, {x, z});
-			}
-		}
 	});
 
 	p_network->m_player_disconnected.connect([&](i32 client_id) {
@@ -56,19 +51,107 @@ void ServerLogic::run(std::stop_token stop_token) {
 
 void ServerLogic::tick() {
 	PROFILE_FUNC();
+}
 
-	for(const auto &[player_id, player_entity] : m_players) {
-		// TODO: this should be on the client
+void ServerLogic::handle_packet(C2S_Packet packet, i32 sender_id) {
+	PROFILE_FUNC();
+
+	if(!m_players.contains(sender_id)) {
+		server_log("Invalid sender id: {}", sender_id);
+		return;
+	}
+
+	std::visit(Overloaded {
+		[&](C2S_ChatMessagePacket p) -> void {
+			handle_chat_message_packet(std::move(p), sender_id);
+		},
+		[&](C2S_PlayerUpdatePacket p) -> void {
+			handle_player_update_packet(std::move(p), sender_id);
+		},
+	}, packet);
+}
+
+void ServerLogic::handle_chat_message_packet(C2S_ChatMessagePacket p, i32 sender_id) {
+	PROFILE_FUNC();
+
+	// TODO: Handle commands
+	server_log("[CHAT] {}: {}", sender_id, p.message);
+
+	S2C_ChatMessagePacket broadcast_packet = {
+		.sender_id = sender_id,
+		.message = std::move(p.message)
+	};
+
+	mp_network->broadcast_packet(std::move(broadcast_packet));
+}
+
+void ServerLogic::handle_player_update_packet(C2S_PlayerUpdatePacket p, i32 sender_id) {
+	PROFILE_FUNC();
+
+	PlayerServerEntity &player_entity = m_players.at(sender_id);
+	player_entity.update(p.position, p.pitch, p.yaw);
+
+	const BlockPosition position = player_entity.get_block_position();
+
+	update_client_chunks(sender_id, player_entity);
+}
+
+void ServerLogic::update_client_chunks(i32 client_id, PlayerServerEntity &player) {
+	PROFILE_FUNC();
+
+	const ChunkPosition center = player.get_block_position().chunk_position;
+
+	// TODO: Dynamic render distance
+	const u32 render_distance = MAX_SPIRAL_RADIUS / 4;
+	const u32 render_distance_sqr = render_distance * render_distance;
+
+	constexpr u32 MAX_CHUNKS_SENTS = 1;
+	u32 chunks_sent = 0;
+
+	for(const i16vec2 offset : CHUNK_OFFSETS) {
+		const u32 dist_sqr = (offset.x * offset.x) + (offset.y * offset.y);
+
+		if(dist_sqr > render_distance_sqr) {
+			break;
+		}
+
+		const ChunkPosition target_position = center + offset;
+		if(player.has_chunk_loaded(target_position)) {
+			continue;
+		}
+
+		player.register_chunk_load(target_position);
+		send_chunk_update_to_client(client_id, target_position);
+
+		chunks_sent++;
+		if(chunks_sent >= MAX_CHUNKS_SENTS) {
+			break;
+		}
+	}
+
+	u32 unload_radius_sqr = (render_distance + 2) * (render_distance + 2);
+	std::vector<ChunkPosition> chunks_to_unload;
+
+	for(const ChunkPosition pos : player.get_loaded_chunks()) {
+		const i16vec2 delta = pos - center;
+		const u32 dist_sqr = (delta.x * delta.x) + (delta.y * delta.y); 
+
+		if(dist_sqr > unload_radius_sqr) {
+			chunks_to_unload.emplace_back(std::move(pos));
+		}
+	}
+
+	for(const ChunkPosition pos : chunks_to_unload) {
+		player.register_chunk_unload(std::move(pos));
+		send_chunk_unload_to_client(client_id, pos);
 	}
 }
 
-void ServerLogic::send_chunk_to_client(i32 client_id, ChunkPosition position) {
+void ServerLogic::send_chunk_update_to_client(i32 client_id, ChunkPosition position) {
 	PROFILE_FUNC();
 
 	Chunk *chunk = m_world.get_chunk(position);
 	if(chunk == nullptr) {
-		server_log("Chunk doesn't exist");
-
 		chunk = m_world.create_chunk(position);
 		m_world.generate_chunk(*chunk);
 	}
@@ -90,47 +173,17 @@ void ServerLogic::send_chunk_to_client(i32 client_id, ChunkPosition position) {
 		const SubChunkData &blocks = subchunk->get_blocks();
 		std::copy(blocks.begin(), blocks.end(), ferry_data->begin());
 
-		packet.data[i] = ferry_data;
+		packet.data[i] = std::move(ferry_data);
 	}
 
 	mp_network->send_packet_to_client(client_id, std::move(packet));
 }
 
-void ServerLogic::handle_packet(C2S_Packet packet, i32 sender_id) {
+void ServerLogic::send_chunk_unload_to_client(i32 client_id, ChunkPosition position) {
 	PROFILE_FUNC();
 
-	std::visit(Overloaded {
-		[&](const C2S_ChatMessagePacket &p)  {
-			// TODO: Handle commands
-			server_log("[CHAT] {}: {}", sender_id, p.message);
+	S2C_ChunkUnloadPacket packet;
+	packet.position = std::move(position);
 
-			S2C_ChatMessagePacket broadcast_packet = {
-				.sender_id = sender_id,
-				.message = p.message
-			};
-
-			mp_network->broadcast_packet(std::move(broadcast_packet));
-		},
-
-		[&](const C2S_PlayerUpdatePacket &p)  {
-			if(!m_players.contains(sender_id)) {
-				server_log("Invalid sender id: {}", sender_id);
-				return;
-			}
-
-			PlayerServerEntity &player_entity = m_players.at(sender_id);
-			player_entity.update(p.position, p.pitch, p.yaw);
-
-			const BlockPosition position = player_entity.get_block_position();
-
-			// TODO: Temporary
-			Chunk *chunk = m_world.get_chunk(position.chunk_position); 
-			if(chunk == nullptr) {
-				chunk = m_world.create_chunk(position.chunk_position);
-				m_world.generate_chunk(*chunk);
-
-				send_chunk_to_client(sender_id, position.chunk_position);
-			}
-		},
-	}, packet);
+	mp_network->send_packet_to_client(client_id, std::move(packet));
 }

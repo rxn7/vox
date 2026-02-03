@@ -21,8 +21,13 @@ struct S2C_ChunkUpdatePacket {
 	std::vector<std::shared_ptr<SubChunkData>> data;
 };
 
-typedef std::variant<
+struct S2C_ChunkUnloadPacket {
+	ChunkPosition position;
+};
+
+using S2C_Packet = std::variant<
 	S2C_ChatMessagePacket,
 	S2C_PlayerUpdatePacket,
-	S2C_ChunkUpdatePacket
-> S2C_Packet;
+	S2C_ChunkUpdatePacket,
+	S2C_ChunkUnloadPacket
+>;

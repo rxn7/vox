@@ -4,7 +4,7 @@ add_executable(vox ${SOURCES})
 target_include_directories(vox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_precompile_headers(vox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/pch.hpp)
 
-target_link_libraries(vox PUBLIC vox_common imgui glfw glad_gl_core_43)
+target_link_libraries(vox PRIVATE vox_common imgui glfw glad_gl_core_43)
 
 add_subdirectory(embed)
 
