@@ -49,9 +49,9 @@ private:
 	IGame *mp_game;
 	bool m_is_opengl_initialized = false;
 
-#ifndef NDEBUG
+#ifdef VOX_DEBUG
 	ProfilerImGuiTool m_profiler_imgui_tool;
 #endif
 	
-	static Engine *sp_instance;
+	inline static Engine *sp_instance;
 };

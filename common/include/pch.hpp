@@ -14,9 +14,11 @@
 #include <atomic>
 #include <queue>
 #include <mutex>
+#include <shared_mutex>
 #include <thread>
 #include <bitset>
 #include <cfloat>
+#include <future>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>

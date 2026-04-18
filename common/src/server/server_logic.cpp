@@ -20,7 +20,7 @@ ServerLogic::ServerLogic(std::shared_ptr<IServerDriver> p_network) : mp_network(
 }
 
 void ServerLogic::run(std::stop_token stop_token) {
-#ifndef NDEBUG
+#ifdef VOX_DEBUG
 	Profiler::get_instance().register_this_thread("Server Logic");
 #endif
 
@@ -51,6 +51,10 @@ void ServerLogic::run(std::stop_token stop_token) {
 
 void ServerLogic::tick() {
 	PROFILE_FUNC();
+
+	for(auto &[id, player] : m_players) {
+		update_client_chunks(id, player);
+	}
 }
 
 void ServerLogic::handle_packet(C2S_Packet packet, i32 sender_id) {
@@ -90,10 +94,6 @@ void ServerLogic::handle_player_update_packet(C2S_PlayerUpdatePacket p, i32 send
 
 	PlayerServerEntity &player_entity = m_players.at(sender_id);
 	player_entity.update(p.position, p.pitch, p.yaw);
-
-	const BlockPosition position = player_entity.get_block_position();
-
-	update_client_chunks(sender_id, player_entity);
 }
 
 void ServerLogic::update_client_chunks(i32 client_id, PlayerServerEntity &player) {
@@ -137,12 +137,12 @@ void ServerLogic::update_client_chunks(i32 client_id, PlayerServerEntity &player
 		const u32 dist_sqr = (delta.x * delta.x) + (delta.y * delta.y); 
 
 		if(dist_sqr > unload_radius_sqr) {
-			chunks_to_unload.emplace_back(std::move(pos));
+			chunks_to_unload.emplace_back(pos);
 		}
 	}
 
 	for(const ChunkPosition pos : chunks_to_unload) {
-		player.register_chunk_unload(std::move(pos));
+		player.register_chunk_unload(pos);
 		send_chunk_unload_to_client(client_id, pos);
 	}
 }
@@ -150,31 +150,29 @@ void ServerLogic::update_client_chunks(i32 client_id, PlayerServerEntity &player
 void ServerLogic::send_chunk_update_to_client(i32 client_id, ChunkPosition position) {
 	PROFILE_FUNC();
 
-	Chunk *chunk = m_world.get_chunk(position);
-	if(chunk == nullptr) {
-		chunk = m_world.create_chunk(position);
-		m_world.generate_chunk(*chunk);
+	std::shared_ptr<Chunk> p_chunk = m_world.get_chunk(position);
+	if(p_chunk == nullptr) {
+		p_chunk = m_world.create_chunk(position);
+		m_world.generate_chunk(p_chunk); // TODO: async
 	}
 
 	S2C_ChunkUpdatePacket packet;
 	packet.position = position;
-	packet.data.resize(SUBCHUNK_COUNT);
+	packet.subchunk_mask = 0;
+	packet.data.reserve(SUBCHUNK_COUNT / 2);
 
+	std::shared_lock<std::shared_mutex> lock(p_chunk->m_mutex);
 	for(i32 i = 0; i < SUBCHUNK_COUNT; ++i) {
-		SubChunk *subchunk = chunk->get_subchunk(i);
+		std::shared_ptr<SubChunk> p_subchunk = p_chunk->get_subchunk(i);
 
-		if(!subchunk || subchunk->is_empty()) {
-			packet.data[i] = nullptr;
+		if(!p_subchunk || p_subchunk->is_empty()) {
 			continue;
 		}
 
-		std::shared_ptr<SubChunkData> ferry_data = std::make_shared<SubChunkData>();
-
-		const SubChunkData &blocks = subchunk->get_blocks();
-		std::copy(blocks.begin(), blocks.end(), ferry_data->begin());
-
-		packet.data[i] = std::move(ferry_data);
+		packet.subchunk_mask |= (1 << i);
+		packet.data.push_back(p_subchunk->get_blocks());
 	}
+	lock.unlock();
 
 	mp_network->send_packet_to_client(client_id, std::move(packet));
 }

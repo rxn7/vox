@@ -36,6 +36,8 @@ void WorldRenderer::render(const mat4 &camera_matrix) {
 	m_draw_commands.clear();
 	m_packed_subchunk_positions.clear();
 
+	process_upload_tasks();
+
 	for(auto &mesh : m_subchunk_meshes) {
 		render_subchunk_mesh(mesh.second);
 	}
@@ -70,18 +72,28 @@ void WorldRenderer::render(const mat4 &camera_matrix) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }
+
 void WorldRenderer::update_subchunk(SubChunk &subchunk) {
 	PROFILE_FUNC();
+	generate_subchunk_mesh_async(subchunk.get_chunk(), subchunk.get_position());
+}
 
-	const SubChunkPosition position = subchunk.get_position();
-
-	const auto it = m_subchunk_meshes.find(position);
-	if(it == m_subchunk_meshes.end()) {
-		m_subchunk_meshes.emplace(position, SubChunkMesh(position));
-	}
-
+void WorldRenderer::generate_subchunk_mesh_async(std::shared_ptr<Chunk> p_chunk, SubChunkPosition position) {
 	PROFILE_FUNC();
-	m_subchunk_meshes.at(position).generate_and_upload(subchunk, *this);
+
+	p_chunk->set_dirty(position.y, false);
+
+	m_generation_futures.push_back(std::async(std::launch::async, [this, p_chunk, position]() {
+		std::shared_ptr<SubChunk> p_subchunk = p_chunk->get_subchunk(position.y);
+		if(!p_subchunk) {
+			return;
+		}
+
+		SubChunkMeshData data = SubChunkMesh::generate(*p_subchunk);
+
+		std::lock_guard<std::mutex> lock(m_upload_mutex);
+		m_upload_tasks.push_back({position, data});
+	}));
 }
 
 void WorldRenderer::remove_subchunk(SubChunk &subchunk) {
@@ -119,9 +131,41 @@ void WorldRenderer::upload_subchunk_mesh(const SubChunkMeshAllocation &alloc, st
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, vert_offset, vertices.size_bytes(), vertices.data());
 
-	PROFILE_FUNC();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, index_offset, indices.size_bytes(), indices.data());
+}
+
+void WorldRenderer::process_upload_tasks() {
+	PROFILE_FUNC();
+
+	std::lock_guard<std::mutex> lock(m_upload_mutex);
+	for(SubChunkMeshUploadTask &task : m_upload_tasks) {
+		auto [it, inserted] = m_subchunk_meshes.try_emplace(task.position, task.position);
+		SubChunkMesh &mesh = it->second;
+
+		if(mesh.m_alloc.is_valid()) {
+			free_subchunk_mesh(mesh.m_alloc);
+			mesh.m_alloc = {};
+		}
+
+		mesh.m_index_count = task.data.indices.size();
+		
+		if(task.data.vertices.empty()) {
+			continue;
+		}
+
+		const std::optional<SubChunkMeshAllocation> result = allocate_subchunk_mesh(task.data.vertices.size(), task.data.indices.size());
+		if(result) {
+			mesh.m_alloc = *result;
+			upload_subchunk_mesh(mesh.m_alloc, task.data.vertices, task.data.indices);
+		}
+	}
+
+	std::erase_if(m_generation_futures, [](const std::future<void> &f) {
+		return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+	});
+
+	m_upload_tasks.clear();
 }
 
 void WorldRenderer::render_subchunk_mesh(const SubChunkMesh &mesh) {

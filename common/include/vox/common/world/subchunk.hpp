@@ -10,7 +10,7 @@ class Chunk;
 
 class SubChunk {
 public:
-	SubChunk(Chunk &chunk, u32 idx);
+	SubChunk(const std::shared_ptr<Chunk> &p_chunk, u32 idx);
 
 	bool is_empty() const;
 
@@ -32,8 +32,8 @@ public:
 		return m_idx;
 	}
 
-	inline Chunk &get_chunk() const {
-		return m_chunk;
+	inline std::shared_ptr<Chunk> get_chunk() const {
+		return mp_chunk;
 	}
 
 	inline SubChunkData &get_blocks() {
@@ -41,7 +41,7 @@ public:
 	}
 
 private:
-	Chunk &m_chunk;
+	std::shared_ptr<Chunk> mp_chunk;
 	u32 m_idx;
 	SubChunkData m_blocks;
 };

@@ -8,8 +8,6 @@
 #include "vox/common/world/block_registry.hpp"
 #include "vox/common/world/subchunk.hpp"
 
-Game *Game::sp_game;
-
 Game::Game() 
 : mp_network(std::make_shared<HostNetworkDriver>()),
 m_server(mp_network), 
@@ -36,7 +34,7 @@ Game::~Game() {
 }
 
 bool Game::init() {
-#ifndef NDEBUG
+#ifdef VOX_DEBUG
 	Profiler::get_instance().register_this_thread("Main");
 #endif
 	PROFILE_FUNC();
@@ -87,7 +85,7 @@ void Game::update(f64 alpha, f32 delta_time) {
 	handle_input();
 	m_player.update(m_world, alpha);
 	
-	while(Chunk *chunk = m_world.try_pop_dirty_chunk()) {
+	while(std::shared_ptr<Chunk> chunk = m_world.try_pop_dirty_chunk()) {
 		m_world.update_dirty_chunk(chunk);
 	}
 }
@@ -226,7 +224,7 @@ void Game::handle_packet(S2C_Packet packet) {
 		},
 
 		[&](S2C_ChunkUpdatePacket p)  {
-			m_world.handle_chunk_udate_packet(std::move(p));
+			m_world.handle_chunk_update_packet(std::move(p));
 		},
 
 		[&](S2C_ChunkUnloadPacket p)  {

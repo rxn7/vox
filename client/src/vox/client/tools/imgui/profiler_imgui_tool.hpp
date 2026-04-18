@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef NDEBUG
+#ifdef VOX_DEBUG
 #include "vox/common/profiler/profiler.hpp"
 
 class ProfilerThreadHistory;

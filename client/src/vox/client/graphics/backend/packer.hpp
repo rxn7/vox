@@ -19,13 +19,10 @@ namespace Packer {
 	static u32 pack_vertex(u8 x, u8 y, u8 z, TextureID texture_id, BlockFaceID face_id, u8 ambient_occlusion) {
 		PROFILE_FUNC();
 
-		u32 packed = 0;
-		packed = glm::bitfieldInsert(packed, static_cast<u32>(x), 0, 5);
-		packed = glm::bitfieldInsert(packed, static_cast<u32>(y), 5, 5);
-		packed = glm::bitfieldInsert(packed, static_cast<u32>(z), 10, 5);
-		packed = glm::bitfieldInsert(packed, static_cast<u32>(texture_id), 15, 8);
-		packed = glm::bitfieldInsert(packed, static_cast<u32>(face_id), 23, 3);
-		packed = glm::bitfieldInsert(packed, static_cast<u32>(ambient_occlusion), 26, 2);
-		return packed;
-	}
+		return	(static_cast<u32>(x) & 0x1F) |
+				((static_cast<u32>(y) & 0x1F) << 5) |
+			   	((static_cast<u32>(z) & 0x1F) << 10) |
+			   	((static_cast<u32>(texture_id) & 0xFF) << 15) | 
+			   	((static_cast<u32>(face_id) & 0x7) << 23) |
+			   	((static_cast<u32>(ambient_occlusion) & 0x3) << 26);}
 };

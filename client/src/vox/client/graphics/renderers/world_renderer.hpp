@@ -5,6 +5,11 @@
 #include "vox/client/graphics/backend/shader.hpp"
 #include "vox/client/graphics/backend/texture_array.hpp"
 
+struct SubChunkMeshUploadTask {
+	SubChunkPosition position;
+	SubChunkMeshData data;
+};
+
 struct DrawElementsIndirectCommand {
 	u32 index_count;
 	u32 instance_count;
@@ -22,6 +27,8 @@ public:
 	void update_subchunk(SubChunk &subchunk);
 	void remove_subchunk(SubChunk &subchunk);
 
+	void generate_subchunk_mesh_async(std::shared_ptr<Chunk> chunk, SubChunkPosition position);
+
 	void upload_subchunk_mesh(const SubChunkMeshAllocation &alloc, std::span<const u32> vertices, std::span<const u32> indices);
 	[[nodiscard]] std::optional<SubChunkMeshAllocation> allocate_subchunk_mesh(u32 vertex_count, u32 index_count);
 	void free_subchunk_mesh(const SubChunkMeshAllocation &alloc);
@@ -35,6 +42,7 @@ public:
 	}
 	
 private:
+	void process_upload_tasks();
 	void render_subchunk_mesh(const SubChunkMesh &mesh);
 	
 public:
@@ -55,6 +63,11 @@ private:
 	Shader m_shader;
 	TextureArray m_textures;
 
+	std::mutex m_upload_mutex;
+
+	std::vector<SubChunkMeshUploadTask> m_upload_tasks;
+
+	std::vector<std::future<void>> m_generation_futures;
 	std::vector<DrawElementsIndirectCommand> m_draw_commands;
 	std::vector<u32> m_packed_subchunk_positions;
 	std::unordered_map<SubChunkPosition, SubChunkMesh> m_subchunk_meshes;

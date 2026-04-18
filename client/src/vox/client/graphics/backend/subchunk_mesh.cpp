@@ -3,7 +3,6 @@
 #include "vox/client/graphics/face_data.hpp"
 #include "vox/client/graphics/backend/packer.hpp"
 #include "vox/client/graphics/backend/subchunk_mesh.hpp"
-#include "vox/client/graphics/renderers/world_renderer.hpp"
 #include "vox/client/graphics/graphics_settings.hpp"
 
 inline u8 calculate_vertex_ao(bool side1_occluded, bool side2_occluded, bool corner_occluded) {
@@ -13,26 +12,22 @@ inline u8 calculate_vertex_ao(bool side1_occluded, bool side2_occluded, bool cor
 	return side1_occluded + side2_occluded + corner_occluded;
 }
 
-void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &renderer) {
-	PROFILE_FUNC();
-	
-	static std::vector<u32> s_vertices{};
-	s_vertices.reserve(4096);
-	s_vertices.clear();
+SubChunkMeshData SubChunkMesh::generate(const SubChunk &subchunk) {
+	// PROFILE_FUNC(); 
+	//
+	SubChunkMeshData data;
 
-	static std::vector<u32> s_indices;
-	s_vertices.reserve(6144);
-	s_indices.clear();
+	data.vertices.reserve(4096);
+	data.vertices.clear();
+
+	data.indices.reserve(6144);
+	data.indices.clear();
 
 	if(subchunk.is_empty()) {
-		return;
+		return data;
 	}
 
-	if(m_alloc.is_valid()) {
-		renderer.free_subchunk_mesh(m_alloc);
-	}
-
-	const Chunk &chunk = subchunk.get_chunk();
+	std::shared_ptr<Chunk> p_chunk = subchunk.get_chunk();
 	const bool ao_enabled = GraphicsSettings::get_instance().m_state.ambient_occlusion_enabled;
 
 	const u32 subchunk_y_offset = subchunk.get_idx() * SUBCHUNK_SIZE;
@@ -54,7 +49,7 @@ void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &
 					const auto [normal, tangent1, tangent2] = get_face_data(face_id);
 
 					const auto is_block_solid = [&](i16vec3 offset) -> bool {
-						return !chunk.is_block_transparent_relative(x + offset.x, y + offset.y + subchunk_y_offset, z + offset.z);
+						return !p_chunk->is_block_transparent_relative(x + offset.x, y + offset.y + subchunk_y_offset, z + offset.z);
 					};
 					
 					const auto calculate_ao = [&](i32 t1, i32 t2) -> u8 {
@@ -80,17 +75,17 @@ void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &
 					const u8 ao_tr = calculate_ao( 1,  1);
 					const u8 ao_tl = calculate_ao(-1,  1);
 
-					s_vertices.push_back(Packer::pack_vertex(x + bl.x, y + bl.y, z + bl.z, texture_id, face_id, ao_bl));
-					s_vertices.push_back(Packer::pack_vertex(x + br.x, y + br.y, z + br.z, texture_id, face_id, ao_br));
-					s_vertices.push_back(Packer::pack_vertex(x + tr.x, y + tr.y, z + tr.z, texture_id, face_id, ao_tr));
-					s_vertices.push_back(Packer::pack_vertex(x + tl.x, y + tl.y, z + tl.z, texture_id, face_id, ao_tl));
-					
-					s_indices.push_back(index_offset + 0);
-					s_indices.push_back(index_offset + 1);
-					s_indices.push_back(index_offset + 2);
-					s_indices.push_back(index_offset + 2);
-					s_indices.push_back(index_offset + 3);
-					s_indices.push_back(index_offset + 0);
+					data.vertices.push_back(Packer::pack_vertex(x + bl.x, y + bl.y, z + bl.z, texture_id, face_id, ao_bl));
+					data.vertices.push_back(Packer::pack_vertex(x + br.x, y + br.y, z + br.z, texture_id, face_id, ao_br));
+					data.vertices.push_back(Packer::pack_vertex(x + tr.x, y + tr.y, z + tr.z, texture_id, face_id, ao_tr));
+					data.vertices.push_back(Packer::pack_vertex(x + tl.x, y + tl.y, z + tl.z, texture_id, face_id, ao_tl));
+
+					data.indices.push_back(index_offset + 0);
+					data.indices.push_back(index_offset + 1);
+					data.indices.push_back(index_offset + 2);
+					data.indices.push_back(index_offset + 2);
+					data.indices.push_back(index_offset + 3);
+					data.indices.push_back(index_offset + 0);
 					
 					index_offset += 4;
 				};
@@ -116,12 +111,5 @@ void SubChunkMesh::generate_and_upload(const SubChunk &subchunk, WorldRenderer &
 		}
 	}
 
-	const auto result = renderer.allocate_subchunk_mesh(s_vertices.size(), s_indices.size());
-	if(result) {
-		m_alloc = *result;
-		renderer.upload_subchunk_mesh(m_alloc, s_vertices, s_indices);
-	}
-
-	subchunk.get_chunk().set_dirty(subchunk.get_idx(), false);
-	m_index_count = s_indices.size();
+	return data;
 }

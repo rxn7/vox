@@ -2,14 +2,15 @@
 
 IWorld::~IWorld() { }
 
-Chunk *IWorld::create_chunk(ChunkPosition position) {
-	const auto result = m_chunks.insert({position, std::make_unique<Chunk>(*this, position)});
+std::shared_ptr<Chunk> IWorld::create_chunk(ChunkPosition position) {
+	const auto result = m_chunks.insert({position, std::make_shared<Chunk>(*this, position)});
 
 	if(!result.second) {
 		return nullptr;
 	}
 
-	Chunk *chunk = result.first->second.get();
+	std::shared_ptr<Chunk> chunk = result.first->second;
+	chunk->m_ref = chunk;
 
 	m_chunk_added_signal.emit(*chunk);
 	return chunk;
@@ -30,7 +31,7 @@ void IWorld::remove_chunk(ChunkPosition position) {
 void IWorld::set_block(BlockPosition position, BlockID value) {
 	PROFILE_FUNC();
 
-	Chunk *chunk = get_chunk(position.chunk_position);
+	std::shared_ptr<Chunk> chunk = get_chunk(position.chunk_position);
 	if(chunk == nullptr) {
 		return;
 	}
@@ -55,7 +56,7 @@ void IWorld::set_block(BlockPosition position, BlockID value) {
 
 	for(i32 dx = x_min; dx <= x_max; ++dx) {
 		for(i32 dz = z_min; dz <= z_max; ++dz) {
-			Chunk *target_chunk = chunk;
+			std::shared_ptr<Chunk> target_chunk = chunk;
 			if(dx != 0 || dz != 0) {
 				target_chunk = get_chunk(ChunkPosition(position.chunk_position.x + dx, position.chunk_position.y + dz));
 			}
@@ -83,7 +84,7 @@ BlockID IWorld::get_block(BlockPosition position) const {
 		return BlockID::Air;
 	}
 
-	const Chunk *chunk = get_chunk(position.chunk_position);
+	const std::shared_ptr<Chunk> chunk = get_chunk(position.chunk_position);
 	if(chunk == nullptr) {
 		return BlockID::Air;
 	}
@@ -91,7 +92,7 @@ BlockID IWorld::get_block(BlockPosition position) const {
 	return chunk->get_block_local(position.local_position);
 }
 
-Chunk *IWorld::get_chunk(ChunkPosition position) const {
+std::shared_ptr<Chunk> IWorld::get_chunk(ChunkPosition position) const {
 	PROFILE_FUNC();
 
 	const auto it = m_chunks.find(position);
@@ -99,7 +100,7 @@ Chunk *IWorld::get_chunk(ChunkPosition position) const {
 		return nullptr;
 	}
 	
-	return it->second.get();
+	return it->second;
 }
 
 void IWorld::mark_all_chunks_dirty() {

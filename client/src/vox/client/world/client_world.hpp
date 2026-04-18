@@ -9,14 +9,13 @@ public:
 	ClientWorld(WorldRenderer &renderer);
 	virtual ~ClientWorld();
 
-	void handle_chunk_udate_packet(S2C_ChunkUpdatePacket packet);
+	void handle_chunk_update_packet(S2C_ChunkUpdatePacket packet);
 	void handle_chunk_unload_packet(S2C_ChunkUnloadPacket packet);
 
-	void update_dirty_chunk(Chunk *chunk);
+	void update_dirty_chunk(std::shared_ptr<Chunk> chunk);
 
-	Chunk *try_pop_dirty_chunk();
+	std::shared_ptr<Chunk> try_pop_dirty_chunk();
 		
 private:
 	WorldRenderer &m_renderer;
-	std::unordered_map<ChunkPosition, std::unique_ptr<Chunk>> m_chunks;
 };

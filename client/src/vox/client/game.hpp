@@ -81,5 +81,5 @@ private:
 
 	CallbackID m_chunk_removed_callback;
 
-	static Game *sp_game;
+	inline static Game *sp_game;
 };

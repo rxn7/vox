@@ -7,8 +7,6 @@
 
 #include <stb_image.h>
 
-Engine *Engine::sp_instance = nullptr;
-
 Engine::Engine() { 
 	assert(sp_instance == nullptr);
 	sp_instance = this;
@@ -110,7 +108,7 @@ void Engine::render(f64 alpha) {
 		const bool enable_imgui_input = Input::get_instance().get_mouse_mode() == GLFW_CURSOR_NORMAL;
 		ImGui::GetIO().SetAppAcceptingEvents(enable_imgui_input);
 		
-#ifndef NDEBUG
+#ifdef VOX_DEBUG
 		m_profiler_imgui_tool.render();
 #endif
 

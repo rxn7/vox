@@ -10,13 +10,13 @@ void ServerWorld::create_initial_chunks() {
 
 	for(i32 x = -4; x < 4; ++x) {
 		for(i32 z = -4; z < 4; ++z) {
-			Chunk *chunk = create_chunk(ChunkPosition(x, z));
-			generate_chunk(*chunk);
+			std::shared_ptr<Chunk> chunk = create_chunk(ChunkPosition(x, z));
+			generate_chunk(chunk);
 		}
 	}
 }
 
-void ServerWorld::generate_chunk(Chunk &chunk) {
+void ServerWorld::generate_chunk(std::shared_ptr<Chunk> chunk) {
 	PROFILE_FUNC();
 
 	// TODO: Temporary
@@ -26,7 +26,7 @@ void ServerWorld::generate_chunk(Chunk &chunk) {
 
 			for(u32 y = 0; y < max_y; ++y) {
 				if(y == max_y - 1) {
-					chunk.set_block_local(LocalBlockPosition(x, y, z), BlockID::Grass);
+					chunk->set_block_local(LocalBlockPosition(x, y, z), BlockID::Grass);
 
 					// Trees (temporary)
 					if(rand() % 20 == 0) {
@@ -37,7 +37,7 @@ void ServerWorld::generate_chunk(Chunk &chunk) {
 									continue;
 								}
 
-								if(chunk.get_block_relative(x + dx, y+1, z + dz) != BlockID::Air) {
+								if(chunk->get_block_relative(x + dx, y+1, z + dz) != BlockID::Air) {
 									has_neighbor = true;
 									break;
 								}
@@ -54,7 +54,7 @@ void ServerWorld::generate_chunk(Chunk &chunk) {
 						for(u32 dy = tree_height-1; dy <= tree_height + 1; ++dy) {
 							for(i8 dx = -radius; dx <= radius; ++dx) {
 								for(i8 dz = -radius; dz <= radius; ++dz) {
-									chunk.set_block_relative(x + dx, y + dy, z + dz, BlockID::Leaves);
+									chunk->set_block_relative(x + dx, y + dy, z + dz, BlockID::Leaves);
 								}
 							}
 
@@ -62,13 +62,13 @@ void ServerWorld::generate_chunk(Chunk &chunk) {
 						}
 
 						for(u32 i = 0; i < tree_height - 1; ++i) {
-							chunk.set_block_local(LocalBlockPosition(x, y + i, z), BlockID::Log);
+							chunk->set_block_local(LocalBlockPosition(x, y + i, z), BlockID::Log);
 						}
 					}
 				} else if(y < max_y - 5) {
-					chunk.set_block_local(LocalBlockPosition(x, y, z), BlockID::Stone);
+					chunk->set_block_local(LocalBlockPosition(x, y, z), BlockID::Stone);
 				} else {
-					chunk.set_block_local(LocalBlockPosition(x, y, z), BlockID::Dirt);
+					chunk->set_block_local(LocalBlockPosition(x, y, z), BlockID::Dirt);
 				}
 			}
 		}

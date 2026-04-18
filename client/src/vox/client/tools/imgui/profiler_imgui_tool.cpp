@@ -1,4 +1,4 @@
-#ifndef NDEBUG
+#ifdef VOX_DEBUG
 
 #include "vox/client/tools/imgui/profiler_imgui_tool.hpp"
 #include "vox/common/helper/format_helper.hpp"

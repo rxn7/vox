@@ -13,12 +13,12 @@ BlockID Chunk::get_block_local(LocalBlockPosition pos) const {
 		return BlockID::Air;
 	}
 
-	SubChunk *subchunk = get_subchunk(pos.y / SUBCHUNK_SIZE);
-	if(subchunk == nullptr) {
+	std::shared_ptr<SubChunk> p_subchunk = get_subchunk(pos.y / SUBCHUNK_SIZE);
+	if(p_subchunk == nullptr) {
 		return BlockID::Air;
 	}
 
-	return subchunk->get_block({pos.x, pos.y % SUBCHUNK_SIZE, pos.z});
+	return p_subchunk->get_block({pos.x, pos.y % SUBCHUNK_SIZE, pos.z});
 }
 
 BlockID Chunk::get_block_relative(i8 x, i16 y, i8 z) const {
@@ -40,17 +40,16 @@ void Chunk::set_block_local(LocalBlockPosition pos, BlockID value) {
 
 	const u32 subchunk_idx = pos.y / SUBCHUNK_SIZE;
 
-	SubChunk *subchunk = get_subchunk(subchunk_idx);
-	if(subchunk == nullptr) {
+	std::shared_ptr<SubChunk> p_subchunk = get_subchunk(subchunk_idx);
+	if(p_subchunk == nullptr) {
 		if(value == BlockID::Air) {
 			return;
 		}
 
-		m_subchunks[subchunk_idx] = std::make_unique<SubChunk>(*this, subchunk_idx);
-		subchunk = m_subchunks[subchunk_idx].get();
+		p_subchunk = m_subchunks[subchunk_idx] = m_world.create_subchunk(m_ref, subchunk_idx);
 	}
 
-	subchunk->set_block({pos.x, pos.y % SUBCHUNK_SIZE, pos.z}, value);
+	p_subchunk->set_block({pos.x, pos.y % SUBCHUNK_SIZE, pos.z}, value);
 
 	m_dirty_subchunks_bitmap[subchunk_idx] = true;
 }

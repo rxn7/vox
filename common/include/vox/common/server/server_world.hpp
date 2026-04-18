@@ -9,5 +9,5 @@ public:
 	virtual ~ServerWorld();
 	
 	void create_initial_chunks();
-	void generate_chunk(Chunk &chunk);
+	void generate_chunk(std::shared_ptr<Chunk> chunk);
 };

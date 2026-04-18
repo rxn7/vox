@@ -2,7 +2,7 @@
 
 #include "vox/common/profiler/profiler.hpp"
 
-#ifndef NDEBUG
+#ifdef VOX_DEBUG
 
 class ProfilerScopeTimer {
 public:

@@ -1,9 +1,8 @@
 #pragma once
-#undef NDEBUG
 
 // TODO: VOX_USE_PROFILER define
 
-#ifndef NDEBUG
+#ifdef VOX_DEBUG
 #include "vox/common/helper/singleton.hpp"
 
 typedef std::chrono::high_resolution_clock ProfilerClock;

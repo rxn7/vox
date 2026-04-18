@@ -17,6 +17,12 @@ struct SubChunkPosition {
 template<>
 struct std::hash<SubChunkPosition> {
 	sz operator()(const SubChunkPosition &pos) const {
-		return std::hash<i16>()(pos.x) ^ std::hash<u8>()(pos.y) ^ std::hash<i16>()(pos.z);
+		uint64_t x = static_cast<uint16_t>(pos.x);
+		uint64_t y = static_cast<uint8_t>(pos.y);
+		uint64_t z = static_cast<uint16_t>(pos.z);
+
+		uint64_t packed = (x << 24) | (z << 8) | y;
+
+		return std::hash<uint64_t>()(packed);
 	}
 };

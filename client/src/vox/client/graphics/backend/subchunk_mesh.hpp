@@ -5,6 +5,11 @@
 
 class WorldRenderer;
 
+struct SubChunkMeshData {
+	std::vector<u32> vertices;
+	std::vector<u32> indices;
+};
+
 struct SubChunkMeshAllocation {
 	OffsetAllocator::Allocation vertex_alloc;
 	OffsetAllocator::Allocation index_alloc;
@@ -18,14 +23,15 @@ class SubChunkMesh {
 public:
 	SubChunkMesh(SubChunkPosition position) : m_position(position) {}
 
-	void generate_and_upload(const SubChunk &chunk, WorldRenderer &renderer);
+	static SubChunkMeshData generate(const SubChunk &chunk);
+	void upload(const SubChunk &chunk, WorldRenderer &renderer);
 
 	inline SubChunkPosition get_position() const {
 		return m_position;
 	}
 
 public:
-	u32 m_index_count = 0;
+	u32 m_index_count;
 	SubChunkMeshAllocation m_alloc;
 	
 private:

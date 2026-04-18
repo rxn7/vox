@@ -28,6 +28,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON CACHE STRING "" FORCE)
 set(CMAKE_CXX_EXTENSIONS OFF CACHE STRING "" FORCE)
 set(CMAKE_CONFIGURATION_TYPES "Release;Debug" CACHE STRING "" FORCE)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_compile_definitions("VOX_DEBUG")
+endif()
+
 include(cmake/imgui.cmake)
 include(cmake/glad.cmake)
 include(cmake/glfw.cmake)

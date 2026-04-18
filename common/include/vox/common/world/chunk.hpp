@@ -53,39 +53,28 @@ public:
 		return vec3(m_position.x, 0, m_position.y) * CHUNK_WIDTH; 
 	}
 
-	inline const std::array<std::unique_ptr<SubChunk>, SUBCHUNK_COUNT> &get_subchunks() const {
+	inline const std::array<std::shared_ptr<SubChunk>, SUBCHUNK_COUNT> &get_subchunks() const {
 		return m_subchunks;
 	}
 
-	inline SubChunk *get_subchunk(u32 idx) const {
+	inline std::shared_ptr<SubChunk> get_subchunk(u32 idx) const {
 		if(idx >= SUBCHUNK_COUNT) {
 			return nullptr;
 		}
-		return m_subchunks[idx].get();
+		return m_subchunks[idx];
 	}
 
-	inline SubChunk *create_subchunk(u32 idx) {
-		 m_subchunks[idx] = std::make_unique<SubChunk>(*this, idx);
-		 return m_subchunks[idx].get();
-	}
-
-	inline SubChunk *get_or_create(u32 idx) {
-		if(idx >= SUBCHUNK_COUNT) [[unlikely]] {
-			std::println("Tried to get subchunk at invalid idx: {}", idx);
-			return nullptr;
-		}
-
-		if(SubChunk *subchunk = get_subchunk(idx)) {
-			return subchunk;
-		}
-
-		return create_subchunk(idx);
-	}
+public:
+	mutable std::shared_mutex m_mutex;
 
 private:
 	ChunkPosition m_position;
 	IWorld &m_world;
 
 	std::bitset<SUBCHUNK_COUNT> m_dirty_subchunks_bitmap;
-	std::array<std::unique_ptr<SubChunk>, SUBCHUNK_COUNT> m_subchunks;
+	std::array<std::shared_ptr<SubChunk>, SUBCHUNK_COUNT> m_subchunks;
+
+	std::shared_ptr<Chunk> m_ref;
+
+	friend class IWorld;
 };

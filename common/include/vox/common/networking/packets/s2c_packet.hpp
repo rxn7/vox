@@ -16,9 +16,11 @@ struct S2C_PlayerUpdatePacket {
 	float pitch, yaw;
 };
 
+// TODO: Sent only modified subchunks
 struct S2C_ChunkUpdatePacket {
 	ChunkPosition position;
-	std::vector<std::shared_ptr<SubChunkData>> data;
+	u16 subchunk_mask = 0;
+	std::vector<SubChunkData> data;
 };
 
 struct S2C_ChunkUnloadPacket {
